@@ -38,10 +38,10 @@ export default function Features() {
               key={idx} 
               className="group relative bg-linear-to-br from-amber-50 to-orange-50 rounded-3xl p-8 transform transition-all duration-500 hover:scale-105 hover:shadow-2xl border border-amber-200/50 overflow-hidden"
             >
-              {/* Gradient background on hover */}
+
               <div className={`absolute inset-0 bg-linear-to-br ${feature.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
               
-              {/* Icon with gradient background */}
+             
               <div className={`relative w-16 h-16 rounded-2xl bg-linear-to-br ${feature.color} flex items-center justify-center mb-6 transform group-hover:rotate-12 transition-transform duration-500 shadow-lg`}>
                 <feature.icon className="w-8 h-8 text-white" />
               </div>
@@ -53,7 +53,6 @@ export default function Features() {
                 {feature.description}
               </p>
               
-              {/* Decorative corner element */}
               <div className={`absolute top-0 right-0 w-24 h-24 bg-linear-to-br ${feature.color} opacity-10 rounded-bl-full transform translate-x-12 -translate-y-12 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform duration-500`}></div>
             </div>
           ))}

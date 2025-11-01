@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 
-// Custom hook for counting animation
 const useCountUp = (end: number, duration: number = 5000, start: number = 0) => {
   const [count, setCount] = useState(start);
   const [isVisible, setIsVisible] = useState(false);
@@ -16,7 +15,6 @@ const useCountUp = (end: number, duration: number = 5000, start: number = 0) => 
       if (!startTime) startTime = currentTime;
       const progress = Math.min((currentTime - startTime) / duration, 1);
       
-      // Easing function for smooth animation
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
       const currentCount = Math.floor(startValue + (endValue - startValue) * easeOutQuart);
       
@@ -33,7 +31,6 @@ const useCountUp = (end: number, duration: number = 5000, start: number = 0) => 
   return { count, setIsVisible };
 };
 
-// Stat Card Component with counter
 interface StatCardProps {
   label: string;
   value: string;
@@ -42,7 +39,6 @@ interface StatCardProps {
 }
 
 const StatCard = ({ label, value, idx, isVisible }: StatCardProps) => {
-  // Extract number and suffix from value (e.g., "200+" -> 200 and "+")
   const numericValue = parseInt(value.replace(/\D/g, ''));
   const suffix = value.replace(/\d/g, '');
   
@@ -50,7 +46,6 @@ const StatCard = ({ label, value, idx, isVisible }: StatCardProps) => {
 
   useEffect(() => {
     if (isVisible) {
-      // Add delay based on index for staggered animation
       const timer = setTimeout(() => {
         setCountVisible(true);
       }, idx * 150);
@@ -99,7 +94,6 @@ export default function Hero() {
         background: '#DACDC9'
       }}
     >
-      {/* Background Image with Overlay */}
       <div 
         className="absolute inset-0 z-0"
         style={{
@@ -111,13 +105,11 @@ export default function Hero() {
         }}
       />
 
-      {/* Animated floating elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-20 left-10 w-72 h-72 bg-white/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-white/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
       </div>
 
-      {/* Content */}
       <div className="relative z-10 container mx-auto px-6 text-center pt-16 md:pt-0">
         <div className={`transition-all duration-1000 transform ${
           textVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
@@ -136,7 +128,6 @@ export default function Hero() {
             </span>
           </h1>
 
-          {/* CTA Button with glow effect */}
           <div className={`transition-all duration-1000 delay-500 ${
             textVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
           }`}>
@@ -145,7 +136,6 @@ export default function Hero() {
             </button>
           </div>
 
-          {/* Stats Cards with Counter Animation */}
           <div className={`grid grid-cols-2 md:grid-cols-4 gap-6 mt-12 max-w-5xl mx-auto transition-all duration-1000 delay-700 ${
             textVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
           }`}>
