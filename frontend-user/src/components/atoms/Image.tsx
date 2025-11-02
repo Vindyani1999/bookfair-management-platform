@@ -1,15 +1,11 @@
-import type { ImgHTMLAttributes, CSSProperties } from 'react';
-
-type Props = ImgHTMLAttributes<HTMLImageElement> & {
-  src: string;
-  alt: string;
-};
+import type { CSSProperties } from "react";
+import type { Props } from "../../utils/types";
 
 export default function Image(props: Props) {
   const { src, alt, style, ...rest } = props;
   const imgStyle: CSSProperties = {
-    maxWidth: '100%',
-    height: 'auto',
+    maxWidth: "100%",
+    height: "auto",
     ...(style as CSSProperties),
   };
 

@@ -1,11 +1,5 @@
-import HallCheckbox from '../atoms/HallCheckbox';
-import type { Hall } from '../../utils/data';
-
-type Props = {
-  halls: Hall[];
-  selected: Record<string, boolean>;
-  onToggle: (id: string, checked: boolean) => void;
-};
+import HallCheckbox from "../atoms/HallCheckbox";
+import type { HallListProps } from "../../utils/types";
 
 function chunk<T>(arr: T[], size: number): T[][] {
   const res: T[][] = [];
@@ -15,7 +9,7 @@ function chunk<T>(arr: T[], size: number): T[][] {
   return res;
 }
 
-export default function HallList({ halls, selected, onToggle }: Props) {
+export default function HallList({ halls, selected, onToggle }: HallListProps) {
   const columns = chunk(halls, 10);
 
   return (
@@ -23,7 +17,13 @@ export default function HallList({ halls, selected, onToggle }: Props) {
       {columns.map((col, ci) => (
         <div key={ci} className="hall-list-column">
           {col.map((h) => (
-            <HallCheckbox key={h.id} id={h.id} label={h.label} checked={!!selected[h.id]} onChange={onToggle} />
+            <HallCheckbox
+              key={h.id}
+              id={h.id}
+              label={h.label}
+              checked={!!selected[h.id]}
+              onChange={onToggle}
+            />
           ))}
         </div>
       ))}

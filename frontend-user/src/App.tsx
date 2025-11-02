@@ -1,5 +1,5 @@
 import "./App.css";
-import MapWithSelector from './components/organisms/MapWithSelector';
+import MapWithSelector from "./components/organisms/MapWithSelector";
 
 function App() {
   return (
