@@ -5,6 +5,13 @@
   text-align: center;
 }
 
+.roboto-slab {
+  font-family: "Roboto Slab", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -39,4 +46,79 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Map selector panel styles */
+.map-panel {
+  background: rgba(0, 0, 0, 0.15); /* warm beige */
+  border-radius: 10px;
+  padding: 18px;
+  color: #3b3735;
+}
+.map-panel__title {
+  font-family: "Roboto Slab", serif;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+
+.hall-list-columns {
+  display: flex;
+  gap: 22px;
+  align-items: flex-start;
+}
+.hall-list-column {
+  font-family: "Roboto Slab", serif;
+  font-weight: 400;
+  display: grid;
+}
+
+/* Custom checkbox: hide native input and draw box via label pseudo elements */
+.hall-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  min-height: 32px;
+}
+.hall-checkbox input[type="checkbox"] {
+  /* hide native checkbox but keep it accessible */
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.hall-label {
+  display: inline-block;
+  position: relative;
+  padding-left: 28px;
+}
+.hall-label::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  border: 2px solid #cfcfcf;
+  border-radius: 3px;
+  background: #fff;
+}
+.hall-checkbox input[type="checkbox"]:checked + .hall-label::before {
+  background: #4caf50;
+  border-color: #a9a9a9;
+}
+.hall-checkbox input[type="checkbox"]:checked + .hall-label::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
 }
