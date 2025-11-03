@@ -244,3 +244,86 @@
 .badge--large {
   background: #6bc34a;
 }
+
+/* Booking form styles (match provided design) */
+.booking-card {
+  background: rgba(0, 0, 0, 0.15); /* pale beige */
+  padding: 22px;
+  border-radius: 12px;
+  /* max-width: 920px; */
+  margin: 8px 0;
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.03);
+}
+.booking-title {
+  margin-top: 0;
+  font-family: "Roboto Slab", serif;
+  font-weight: 700;
+  color: #3b3735;
+  text-align: left;
+}
+.booking-row {
+  margin-bottom: 12px;
+}
+.booking-row.two-cols {
+  display: flex;
+  gap: 40px;
+}
+.booking-row.two-cols > div {
+  flex: 1;
+  min-width: 0;
+}
+.booking-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #3b3735;
+  font-family: "Roboto Slab", serif;
+  text-align: left;
+}
+.booking-input,
+.booking-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(0, 0, 0, 0.06);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  color: #3b3735;
+  text-align: left;
+  align-items: flex-start;
+  box-sizing: border-box; /* include padding in width to prevent overflow */
+}
+.booking-textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+.booking-error {
+  color: #c0392b;
+  margin-top: 6px;
+  font-size: 13px;
+}
+.booking-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+.booking-back {
+  background: transparent;
+  border: 0;
+  color: #3b3735;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.booking-submit {
+  background: #b68f2b;
+  color: white;
+  border: 0;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}

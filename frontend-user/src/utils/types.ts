@@ -26,3 +26,12 @@ export type StallListProps = {
   selected: Record<string, boolean>;
   onToggle: (id: string, checked: boolean) => void;
 };
+
+export type FormData = {
+  fullName: string;
+  contactNumber: string;
+  email: string;
+  businessName?: string;
+  businessAddress?: string;
+  note?: string;
+};

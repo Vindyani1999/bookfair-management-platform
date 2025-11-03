@@ -9,9 +9,11 @@ type Props = {
   selectedHallIds?: string[];
   /** Optional map image src to use instead of the default or hall-specific image */
   mapSrc?: string;
+  /** Called when user finishes stall selection and wants to go to next step */
+  onNext?: (selectedStallIds: string[]) => void;
 };
 
-export default function MapWithStalls({ selectedHallIds }: Props) {
+export default function MapWithStalls({ selectedHallIds, onNext }: Props) {
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [zoom, setZoom] = useState<number>(1);
 
@@ -41,6 +43,11 @@ export default function MapWithStalls({ selectedHallIds }: Props) {
 
   function onToggle(id: string, checked: boolean) {
     setSelected((s) => ({ ...s, [id]: checked }));
+  }
+
+  function handleNext() {
+    const ids = Object.keys(selected).filter((k) => selected[k]);
+    if (onNext) onNext(ids);
   }
 
   return (
@@ -92,6 +99,16 @@ export default function MapWithStalls({ selectedHallIds }: Props) {
           selected={selected}
           onToggle={onToggle}
         />
+        <div style={{ marginTop: 12, textAlign: "right" }}>
+          <button
+            className="zoom-btn"
+            onClick={handleNext}
+            aria-label="Next step"
+            type="button"
+          >
+            Next →
+          </button>
+        </div>
       </aside>
     </div>
   );
