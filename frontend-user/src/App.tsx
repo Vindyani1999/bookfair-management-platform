@@ -1,10 +1,21 @@
-import "./App.css";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
+import About from './pages/info/AboutPage';
+import FAQ from './pages/info/FAQPage';
+import TermsOfService from './pages/info/TermsOfServicePage';
+import PrivacyPolicy from './pages/info/PrivacyPolicyPage';
 
 function App() {
   return (
-    <>
-      <h1> Book Fair Management System </h1>
-    </>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+      </Routes>
+    </Router>
   );
 }
 
