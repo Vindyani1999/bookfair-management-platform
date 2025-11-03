@@ -9,10 +9,6 @@ exports.registerValidation = [
     .isLength({ min: 8 })
     .withMessage('Password must be at least 8 characters long'),
   
-  body('businessName')
-    .notEmpty()
-    .withMessage('Business name is required'),
-  
   body('contactPerson')
     .notEmpty()
     .withMessage('Contact person is required'),
@@ -20,10 +16,6 @@ exports.registerValidation = [
   body('phoneNumber')
     .notEmpty()
     .withMessage('Phone number is required'),
-
-  body('businessAddress')
-    .notEmpty()
-    .withMessage('Business address is required'),
   
   (req, res, next) => {
     const errors = validationResult(req);
