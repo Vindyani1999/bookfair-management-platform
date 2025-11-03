@@ -1,31 +1,41 @@
 import { useState } from "react";
 import Image from "../atoms/Image";
-import HallList from "../molecules/HallList";
-import { halls } from "../../utils/data";
+import { stalls, halls } from "../../utils/data";
+import SelectionSummary from "./SelectionSummary";
+import StallList from "../molecules/StallList";
 
 type Props = {
-  /** Called when user finishes selection and wants to go to next step */
-  onNext?: (selectedHallIds: string[]) => void;
+  /** Hall ids selected in the previous step; if provided, only stalls in these halls are shown */
+  selectedHallIds?: string[];
 };
 
-export default function MapWithSelector({ onNext }: Props) {
+export default function MapWithStalls({ selectedHallIds }: Props) {
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [zoom, setZoom] = useState<number>(1);
 
-  const allHalls = halls.map((h) => ({ id: h.id, label: h.label }));
+  // If previous step passed selected halls, only show stalls for those halls.
+  const visibleStalls =
+    selectedHallIds && selectedHallIds.length > 0
+      ? stalls.filter((s) => selectedHallIds.includes(s.hallId))
+      : stalls;
+
+  const allStalls = visibleStalls.map((s) => ({ id: s.id, label: s.label }));
+  const selectedStalls = allStalls.filter((h) => selected[h.id]);
+
+  // Also derive a small context label for the header from halls data
+  const selectedHallLabels = (selectedHallIds || [])
+    .map((id) => halls.find((h) => h.id === id)?.label)
+    .filter(Boolean)
+    .join(", ");
 
   function onToggle(id: string, checked: boolean) {
     setSelected((s) => ({ ...s, [id]: checked }));
   }
 
-  function handleNext() {
-    const ids = Object.keys(selected).filter((k) => selected[k]);
-    if (onNext) onNext(ids);
-  }
-
   return (
     <div style={{ display: "flex", gap: 24, alignItems: "stretch" }}>
       <div style={{ flex: "1 1 0" }}>
+        <SelectionSummary selectedHalls={selectedStalls} />
         {/* Map canvas: includes image and zoom controls */}
         <div className="map-canvas">
           <div className="zoom-controls" aria-hidden>
@@ -63,19 +73,14 @@ export default function MapWithSelector({ onNext }: Props) {
       </div>
       <aside className="map-panel">
         <h3 className="map-panel__title">
-          Select the halls you preferred for your halls
+          Select available stalls{" "}
+          {selectedHallLabels ? `in ${selectedHallLabels}` : ""}
         </h3>
-        <HallList halls={allHalls} selected={selected} onToggle={onToggle} />
-        <div style={{ marginTop: 12, textAlign: "right" }}>
-          <button
-            className="zoom-btn"
-            onClick={handleNext}
-            aria-label="Next step"
-            type="button"
-          >
-            Next →
-          </button>
-        </div>
+        <StallList
+          stalls={visibleStalls}
+          selected={selected}
+          onToggle={onToggle}
+        />
       </aside>
     </div>
   );
