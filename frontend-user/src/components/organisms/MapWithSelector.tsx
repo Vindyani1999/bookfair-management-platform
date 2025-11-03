@@ -6,9 +6,11 @@ import { halls } from "../../utils/data";
 type Props = {
   /** Called when user finishes selection and wants to go to next step */
   onNext?: (selectedHallIds: string[]) => void;
+  /** Optional map image src — if not provided we use the default overview map */
+  mapSrc?: string;
 };
 
-export default function MapWithSelector({ onNext }: Props) {
+export default function MapWithSelector({ onNext, mapSrc }: Props) {
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [zoom, setZoom] = useState<number>(1);
 
@@ -53,7 +55,7 @@ export default function MapWithSelector({ onNext }: Props) {
           >
             <div className="map-inner" style={{ transform: `scale(${zoom})` }}>
               <Image
-                src="/images/map.png"
+                src={mapSrc ?? "/images/map.png"}
                 alt="Bookfair map"
                 style={{ height: "90%" }}
               />

@@ -46,3 +46,26 @@ export const stalls: Stall[] = [
   { id: "stall-19", hallId: "hall-10", label: "Stall 19" },
   { id: "stall-20", hallId: "hall-10", label: "Stall 20" },
 ];
+
+// Map image paths for each hall. In production these would come from the backend
+// (e.g., an image URL per hall). For now we map to public files under
+// `/images/halls/{hallId}.png`. Add images to `public/images/halls/` to use them.
+export const hallMapImages: Record<string, string> = {
+  "hall-1": "/images/halls/hall-1.png",
+  "hall-2": "/images/halls/hall-2.png",
+  "hall-3": "/images/halls/hall-3.png",
+  "hall-4": "/images/halls/hall-4.png",
+  "hall-5": "/images/halls/hall-5.png",
+  "hall-6": "/images/halls/hall-6.png",
+  "hall-7": "/images/halls/hall-7.png",
+  "hall-8": "/images/halls/hall-8.png",
+  "hall-9": "/images/halls/hall-9.png",
+  "hall-10": "/images/halls/hall-10.png",
+  "hall-11": "/images/halls/hall-11.png",
+  "hall-12": "/images/halls/hall-12.png",
+  "hall-13": "/images/halls/hall-13.png",
+  "hall-14": "/images/halls/hall-14.png",
+  "hall-15": "/images/halls/hall-15.png",
+  "hall-16": "/images/halls/hall-16.png",
+  "hall-17": "/images/halls/hall-17.png",
+};

@@ -1,12 +1,14 @@
 import { useState } from "react";
 import Image from "../atoms/Image";
-import { stalls, halls } from "../../utils/data";
+import { stalls, halls, hallMapImages } from "../../utils/data";
 import SelectionSummary from "./SelectionSummary";
 import StallList from "../molecules/StallList";
 
 type Props = {
   /** Hall ids selected in the previous step; if provided, only stalls in these halls are shown */
   selectedHallIds?: string[];
+  /** Optional map image src to use instead of the default or hall-specific image */
+  mapSrc?: string;
 };
 
 export default function MapWithStalls({ selectedHallIds }: Props) {
@@ -27,6 +29,15 @@ export default function MapWithStalls({ selectedHallIds }: Props) {
     .map((id) => halls.find((h) => h.id === id)?.label)
     .filter(Boolean)
     .join(", ");
+
+  // Prefer explicit mapSrc prop (e.g., provided by backend). If not provided
+  // and exactly one hall was selected, try hall-specific image. Otherwise
+  // fall back to the overview map.
+  const chosenHallSrc =
+    (selectedHallIds &&
+      selectedHallIds.length === 1 &&
+      hallMapImages[selectedHallIds[0]]) ||
+    "/images/map.png";
 
   function onToggle(id: string, checked: boolean) {
     setSelected((s) => ({ ...s, [id]: checked }));
@@ -63,8 +74,8 @@ export default function MapWithStalls({ selectedHallIds }: Props) {
           >
             <div className="map-inner" style={{ transform: `scale(${zoom})` }}>
               <Image
-                src="/images/map.png"
-                alt="Bookfair map"
+                src={chosenHallSrc}
+                alt={`Bookfair hall ${selectedHallLabels}`}
                 style={{ height: "90%" }}
               />
             </div>
