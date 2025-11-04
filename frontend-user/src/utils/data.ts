@@ -69,3 +69,35 @@ export const hallMapImages: Record<string, string> = {
   "hall-16": "/images/halls/hall-16.png",
   "hall-17": "/images/halls/hall-17.png",
 };
+
+// --- Temporary sample reservation data (mock backend response)
+// This should be removed or replaced when the backend reservation API is available.
+export type Reservation = {
+  id: string;
+  date: string;
+  booking: {
+    fullName: string;
+    contactNumber: string;
+    email: string;
+    businessName?: string;
+    businessAddress?: string;
+    note?: string;
+  };
+  selectedHallIds: string[];
+  selectedStallIds: string[];
+};
+
+export const sampleReservation: Reservation = {
+  id: "ugfc4793e3fecfrdk",
+  date: "October 28, 2025",
+  booking: {
+    fullName: "Jane Doe",
+    contactNumber: "+1 555-0123",
+    email: "jane.doe@example.com",
+    businessName: "Doe Books",
+    businessAddress: "123 Paper St, Booktown",
+    note: "Prefer corner stall",
+  },
+  selectedHallIds: ["hall-4"],
+  selectedStallIds: ["stall-7", "stall-8", "stall-20"],
+};

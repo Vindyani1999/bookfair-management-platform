@@ -4,6 +4,8 @@ import MapWithSelector from "./components/organisms/MapWithSelector";
 import MapWithStalls from "./components/organisms/MapWithStalls";
 import BookingForm from "./components/organisms/BookingForm";
 import type { FormData } from "./utils/types";
+import ReservationConfirmation from "./components/organisms/ReservationConfirmation";
+import { sampleReservation } from "./utils/data";
 
 export default function App() {
   const [step, setStep] = useState<number>(1);
@@ -65,6 +67,13 @@ export default function App() {
             </button>
           </div>
           <BookingForm onBack={handleBack} onSubmit={handleSubmitBooking} />
+          <ReservationConfirmation
+            booking={sampleReservation.booking}
+            selectedHallIds={selectedHallIds}
+            selectedStallIds={selectedStallIds}
+            reservationId={sampleReservation.id}
+            reservationDate={sampleReservation.date}
+          />
         </>
       )}
     </main>

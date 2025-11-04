@@ -35,3 +35,11 @@ export type FormData = {
   businessAddress?: string;
   note?: string;
 };
+
+export type ReservationConfirmationProps = {
+  booking: FormData;
+  selectedHallIds: string[];
+  selectedStallIds: string[];
+  reservationId: string;
+  reservationDate: string;
+};
