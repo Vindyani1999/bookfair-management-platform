@@ -1,6 +1,7 @@
 import { halls, stalls } from "../../utils/data";
 import type { ReservationConfirmationProps as Props } from "../../utils/types";
 import CustomButton from "../atoms/CustomButton";
+import "../../App.css";
 
 function sizeForStall(stallId: string) {
   // Deterministic small/medium/large mapping based on numeric suffix (if any)

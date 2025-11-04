@@ -3,6 +3,7 @@ import Image from "../atoms/MapImage";
 import { stalls, halls, hallMapImages } from "../../utils/data";
 import SelectionSummary from "./SelectionSummary";
 import StallList from "../molecules/StallList";
+import "../../App.css";
 
 type Props = {
   /** Hall ids selected in the previous step; if provided, only stalls in these halls are shown */

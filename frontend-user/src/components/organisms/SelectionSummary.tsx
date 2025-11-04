@@ -1,4 +1,5 @@
 import type { Hall } from "../../utils/data";
+import "../../App.css";
 
 type Props = {
   selectedHalls: Hall[];

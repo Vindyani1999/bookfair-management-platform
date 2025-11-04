@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { FormData } from "../../utils/types";
+import "../../App.css";
 
 type Props = {
   onBack?: () => void;

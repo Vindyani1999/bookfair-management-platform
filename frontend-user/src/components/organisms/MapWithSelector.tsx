@@ -2,6 +2,7 @@ import { useState } from "react";
 import Image from "../atoms/MapImage";
 import HallList from "../molecules/HallList";
 import { halls } from "../../utils/data";
+import "../../App.css";
 
 type Props = {
   /** Called when user finishes selection and wants to go to next step */
