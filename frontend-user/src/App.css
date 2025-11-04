@@ -15,12 +15,6 @@ main {
   font-family: "Roboto Slab", serif;
 }
 
-.roboto-slab {
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
-}
-
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -57,9 +51,9 @@ main {
   color: #888;
 }
 
-/* Map selector panel styles */
+/* Map with halls selector panel styles */
 .map-panel {
-  background: rgba(0, 0, 0, 0.15); /* warm beige */
+  background: rgba(0, 0, 0, 0.15);
   border-radius: 10px;
   padding: 18px;
   color: #3b3735;
@@ -91,7 +85,6 @@ main {
   min-height: 32px;
 }
 .hall-checkbox input[type="checkbox"] {
-  /* hide native checkbox but keep it accessible */
   position: absolute;
   opacity: 0;
   width: 1px;
@@ -134,7 +127,6 @@ main {
 /* Map canvas and zoom controls */
 .map-canvas {
   position: relative;
-  /* gray background to match panel height visually */
   background: #ececec;
   padding: 12px;
   border-radius: 8px;
@@ -145,7 +137,7 @@ main {
   height: 100%;
 }
 .map-canvas {
-  touch-action: none; /* enable pointer dragging without browser passive scroll */
+  touch-action: none;
 }
 .map-canvas {
   cursor: grab;
@@ -196,7 +188,6 @@ main {
   display: inline-block;
 }
 .map-inner img {
-  /* Let the canvas control the image height; keep aspect ratio */
   height: 100%;
   width: auto;
   object-fit: contain;
@@ -254,10 +245,9 @@ main {
 
 /* Booking form styles (match provided design) */
 .booking-card {
-  background: rgba(0, 0, 0, 0.15); /* pale beige */
+  background: rgba(0, 0, 0, 0.15);
   padding: 22px;
   border-radius: 12px;
-  /* max-width: 920px; */
   margin: 8px 0;
   box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.03);
 }
@@ -297,7 +287,7 @@ main {
   color: #3b3735;
   text-align: left;
   align-items: flex-start;
-  box-sizing: border-box; /* include padding in width to prevent overflow */
+  box-sizing: border-box;
 }
 .booking-textarea {
   min-height: 96px;
@@ -333,6 +323,29 @@ main {
   font-weight: 700;
 }
 
+/* Custom button styles */
+.atom-button {
+  background: #0b0b0b; /* default dark */
+  color: #fff;
+  border: 0;
+  border-radius: 12px;
+  padding: 0;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.atom-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.atom-button__icon {
+  display: inline-flex;
+  align-items: center;
+}
+
 /* Reservation confirmation layout */
 .success-message {
   margin-top: 0;
@@ -350,7 +363,6 @@ main {
   border-radius: 12px;
   padding: 18px;
   text-align: left;
-  /* box-shadow: 0 6px 0 rgba(0, 0, 0, 0.04) inset; */
 }
 .res-card h3 {
   margin-top: 0;

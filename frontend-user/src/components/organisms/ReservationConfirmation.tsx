@@ -1,5 +1,6 @@
 import { halls, stalls } from "../../utils/data";
 import type { ReservationConfirmationProps as Props } from "../../utils/types";
+import CustomButton from "../atoms/CustomButton";
 
 function sizeForStall(stallId: string) {
   // Deterministic small/medium/large mapping based on numeric suffix (if any)
@@ -62,7 +63,13 @@ export default function ReservationConfirmation({
   }
 
   return (
-    <div style={{ padding: 12 }}>
+    <div
+      style={{
+        padding: "25px",
+        backgroundColor: "rgba(0, 0, 0, 0.15)",
+        borderRadius: 8,
+      }}
+    >
       <h2 className="success-message">Your Reservation is Successful!</h2>
       <div className="reservation-confirmation">
         <div className="res-card res-card--details">
@@ -165,9 +172,12 @@ export default function ReservationConfirmation({
             <img src={qrUrl} alt="Reservation QR" />
           </div>
           <div style={{ marginTop: 12 }}>
-            <button className="booking-submit" onClick={handleDownload}>
-              Download QR Code
-            </button>
+            <CustomButton
+              label="Download QR Code"
+              onClick={handleDownload}
+              textColor="white"
+              color="#000"
+            />
           </div>
         </div>
       </div>

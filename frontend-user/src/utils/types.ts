@@ -1,5 +1,6 @@
 import type { ImgHTMLAttributes } from "react";
 import type { Hall, Stall } from "./data";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 export type Props = ImgHTMLAttributes<HTMLImageElement> & {
   src: string;
@@ -42,4 +43,16 @@ export type ReservationConfirmationProps = {
   selectedStallIds: string[];
   reservationId: string;
   reservationDate: string;
+};
+
+export type CustomButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  /** Visible label (if children not provided) */
+  label?: string;
+  /** Background color (overrides default theme) */
+  color?: string;
+  /** Text color (defaults to white) */
+  textColor?: string;
+  /** Right-side icon (optional) */
+  iconRight?: ReactNode;
+  iconLeft?: ReactNode;
 };

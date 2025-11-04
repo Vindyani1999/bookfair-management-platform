@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Image from "../atoms/Image";
+import Image from "../atoms/MapImage";
 import HallList from "../molecules/HallList";
 import { halls } from "../../utils/data";
 
