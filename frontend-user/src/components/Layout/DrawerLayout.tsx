@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
+// import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import MuiDrawer from '@mui/material/Drawer';
 import MuiAppBar from '@mui/material/AppBar';
@@ -20,8 +20,44 @@ import ListItemText from '@mui/material/ListItemText';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 import { Outlet } from 'react-router-dom';
+import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
+import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
+import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
+import DateRangeOutlinedIcon from '@mui/icons-material/DateRangeOutlined';
+import TelegramIcon from '@mui/icons-material/Telegram';
+import SettingsIcon from '@mui/icons-material/Settings';
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import { styled, useTheme, type CSSObject, type Theme } from '@mui/material';
 
 const drawerWidth = 240;
+
+const drawerData = [
+  {
+    name:'Dashboard',
+    icon:<DashboardOutlinedIcon/>,
+    navPath:''
+  },
+    {
+    name:'Your Bookings',
+    icon:<DateRangeOutlinedIcon/>,
+    navPath:''
+  },
+    {
+    name:'Help',
+    icon:<TelegramIcon/>,
+    navPath:''
+  },
+    {
+    name:'Settings',
+    icon:<SettingsIcon/>,
+    navPath:''
+  },
+    {
+    name:'Logout',
+    icon:<LogoutOutlinedIcon/>,
+    navPath:''
+  }
+]
 
 const openedMixin = (theme: Theme): CSSObject => ({
   width: drawerWidth,
@@ -30,6 +66,7 @@ const openedMixin = (theme: Theme): CSSObject => ({
     duration: theme.transitions.duration.enteringScreen,
   }),
   overflowX: 'hidden',
+  backgroundColor:'#DACDC9'
 });
 
 const closedMixin = (theme: Theme): CSSObject => ({
@@ -42,6 +79,7 @@ const closedMixin = (theme: Theme): CSSObject => ({
   [theme.breakpoints.up('sm')]: {
     width: `calc(${theme.spacing(8)} + 1px)`,
   },
+   backgroundColor:'#DACDC9'
 });
 
 const DrawerHeader = styled('div')(({ theme }) => ({
@@ -110,6 +148,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 export default function DrawerLayout() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
+  const [isOpneFullDash, setIsOpnetFullDash] = React.useState(false);
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -119,10 +158,20 @@ export default function DrawerLayout() {
     setOpen(false);
   };
 
+  const handleDrawerVariation = () => {
+    if(isOpneFullDash){
+      handleDrawerClose()
+      setIsOpnetFullDash(false)
+    }else{
+      handleDrawerOpen()
+      setIsOpnetFullDash(true)
+    }
+  }
+
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AppBar position="fixed" open={open}>
+      {/* <AppBar position="fixed" open={open}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -142,17 +191,24 @@ export default function DrawerLayout() {
             Mini variant drawer
           </Typography>
         </Toolbar>
-      </AppBar>
-      <Drawer variant="permanent" open={open}>
+      </AppBar> */}
+      <Drawer variant="permanent" open={open} >
+        <Box sx={{
+          height:'100%',
+          width:'90%',
+          m:1,
+          bgcolor:'#EDF1F3' ,// hard corded
+          borderRadius:'30px',
+          boxShadow:'5px 5px 8px 0px rgba(0, 0, 0, 0.25)' // hard code
+        }}>
         <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+          <IconButton onClick={handleDrawerVariation}>
+            {isOpneFullDash === false ? <ArrowForwardOutlinedIcon /> : <ArrowBackOutlinedIcon />}
           </IconButton>
         </DrawerHeader>
-        <Divider />
         <List>
-          {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: 'block' }}>
+          {drawerData.map((text, index) => (
+            <ListItem key={text.name} disablePadding sx={{ display: 'block' }}>
               <ListItemButton
                 sx={[
                   {
@@ -183,10 +239,10 @@ export default function DrawerLayout() {
                         },
                   ]}
                 >
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                  {text.icon}
                 </ListItemIcon>
                 <ListItemText
-                  primary={text}
+                  primary={text.name}
                   sx={[
                     open
                       ? {
@@ -201,58 +257,7 @@ export default function DrawerLayout() {
             </ListItem>
           ))}
         </List>
-        <Divider />
-        <List>
-          {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: 'block' }}>
-              <ListItemButton
-                sx={[
-                  {
-                    minHeight: 48,
-                    px: 2.5,
-                  },
-                  open
-                    ? {
-                        justifyContent: 'initial',
-                      }
-                    : {
-                        justifyContent: 'center',
-                      },
-                ]}
-              >
-                <ListItemIcon
-                  sx={[
-                    {
-                      minWidth: 0,
-                      justifyContent: 'center',
-                    },
-                    open
-                      ? {
-                          mr: 3,
-                        }
-                      : {
-                          mr: 'auto',
-                        },
-                  ]}
-                >
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText
-                  primary={text}
-                  sx={[
-                    open
-                      ? {
-                          opacity: 1,
-                        }
-                      : {
-                          opacity: 0,
-                        },
-                  ]}
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
+        </Box>
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <DrawerHeader />
