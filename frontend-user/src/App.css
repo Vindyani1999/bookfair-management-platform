@@ -5,6 +5,16 @@
   text-align: center;
 }
 
+/* Load Roboto Slab for the app and set as the default font for all text */
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;700&display=swap");
+
+html,
+body,
+#root,
+main {
+  font-family: "Roboto Slab", serif;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -39,4 +49,352 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Map with halls selector panel styles */
+.map-panel {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  padding: 18px;
+  color: #3b3735;
+  width: 360px;
+}
+.map-panel__title {
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+
+.hall-list-columns {
+  display: flex;
+  gap: 22px;
+  align-items: flex-start;
+}
+.hall-list-column {
+  font-weight: 400;
+  display: grid;
+}
+
+/* Custom checkbox: hide native input and draw box via label pseudo elements */
+.hall-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  min-height: 32px;
+}
+.hall-checkbox input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.hall-label {
+  display: inline-block;
+  position: relative;
+  padding-left: 28px;
+}
+.hall-label::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  border: 2px solid #cfcfcf;
+  border-radius: 3px;
+  background: #fff;
+}
+.hall-checkbox input[type="checkbox"]:checked + .hall-label::before {
+  background: #4caf50;
+  border-color: #a9a9a9;
+}
+.hall-checkbox input[type="checkbox"]:checked + .hall-label::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+}
+
+/* Map canvas and zoom controls */
+.map-canvas {
+  position: relative;
+  background: #ececec;
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 0 8px rgba(0, 0, 0, 0.03) inset;
+  height: 100%;
+}
+.map-canvas {
+  touch-action: none;
+}
+.map-canvas {
+  cursor: grab;
+}
+.map-canvas.panning {
+  cursor: grabbing;
+}
+.zoom-controls {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  background: #e6e6e6;
+  border-radius: 8px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  z-index: 10;
+}
+.zoom-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 0;
+  background: transparent;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+.zoom-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.map-viewport {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.map-inner {
+  transition: transform 160ms ease;
+  transform-origin: center center;
+  display: inline-block;
+}
+.map-inner img {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* Selection summary (top-left box) */
+.selection-summary {
+  background: #f4f0ef;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.05) inset;
+}
+.selection-summary__title {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.selection-summary__empty {
+  color: #bdbdbd;
+  font-size: 18px;
+  padding: 12px 0;
+  text-align: center;
+}
+.selection-summary__list {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.selection-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+}
+.selection-item__name {
+  font-weight: 600;
+}
+.badge {
+  padding: 6px 10px;
+  border-radius: 16px;
+  color: white;
+  font-size: 12px;
+}
+.badge--small {
+  background: #b68f2b;
+}
+.badge--medium {
+  background: #2aa6b6;
+}
+.badge--large {
+  background: #6bc34a;
+}
+
+/* Booking form styles (match provided design) */
+.booking-card {
+  background: rgba(0, 0, 0, 0.15);
+  padding: 22px;
+  border-radius: 12px;
+  margin: 8px 0;
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.03);
+}
+.booking-title {
+  margin-top: 0;
+  font-weight: 700;
+  color: #3b3735;
+  text-align: left;
+}
+.booking-row {
+  margin-bottom: 12px;
+}
+.booking-row.two-cols {
+  display: flex;
+  gap: 40px;
+}
+.booking-row.two-cols > div {
+  flex: 1;
+  min-width: 0;
+}
+.booking-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #3b3735;
+  text-align: left;
+}
+.booking-input,
+.booking-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(0, 0, 0, 0.06);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  color: #3b3735;
+  text-align: left;
+  align-items: flex-start;
+  box-sizing: border-box;
+}
+.booking-textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+.booking-error {
+  color: #c0392b;
+  margin-top: 6px;
+  font-size: 13px;
+}
+.booking-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+.booking-back {
+  background: transparent;
+  border: 0;
+  color: #3b3735;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.booking-submit {
+  background: #b68f2b;
+  color: white;
+  border: 0;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+/* Custom button styles */
+.atom-button {
+  background: #0b0b0b; /* default dark */
+  color: #fff;
+  border: 0;
+  border-radius: 12px;
+  padding: 0;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.atom-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.atom-button__icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Reservation confirmation layout */
+.success-message {
+  margin-top: 0;
+  font-size: large;
+}
+.reservation-confirmation {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+  align-items: start;
+  margin-top: 18px;
+}
+.res-card {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  padding: 18px;
+  text-align: left;
+}
+.res-card h3 {
+  margin-top: 0;
+  font-size: large;
+  text-align: center;
+}
+.res-card--qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+.qr-container {
+  width: 220px;
+  height: 220px;
+  border-radius: 18px;
+  background: #efefef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.6);
+}
+.qr-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+@media (max-width: 880px) {
+  .reservation-confirmation {
+    grid-template-columns: 1fr;
+  }
 }

@@ -7,19 +7,7 @@ const User = sequelize.define('User', {
     autoIncrement: true,
     primaryKey: true
   },
-  businessName: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: {
-      msg: 'Business name already exists'
-    },
-    validate: {
-      notEmpty: {
-        msg: 'Business name is required'
-      }
-    }
-  },
-  contactPerson: {
+    contactPerson: {
     type: DataTypes.STRING,
     allowNull: false,
     validate: {
@@ -56,14 +44,16 @@ const User = sequelize.define('User', {
       }
     }
   },
+  businessName: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: {
+      msg: 'Business name already exists'
+    }
+  },
   businessAddress: {
     type: DataTypes.TEXT,
-    allowNull: false,
-    validate: {
-      notEmpty: {
-        msg: 'Business address is required'
-      }
-    }
+    allowNull: true
   },
   password: {
     type: DataTypes.STRING,
