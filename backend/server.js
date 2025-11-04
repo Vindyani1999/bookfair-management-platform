@@ -3,6 +3,7 @@ const express = require('express');
 const { connectDB, sequelize } = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
+const hallRoutes = require('./routes/hallRoutes');
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.get('/', (req, res) => res.send('SIB-RMS Backend is running'));
 // Routes
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/hall', hallRoutes);
 
 const PORT = process.env.PORT || 5000;
 
