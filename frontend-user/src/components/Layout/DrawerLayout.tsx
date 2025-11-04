@@ -145,7 +145,8 @@ export default function DrawerLayout() {
   }
 
   return (
-    <Box >
+    <Box>
+    <Box sx={{display:'flex'}}>
       <CssBaseline />
 
       <Drawer variant="permanent" open={open} >
@@ -239,10 +240,11 @@ export default function DrawerLayout() {
           </List>
         </Box>
       </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      <Box component="main" sx={{ flexGrow: 1}}>
         <DrawerHeader />
         <Outlet />
       </Box>
+    </Box>
     </Box>
   );
 }
