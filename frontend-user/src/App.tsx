@@ -12,10 +12,10 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/" element={<DrawerLayout/>}>
-          <Route path="book" element={<TemporaryStepperPage />} />
+        <Route path="/drawer/" element={<DrawerLayout/>}>
+          {/* <Route path="book" element={<TemporaryStepperPage />} /> */}
         </Route>
-        
+        <Route path="/book" element={<TemporaryStepperPage />} />
         <Route path="/about" element={<About />} />
         <Route path="/faq" element={<FAQ />} />
         <Route path="/terms" element={<TermsOfService />} />
