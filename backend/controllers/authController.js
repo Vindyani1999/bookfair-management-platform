@@ -1,4 +1,5 @@
 const User = require('../models/user');
+//const Admin = require('../models/admin');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
@@ -213,3 +214,80 @@ exports.resetPassword = async (req, res) => {
     return res.status(500).json({ message: 'Error resetting password', error: error.message });
   }
 };
+
+
+// /**
+//  * @route   POST /api/v1/admins/login1
+//  * @desc    Login a admin
+//  * @access  Public
+//  */
+// exports.loginAdmin = async (req, res) => {
+//   try {
+//     const { adminName, password } = req.body || {};
+
+//     const admin = await Admin.findOne({ where: { adminName } });
+//     if (!admin) return res.status(400).json({ message: 'Invalid user name or password' });
+
+//     const isMatch = await bcrypt.compare(password, admin.password);
+//     if (!isMatch) return res.status(400).json({ message: 'Invalid user name or password' });  
+
+//     const token = jwt.sign(
+//       { id: admin.id, adminName: admin.adminName, adminRole: admin.role },
+//       process.env.JWT_SECRET,
+//       { expiresIn: '1h' }
+//     );
+
+//     res.status(200).json({
+//       message: 'Login successful',
+//       admin: {
+//         id: admin.id,
+//         adminName: admin.adminName,
+//         adminRole: admin.role
+//       },
+//       token,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: 'Error logging in', error: error.message });
+//   }
+// };
+
+
+// /**
+//  * @route   POST /api/v1/admins/register1
+//  * @desc    Register a new admin
+//  * @access  Public
+//  */
+// exports.registerAdmin = async (req, res) => {
+//   try {
+//     const { adminName, password, role } = req.body
+
+//     if (!adminName || !password ) {
+//       return res.status(400).json({ message: 'User name and password are required' });
+//     }
+
+//     const existingUser = await Admin.findOne({ where: { adminName } });
+//     if (existingUser) return res.status(400).json({ message: 'User name already exists' });
+
+//     const salt = await bcrypt.genSalt(10);
+//     const hashedPassword = await bcrypt.hash(password, salt);
+
+//     const admin = await Admin.create({
+//       adminName,
+//       password: hashedPassword,
+//       role
+//     });
+
+//     res.status(201).json({
+//       message: 'admin registered successfully',
+//       user: {
+//         id: admin.id,
+//         adminName: admin.adminName,
+//         role: admin.role
+//       }
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: 'Error registering user', error: error.message });
+//   }
+// };
