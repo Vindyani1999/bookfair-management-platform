@@ -19,17 +19,7 @@ const Hall = sequelize.define('Hall', {
 			}
 		}
 	},
-	location: {
-		type: DataTypes.STRING,
-		allowNull: true
-	},
-	capacity: {
-		type: DataTypes.INTEGER,
-		allowNull: true,
-		validate: {
-			min: 0
-		}
-	},
+	
 	description: {
 		type: DataTypes.TEXT,
 		allowNull: true

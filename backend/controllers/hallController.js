@@ -1,12 +1,19 @@
 const Hall = require('../models/hall');
+const Stall = require('../models/stall');
 
 /**
- * Get all halls
- * GET /api/v1/halls
+ * @desc    Get all halls
+ * @route   GET /api/v1/halls
+ * @access  Private
  */
 exports.getAllHalls = async (req, res) => {
   try {
-    const halls = await Hall.findAll();
+    const halls = await Hall.findAll({
+      include: [{
+        model: Stall,
+        attributes: ['id', 'number', 'status']
+      }]
+    });
     res.json(halls);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching halls', error: error.message });
@@ -14,25 +21,114 @@ exports.getAllHalls = async (req, res) => {
 };
 
 /**
- * Update a hall
- * PUT /api/v1/halls/:id
+ * @desc    Get single hall by ID
+ * @route   GET /api/v1/halls/:id
+ * @access  Private
+ */
+exports.getHallById = async (req, res) => {
+  try {
+    const hall = await Hall.findByPk(req.params.id, {
+      include: [{
+        model: Stall,
+        attributes: ['id', 'number', 'status', 'ownerId']
+      }]
+    });
+    
+    if (!hall) {
+      return res.status(404).json({ message: 'Hall not found' });
+    }
+
+    res.json(hall);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching hall', error: error.message });
+  }
+};
+
+/**
+ * @desc    Create new hall
+ * @route   POST /api/v1/halls
+ * @access  Private
+ */
+exports.createHall = async (req, res) => {
+  try {
+    const { name, description } = req.body;
+
+    // Validate required fields
+    if (!name) {
+      return res.status(400).json({ message: 'Hall name is required' });
+    }
+
+    const hall = await Hall.create({
+      name,
+      description
+    });
+
+    res.status(201).json({
+      message: 'Hall created successfully',
+      hall
+    });
+  } catch (error) {
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(400).json({ message: 'Hall name already exists' });
+    }
+    res.status(500).json({ message: 'Error creating hall', error: error.message });
+  }
+};
+
+/**
+ * @desc    Update hall
+ * @route   PUT /api/v1/halls/:id
+ * @access  Private
  */
 exports.updateHall = async (req, res) => {
   try {
     const hall = await Hall.findByPk(req.params.id);
-    if (!hall) return res.status(404).json({ message: 'Hall not found' });
+    if (!hall) {
+      return res.status(404).json({ message: 'Hall not found' });
+    }
 
-    const { name, location, capacity, description } = req.body;
+    const { name, description } = req.body;
 
     const updated = await hall.update({
       name: name ?? hall.name,
-      location: location ?? hall.location,
-      capacity: capacity ?? hall.capacity,
-      description: description ?? hall.description,
+      description: description ?? hall.description
     });
 
-    res.json({ message: 'Hall updated successfully', hall: updated });
+    res.json({ 
+      message: 'Hall updated successfully', 
+      hall: updated 
+    });
   } catch (error) {
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(400).json({ message: 'Hall name already exists' });
+    }
     res.status(500).json({ message: 'Error updating hall', error: error.message });
+  }
+};
+
+/**
+ * @desc    Delete hall
+ * @route   DELETE /api/v1/halls/:id
+ * @access  Private
+ */
+exports.deleteHall = async (req, res) => {
+  try {
+    const hall = await Hall.findByPk(req.params.id);
+    if (!hall) {
+      return res.status(404).json({ message: 'Hall not found' });
+    }
+
+    // Check if hall has any stalls
+    const stallCount = await Stall.count({ where: { hallId: req.params.id }});
+    if (stallCount > 0) {
+      return res.status(400).json({ 
+        message: 'Cannot delete hall with existing stalls. Please remove all stalls first.'
+      });
+    }
+
+    await hall.destroy();
+    res.json({ message: 'Hall deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting hall', error: error.message });
   }
 };

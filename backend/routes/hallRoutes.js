@@ -1,8 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const { getAllHalls, updateHall } = require('../controllers/hallController');
+const auth = require('../middleware/auth');
+const { 
+  getAllHalls, 
+  getHallById,
+  createHall,
+  updateHall,
+  deleteHall 
+} = require('../controllers/hallController');
 
-router.get('/', getAllHalls);
-router.put('/:id', updateHall);
+// All routes are protected with auth middleware
+router.get('/', auth, getAllHalls);
+router.get('/:id', auth, getHallById);
+router.post('/', auth, createHall);
+router.put('/:id', auth, updateHall);
+router.delete('/:id', auth, deleteHall);
 
 module.exports = router;
