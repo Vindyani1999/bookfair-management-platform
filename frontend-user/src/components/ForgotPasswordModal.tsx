@@ -304,6 +304,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    style={{ backgroundColor: 'transparent' }}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/70 hover:text-white transition-colors"
                   >
                     {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
