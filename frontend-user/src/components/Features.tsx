@@ -23,7 +23,7 @@ export default function Features() {
   ];
 
   return (
-    <section id="features" className="py-24 px-6 bg-gray-100">
+    <section id="features" className="py-24 px-6 bg-">
       <div className="container mx-auto">
         <h2 className="text-5xl md:text-6xl font-bold text-gray-900 text-center mb-6">
           Why Choose Our Platform?
