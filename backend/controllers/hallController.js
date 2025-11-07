@@ -1,11 +1,7 @@
 const Hall = require('../models/hall');
 const Stall = require('../models/stall');
 
-/**
- * @desc    Get all halls
- * @route   GET /api/v1/halls
- * @access  Private
- */
+
 exports.getAllHalls = async (req, res) => {
   try {
     const halls = await Hall.findAll({
@@ -20,11 +16,7 @@ exports.getAllHalls = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get single hall by ID
- * @route   GET /api/v1/halls/:id
- * @access  Private
- */
+
 exports.getHallById = async (req, res) => {
   try {
     const hall = await Hall.findByPk(req.params.id, {
@@ -44,11 +36,7 @@ exports.getHallById = async (req, res) => {
   }
 };
 
-/**
- * @desc    Create new hall
- * @route   POST /api/v1/halls
- * @access  Private
- */
+
 exports.createHall = async (req, res) => {
   try {
     const { name, description } = req.body;
@@ -75,11 +63,7 @@ exports.createHall = async (req, res) => {
   }
 };
 
-/**
- * @desc    Update hall
- * @route   PUT /api/v1/halls/:id
- * @access  Private
- */
+
 exports.updateHall = async (req, res) => {
   try {
     const hall = await Hall.findByPk(req.params.id);
@@ -106,11 +90,7 @@ exports.updateHall = async (req, res) => {
   }
 };
 
-/**
- * @desc    Delete hall
- * @route   DELETE /api/v1/halls/:id
- * @access  Private
- */
+
 exports.deleteHall = async (req, res) => {
   try {
     const hall = await Hall.findByPk(req.params.id);
