@@ -11,7 +11,7 @@ const REFRESH_TOKEN_EXPIRY = '7d';
  */
 function generateTokens(admin) {
   const accessToken = jwt.sign(
-    { id: admin.id, adminName: admin.adminName, role: admin.role },
+    { id: admin.id, adminName: admin.adminName, role: admin.role || 'admin' },
     process.env.JWT_SECRET,
     { expiresIn: ACCESS_TOKEN_EXPIRY }
   );
