@@ -1,18 +1,17 @@
-import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import Header from '../components/Header';
-import Hero from '../components/Hero';
-import Features from '../components/Features';
-import Footer from '../components/Footer';
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import Header from "../components/Header";
+import Hero from "../components/Hero";
+import Features from "../components/Features";
+import Footer from "../components/Footer";
 
 export default function LandingPage() {
-
   const location = useLocation();
 
   useEffect(() => {
-    if (location.state?.scrollTo === 'features') {
-      const el = document.getElementById('features');
-      el?.scrollIntoView({ behavior: 'smooth' });
+    if (location.state?.scrollTo === "features") {
+      const el = document.getElementById("features");
+      el?.scrollIntoView({ behavior: "smooth" });
     }
   }, [location.state]);
   return (

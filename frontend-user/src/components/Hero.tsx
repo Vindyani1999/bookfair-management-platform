@@ -1,7 +1,11 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-const useCountUp = (end: number, duration: number = 5000, start: number = 0) => {
+const useCountUp = (
+  end: number,
+  duration: number = 5000,
+  start: number = 0
+) => {
   const [count, setCount] = useState(start);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -17,7 +21,9 @@ const useCountUp = (end: number, duration: number = 5000, start: number = 0) => 
       const progress = Math.min((currentTime - startTime) / duration, 1);
 
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-      const currentCount = Math.floor(startValue + (endValue - startValue) * easeOutQuart);
+      const currentCount = Math.floor(
+        startValue + (endValue - startValue) * easeOutQuart
+      );
 
       setCount(currentCount);
 
@@ -40,10 +46,13 @@ interface StatCardProps {
 }
 
 const StatCard = ({ label, value, idx, isVisible }: StatCardProps) => {
-  const numericValue = parseInt(value.replace(/\D/g, ''));
-  const suffix = value.replace(/\d/g, '');
+  const numericValue = parseInt(value.replace(/\D/g, ""));
+  const suffix = value.replace(/\d/g, "");
 
-  const { count, setIsVisible: setCountVisible } = useCountUp(numericValue, 2000);
+  const { count, setIsVisible: setCountVisible } = useCountUp(
+    numericValue,
+    2000
+  );
 
   useEffect(() => {
     if (isVisible) {
@@ -60,7 +69,8 @@ const StatCard = ({ label, value, idx, isVisible }: StatCardProps) => {
       style={{ transitionDelay: `${idx * 100}ms` }}
     >
       <div className="text-4xl font-bold text-slate-800 mb-2">
-        {count}{suffix}
+        {count}
+        {suffix}
       </div>
       <div className="text-slate-600 text-sm font-medium">{label}</div>
     </div>
@@ -84,42 +94,54 @@ export default function Hero() {
   }, []);
 
   const stats = [
-    { label: 'Stalls Available', value: '200+' },
-    { label: 'Publishers', value: '150+' },
-    { label: 'Days', value: '7' },
-    { label: 'Expected Visitors', value: '50K+' }
+    { label: "Stalls Available", value: "200+" },
+    { label: "Publishers", value: "150+" },
+    { label: "Days", value: "7" },
+    { label: "Expected Visitors", value: "50K+" },
   ];
 
   return (
     <section
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
       style={{
-        background: '#DACDC9'
+        background: "#DACDC9",
       }}
     >
       <div
         className="absolute inset-0 z-0"
         style={{
           backgroundImage: `url('/images/bgimg.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          opacity: 0.8
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          opacity: 0.8,
         }}
       />
 
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-20 left-10 w-72 h-72 bg-white/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-white/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div
+          className="absolute bottom-20 right-10 w-96 h-96 bg-white/20 rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: "1s" }}
+        ></div>
       </div>
 
       <div className="relative z-10 container mx-auto px-6 text-center pt-16 md:pt-0">
-        <div className={`transition-all duration-1000 transform ${textVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-          }`}>
-
-          <p className={`text-2xl md:text-3xl text-amber-100 mb-12 bg-amber-600-500/20 rounded-full border border-amber-400/30 max-w-3xl mx-auto leading-relaxed font-medium transition-all duration-1000 delay-300 animate-pulse drop-shadow ${textVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-            }`}>
-            Colombo International Book Fair &  Exhibition
+        <div
+          className={`transition-all duration-1000 transform ${
+            textVisible
+              ? "translate-y-0 opacity-100"
+              : "translate-y-10 opacity-0"
+          }`}
+        >
+          <p
+            className={`text-2xl md:text-3xl text-amber-100 mb-12 bg-amber-600-500/20 rounded-full border border-amber-400/30 max-w-3xl mx-auto leading-relaxed font-medium transition-all duration-1000 delay-300 animate-pulse drop-shadow ${
+              textVisible
+                ? "translate-y-0 opacity-100"
+                : "translate-y-10 opacity-0"
+            }`}
+          >
+            Colombo International Book Fair & Exhibition
           </p>
 
           <h1 className="text-6xl md:text-8xl font-bold text-amber-50 mb-8 leading-tight tracking-tight drop-shadow-lg">
@@ -129,18 +151,28 @@ export default function Hero() {
             </span>
           </h1>
 
-          <div className={`transition-all duration-1000 delay-500 ${textVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-            }`}>
+          <div
+            className={`transition-all duration-1000 delay-500 ${
+              textVisible
+                ? "translate-y-0 opacity-100"
+                : "translate-y-10 opacity-0"
+            }`}
+          >
             <button
-              onClick={() => navigate('/login')}
+              onClick={() => navigate("/login")}
               className="group relative bg-slate-800 hover:bg-slate-900 text-white px-12 py-5 rounded-full text-xl font-semibold transition-all duration-300 transform hover:scale-110 hover:shadow-2xl overflow-hidden"
             >
               <span className="relative z-10">Reserve Now</span>
             </button>
           </div>
 
-          <div className={`grid grid-cols-2 md:grid-cols-4 gap-6 mt-12 max-w-5xl mx-auto transition-all duration-1000 delay-700 ${textVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-            }`}>
+          <div
+            className={`grid grid-cols-2 md:grid-cols-4 gap-6 mt-12 max-w-5xl mx-auto transition-all duration-1000 delay-700 ${
+              textVisible
+                ? "translate-y-0 opacity-100"
+                : "translate-y-10 opacity-0"
+            }`}
+          >
             {stats.map((stat, idx) => (
               <StatCard
                 key={idx}
