@@ -257,14 +257,22 @@ export default function DrawerLayout() {
       </Drawer>
       <Box
         component="main"
-        sx={{
+        sx={(theme: Theme) => ({
           flexGrow: 1,
           // match the app's stepper/background so the toolbar spacer isn't white
           backgroundColor: "#DACDC9",
           // make the main area fill the viewport and prevent page scrolling
           height: "100vh",
           overflow: "hidden",
-        }}
+          // shift the main content to the right when drawer opens/closes
+          transition: theme.transitions.create(["margin", "width"], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
+          marginLeft: open
+            ? `${drawerWidth}px`
+            : `calc(${theme.spacing(7)} + 1px)`,
+        })}
       >
         {/* Removed the DrawerHeader spacer here so pages (like the stepper) can render flush at the top */}
         <Outlet />
