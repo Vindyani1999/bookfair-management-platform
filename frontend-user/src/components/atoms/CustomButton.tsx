@@ -11,17 +11,24 @@ export default function CustomButton({
   className = "",
   ...rest
 }: CustomButtonProps) {
+  const isDisabled = Boolean(
+    (rest as unknown as { disabled?: boolean }).disabled
+  );
+
   return (
     <button
       {...rest}
       className={`atom-button ${className}`}
       style={{
-        backgroundColor: color ?? undefined,
-        color: textColor,
+        backgroundColor: isDisabled ? "#bdbdbd" : color ?? undefined,
+        color: isDisabled ? "#757575" : textColor,
         height: "45px",
         padding: `0 20px`,
         lineHeight: "45px",
         borderRadius: 10,
+        cursor: isDisabled ? "not-allowed" : undefined,
+        opacity: isDisabled ? 0.7 : undefined,
+        boxShadow: isDisabled ? "none" : undefined,
         ...style,
       }}
     >
