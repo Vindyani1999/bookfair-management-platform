@@ -1,5 +1,10 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from './context/AuthContext';
 import LandingPage from "./pages/LandingPage";
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import UserDashboard from './pages/UserDashboard';
+import ProtectedRoute from './components/ProtectedRoute';
 import About from "./pages/info/AboutPage";
 import FAQ from "./pages/info/FAQPage";
 import TermsOfService from "./pages/info/TermsOfServicePage";

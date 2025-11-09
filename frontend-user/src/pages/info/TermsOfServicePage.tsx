@@ -19,7 +19,7 @@ export default function TermsOfService() {
       </div>
 
       <div className="container mx-auto px-6 py-16">
-        <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg border border-amber-200 p-8 md:p-12">
+        <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg border border-amber-200 p-8 md:p-12 text-left">
 
           <div className="bg-amber-50 border-l-4 border-amber-600 p-6 rounded-r-lg mb-8">
             <div className="flex items-start">
