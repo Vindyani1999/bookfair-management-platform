@@ -2,13 +2,12 @@ import * as React from "react";
 import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
-import CssBaseline from "@mui/material/CssBaseline";
 import IconButton from "@mui/material/IconButton";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
@@ -143,127 +142,131 @@ export default function DrawerLayout() {
   };
 
   return (
-    <Box>
-      <Box sx={{ display: "flex" }}>
-        <CssBaseline />
-
-        <Drawer variant="permanent" open={open}>
-          <Box
-            sx={{
-              height: "100%",
-              width: "90%",
-              m: 1,
-              bgcolor: "#EDF1F3", // hard corded
-              borderRadius: "30px",
-              boxShadow: "5px 5px 8px 0px rgba(0, 0, 0, 0.25)", // hard code
-            }}
-          >
-            <DrawerHeader>
+    <div>
+      <Drawer variant="permanent" open={open}>
+        <Box
+          sx={{
+            height: "100%",
+            width: "90%",
+            m: 1,
+            bgcolor: "#EDF1F3", // hard corded
+            borderRadius: "30px",
+            boxShadow: "5px 5px 8px 0px rgba(0, 0, 0, 0.25)", // hard code
+          }}
+        >
+          <DrawerHeader>
+            <Box
+              sx={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                mb: 7,
+              }}
+            >
               <Box
                 sx={{
                   width: "100%",
                   display: "flex",
-                  flexDirection: "column",
-                  mb: 7,
+                  justifyContent: isOpneFullDash === false ? "center" : "end",
+                  mt: 2,
+                  p: 1,
                 }}
               >
-                <Box
-                  sx={{
-                    width: "100%",
-                    display: "flex",
-                    justifyContent: isOpneFullDash === false ? "center" : "end",
-                    mt: 2,
-                    p: 1,
-                  }}
-                >
-                  <IconButton onClick={handleDrawerVariation} sx={{ width: 5 }}>
-                    {isOpneFullDash === false ? (
-                      <ArrowForwardOutlinedIcon />
-                    ) : (
-                      <ArrowBackOutlinedIcon />
-                    )}
-                  </IconButton>
-                </Box>
-                {isOpneFullDash ? (
-                  <img src="/images/black_logo.png" alt="Logo" style={{}} />
-                ) : (
-                  <ImportContactsOutlinedIcon sx={{ ml: 1 }} />
-                )}
+                <IconButton onClick={handleDrawerVariation} sx={{ width: 5 }}>
+                  {isOpneFullDash === false ? (
+                    <ArrowForwardOutlinedIcon />
+                  ) : (
+                    <ArrowBackOutlinedIcon />
+                  )}
+                </IconButton>
               </Box>
-            </DrawerHeader>
-            <List>
-              {drawerData.map((text, index) => (
-                <ListItem
-                  key={text.name}
-                  disablePadding
-                  sx={{ display: "block" }}
+              {isOpneFullDash ? (
+                <img src="/images/black_logo.png" alt="Logo" style={{}} />
+              ) : (
+                <ImportContactsOutlinedIcon sx={{ ml: 1 }} />
+              )}
+            </Box>
+          </DrawerHeader>
+          <List>
+            {drawerData.map((text) => (
+              <ListItem
+                key={text.name}
+                disablePadding
+                sx={{ display: "block" }}
+              >
+                <ListItemButton
+                  sx={[
+                    {
+                      minHeight: 48,
+                      px: 2.5,
+                      bgcolor:
+                        selectedTab === text.name ? "#DACDC9" : "#EDF1F3", // hardcoded
+                      borderRadius: "0px 30px 30px 0px",
+                      mr: 1,
+                    },
+                    open
+                      ? {
+                          justifyContent: "initial",
+                        }
+                      : {
+                          justifyContent: "center",
+                        },
+                  ]}
+                  onClick={() => handleTabClick(text)}
                 >
-                  <ListItemButton
+                  <ListItemIcon
                     sx={[
                       {
-                        minHeight: 48,
-                        px: 2.5,
-                        bgcolor:
-                          selectedTab === text.name ? "#DACDC9" : "#EDF1F3", // hardcoded
-                        borderRadius: "0px 30px 30px 0px",
-                        mr: 1,
+                        minWidth: 0,
+                        justifyContent: "center",
+                        color: "#000000",
                       },
                       open
                         ? {
-                            justifyContent: "initial",
+                            mr: 3,
                           }
                         : {
-                            justifyContent: "center",
+                            mr: "auto",
                           },
                     ]}
-                    onClick={() => handleTabClick(text)}
                   >
-                    <ListItemIcon
-                      sx={[
-                        {
-                          minWidth: 0,
-                          justifyContent: "center",
-                          color: "#000000",
-                        },
-                        open
-                          ? {
-                              mr: 3,
-                            }
-                          : {
-                              mr: "auto",
-                            },
-                      ]}
-                    >
-                      {text.icon}
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={text.name}
-                      primaryTypographyProps={{
-                        fontWeight: 700,
-                        color: "#000000", // hardcoded
-                        fontFamily: "Roboto Slab", //hardcoded
-                      }}
-                      sx={[
-                        open
-                          ? {
-                              opacity: 1,
-                            }
-                          : {
-                              opacity: 0,
-                            },
-                      ]}
-                    />
-                  </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
-          </Box>
-        </Drawer>
-        <Box component="main" sx={{ flexGrow: 1 }}>
-          <DrawerHeader />
-          <Outlet />
+                    {text.icon}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={text.name}
+                    primaryTypographyProps={{
+                      fontWeight: 700,
+                      color: "#000000", // hardcoded
+                      fontFamily: "Roboto Slab", //hardcoded
+                    }}
+                    sx={[
+                      open
+                        ? {
+                            opacity: 1,
+                          }
+                        : {
+                            opacity: 0,
+                          },
+                    ]}
+                  />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
         </Box>
+      </Drawer>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          // match the app's stepper/background so the toolbar spacer isn't white
+          backgroundColor: "#DACDC9",
+          minHeight: "100vh",
+        }}
+      >
+        {/* Removed the DrawerHeader spacer here so pages (like the stepper) can render flush at the top */}
+        <Outlet />
       </Box>
-    </Box>
+    </div>
   );
 }

@@ -210,7 +210,7 @@ const SteperComponent = () => {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "flex-start",
-          py: 6,
+          py: 2,
           position: "relative",
         }}
       >
