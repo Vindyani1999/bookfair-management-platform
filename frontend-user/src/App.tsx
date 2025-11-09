@@ -3,7 +3,6 @@ import { AuthProvider } from './context/AuthContext';
 import LandingPage from "./pages/LandingPage";
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
-import UserDashboard from './pages/UserDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import About from "./pages/info/AboutPage";
 import FAQ from "./pages/info/FAQPage";
@@ -16,6 +15,7 @@ import Dashboard from "./pages/Dashboard";
 function App() {
   return (
     <Router>
+      <AuthProvider>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/" element={<DrawerLayout />}>
@@ -26,7 +26,19 @@ function App() {
         <Route path="/faq" element={<FAQ />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          {/* <Route
+            path="dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          /> */}
+          <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </AuthProvider>
     </Router>
   );
 }
