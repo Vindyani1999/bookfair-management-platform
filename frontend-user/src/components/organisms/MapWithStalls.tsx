@@ -22,7 +22,9 @@ export default function MapWithStalls({
   onToggle: controlledOnToggle,
   mapSrc,
 }: Props) {
-  const [internalSelected, setInternalSelected] = useState<Record<string, boolean>>({});
+  const [internalSelected, setInternalSelected] = useState<
+    Record<string, boolean>
+  >({});
   const selected = controlledSelected ?? internalSelected;
   const [zoom, setZoom] = useState<number>(1);
 
@@ -46,10 +48,10 @@ export default function MapWithStalls({
   // fall back to the overview map. An explicit `mapSrc` prop overrides all.
   const chosenHallSrc =
     mapSrc ||
-    ((selectedHallIds &&
+    (selectedHallIds &&
       selectedHallIds.length === 1 &&
       hallMapImages[selectedHallIds[0]]) ||
-    "/images/map.png");
+    "/images/map.png";
 
   function onToggle(id: string, checked: boolean) {
     if (controlledOnToggle) return controlledOnToggle(id, checked);

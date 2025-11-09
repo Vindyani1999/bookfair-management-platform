@@ -13,8 +13,14 @@ type Props = {
   mapSrc?: string;
 };
 
-export default function MapWithSelector({ selected: controlledSelected, onToggle: controlledOnToggle, mapSrc }: Props) {
-  const [internalSelected, setInternalSelected] = useState<Record<string, boolean>>({});
+export default function MapWithSelector({
+  selected: controlledSelected,
+  onToggle: controlledOnToggle,
+  mapSrc,
+}: Props) {
+  const [internalSelected, setInternalSelected] = useState<
+    Record<string, boolean>
+  >({});
   const selected = controlledSelected ?? internalSelected;
   const [zoom, setZoom] = useState<number>(1);
 

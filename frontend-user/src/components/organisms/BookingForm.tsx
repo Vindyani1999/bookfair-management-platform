@@ -30,7 +30,8 @@ export default function BookingForm({ onSubmit, onBack }: Props) {
     const next: typeof errors = {};
     if (!data.fullName.trim()) next.fullName = "Full name is required";
     if (!data.email.trim()) next.email = "Email is required";
-    if (!data.contactNumber.trim()) next.contactNumber = "Contact number is required";
+    if (!data.contactNumber.trim())
+      next.contactNumber = "Contact number is required";
     // very small email check
     if (data.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email))
       next.email = "Enter a valid email";
@@ -113,7 +114,11 @@ export default function BookingForm({ onSubmit, onBack }: Props) {
         />
       </div>
       <div className="booking-actions">
-        <button type="button" className="booking-back" onClick={() => onBack && onBack()}>
+        <button
+          type="button"
+          className="booking-back"
+          onClick={() => onBack && onBack()}
+        >
           ← Back
         </button>
         <button type="submit" className="booking-submit">

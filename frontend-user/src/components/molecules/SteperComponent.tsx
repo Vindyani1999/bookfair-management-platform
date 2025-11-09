@@ -59,7 +59,9 @@ function CustomStepIcon(props: any) {
   const { active, completed } = props;
   return (
     <StepIconRoot active={active} completed={completed}>
-      {completed ? <CheckIcon sx={{ fontSize: "12px", color: "#fff" }} /> : null}
+      {completed ? (
+        <CheckIcon sx={{ fontSize: "12px", color: "#fff" }} />
+      ) : null}
     </StepIconRoot>
   );
 }
@@ -114,8 +116,12 @@ const SteperComponent = () => {
   ];
 
   // Booking flow state managed by the stepper (single source of truth)
-  const [selectedHalls, setSelectedHalls] = useState<Record<string, boolean>>({});
-  const [selectedStalls, setSelectedStalls] = useState<Record<string, boolean>>({});
+  const [selectedHalls, setSelectedHalls] = useState<Record<string, boolean>>(
+    {}
+  );
+  const [selectedStalls, setSelectedStalls] = useState<Record<string, boolean>>(
+    {}
+  );
   const [selectedHallIds, setSelectedHallIds] = useState<string[]>([]);
   const [selectedStallIds, setSelectedStallIds] = useState<string[]>([]);
   const [bookingData, setBookingData] = useState<FormData | null>(null);
@@ -243,15 +249,18 @@ const SteperComponent = () => {
             <BookingForm onBack={handleBack} onSubmit={handleSubmitBooking} />
           )}
 
-          {activeStep === 4 && reservationId && reservationDate && bookingData && (
-            <ReservationConfirmation
-              booking={bookingData}
-              selectedHallIds={selectedHallIds}
-              selectedStallIds={selectedStallIds}
-              reservationId={reservationId}
-              reservationDate={reservationDate}
-            />
-          )}
+          {activeStep === 4 &&
+            reservationId &&
+            reservationDate &&
+            bookingData && (
+              <ReservationConfirmation
+                booking={bookingData}
+                selectedHallIds={selectedHallIds}
+                selectedStallIds={selectedStallIds}
+                reservationId={reservationId}
+                reservationDate={reservationDate}
+              />
+            )}
         </Box>
 
         {/* Fixed Bottom Buttons */}
