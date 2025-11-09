@@ -204,7 +204,7 @@ const SteperComponent = () => {
       <Box
         sx={{
           width: "100%",
-          minHeight: "100vh",
+          height: "100%",
           backgroundColor: "#DACDC9",
           display: "flex",
           flexDirection: "column",
@@ -215,7 +215,20 @@ const SteperComponent = () => {
         }}
       >
         {/* Stepper */}
-        <Box sx={{ width: { xs: "95%", sm: "85%", md: "70%" }, mb: 6 }}>
+        <Box
+          sx={{
+            width: { xs: "95%", sm: "85%", md: "70%" },
+            mb: 3,
+            // keep the stepper pinned to the top of the viewport
+            position: "sticky",
+            top: 0,
+            zIndex: 1200,
+            // ensure sticky area has same background so it appears seamless
+            backgroundColor: "#DACDC9",
+            // small horizontal padding on very small screens
+            px: { xs: 2, sm: 0 },
+          }}
+        >
           <CustomStepper
             activeStep={activeStep}
             alternativeLabel
@@ -232,7 +245,16 @@ const SteperComponent = () => {
         </Box>
 
         {/* Render the booking stepper content (controlled by this component) */}
-        <Box sx={{ width: { xs: "95%", sm: "85%", md: "70%" }, mt: 4 }}>
+        <Box
+          sx={{
+            width: { xs: "95%", sm: "85%", md: "70%" },
+            mt: 0,
+            // let the content area scroll while header remains sticky
+            flex: 1,
+            overflowY: "auto",
+            pb: 12,
+          }}
+        >
           {activeStep === 0 && (
             <MapWithSelector selected={selectedHalls} onToggle={toggleHall} />
           )}

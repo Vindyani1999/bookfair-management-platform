@@ -261,7 +261,9 @@ export default function DrawerLayout() {
           flexGrow: 1,
           // match the app's stepper/background so the toolbar spacer isn't white
           backgroundColor: "#DACDC9",
-          minHeight: "100vh",
+          // make the main area fill the viewport and prevent page scrolling
+          height: "100vh",
+          overflow: "hidden",
         }}
       >
         {/* Removed the DrawerHeader spacer here so pages (like the stepper) can render flush at the top */}
