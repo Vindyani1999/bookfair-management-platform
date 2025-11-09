@@ -84,3 +84,7 @@ button:focus-visible {
 .animate-fade-in {
   animation: fadeIn 0.3s ease-in-out;
 }
+@theme{
+  --color-primary:#DACDC9;
+  --color-secondary:#000000;
+}

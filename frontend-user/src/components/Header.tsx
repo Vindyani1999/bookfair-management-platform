@@ -13,8 +13,8 @@ export default function Header() {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleLogout = () => {
@@ -30,17 +30,18 @@ export default function Header() {
 
   return (
     <header
-      className={`fixed top-0 w-full z-50 transition-all duration-500 ${scrolled ? 'backdrop-blur-xl shadow-2xl' : 'bg-transparent'
-        }`}
+      className={`fixed top-0 w-full z-50 transition-all duration-500 ${
+        scrolled ? "backdrop-blur-xl shadow-2xl" : "bg-transparent"
+      }`}
       style={{
-        backgroundColor: scrolled ? '#DACDC9' : 'transparent'
+        backgroundColor: scrolled ? "#DACDC9" : "transparent",
       }}
     >
       <nav className="container mx-auto px-6 py-2">
         <div className="flex items-center justify-between">
           <div
             className="flex items-center space-x-2 group cursor-pointer"
-            onClick={() => navigate('/')}
+            onClick={() => navigate("/")}
           >
             <BookOpen className="w-8 h-8 text-white transition-transform group-hover:rotate-12 duration-300" />
             <img

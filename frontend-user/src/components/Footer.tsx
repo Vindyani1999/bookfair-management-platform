@@ -1,26 +1,26 @@
-import { BookOpen, Mail, Phone } from 'lucide-react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { BookOpen, Mail, Phone } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 export default function Footer() {
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    if (location.state?.scrollTo === 'features') {
-      const el = document.getElementById('features');
-      el?.scrollIntoView({ behavior: 'smooth' });
+    if (location.state?.scrollTo === "features") {
+      const el = document.getElementById("features");
+      el?.scrollIntoView({ behavior: "smooth" });
     } else {
       window.scrollTo(0, 0);
     }
   }, [location.pathname, location.state]);
 
   const scrollToFeatures = () => {
-    if (location.pathname !== '/') {
-      navigate('/', { state: { scrollTo: 'features' } });
+    if (location.pathname !== "/") {
+      navigate("/", { state: { scrollTo: "features" } });
     } else {
-      const el = document.getElementById('features');
-      el?.scrollIntoView({ behavior: 'smooth' });
+      const el = document.getElementById("features");
+      el?.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -52,7 +52,11 @@ export default function Footer() {
               <li>
                 <button
                   onClick={scrollToFeatures}
-                  style={{ backgroundColor: 'transparent', border: 'none', padding: 0 }}
+                  style={{
+                    backgroundColor: "transparent",
+                    border: "none",
+                    padding: 0,
+                  }}
                   className="text-gray-400 hover:text-amber-500 transition-colors"
                 >
                   Features
@@ -115,7 +119,9 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-700 pt-8 text-center text-gray-400">
-          <p>&copy; 2025 Colombo International Book Fair. All rights reserved.</p>
+          <p>
+            &copy; 2025 Colombo International Book Fair. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
