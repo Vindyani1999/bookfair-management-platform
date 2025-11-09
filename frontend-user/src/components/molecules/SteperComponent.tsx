@@ -1,23 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Stepper,
   Step,
   StepLabel,
   Box,
-  Button,
   styled,
   ThemeProvider,
   StepConnector,
   stepConnectorClasses,
 } from "@mui/material";
+import CustomButton from "../atoms/CustomButton";
 import CheckIcon from "@mui/icons-material/Check";
 import theme from "../../utils/colorConfig";
 import MapWithSelector from "../organisms/MapWithSelector";
 import MapWithStalls from "../organisms/MapWithStalls";
 import BookingForm from "../organisms/BookingForm";
+import PaymentDetails from "../organisms/PaymentDetails";
 import ReservationConfirmation from "../organisms/ReservationConfirmation";
 import type { FormData } from "../../utils/types";
 
@@ -127,6 +128,12 @@ const SteperComponent = () => {
   const [bookingData, setBookingData] = useState<FormData | null>(null);
   const [reservationId, setReservationId] = useState<string | null>(null);
   const [reservationDate, setReservationDate] = useState<string | null>(null);
+  // ref to interact with the controlled BookingForm (forwardRef)
+  const bookingFormRef = useRef<any>(null);
+  const [bookingFormValid, setBookingFormValid] = useState<boolean>(false);
+  // payment form ref & validity
+  const paymentFormRef = useRef<any>(null);
+  const [paymentFormValid, setPaymentFormValid] = useState<boolean>(false);
 
   function toggleHall(id: string, checked: boolean) {
     // Allow only one hall to be selected. Selecting a hall will deselect others.
@@ -154,31 +161,43 @@ const SteperComponent = () => {
     // Behavior depends on current activeStep
     if (activeStep === 0) {
       const ids = Object.keys(selectedHalls).filter((k) => selectedHalls[k]);
-      // require exactly one hall
-      if (ids.length !== 1) {
-        alert("Please select exactly one hall to continue.");
-        return;
-      }
       setSelectedHallIds(ids);
       setActiveStep(1);
       return;
     }
     if (activeStep === 1) {
       const ids = Object.keys(selectedStalls).filter((k) => selectedStalls[k]);
-      // require at least one and at most 3 stalls
-      if (ids.length < 1) {
-        alert("Please select at least one stall before continuing.");
-        return;
-      }
-      if (ids.length > 3) {
-        alert("You can select up to 3 stalls only.");
-        return;
-      }
       setSelectedStallIds(ids);
       setActiveStep(2);
       return;
     }
-    // For booking step (2) we move forward when booking form submits
+    if (activeStep === 2) {
+      // Validate booking form via ref and advance to payment if valid
+      if (bookingFormRef.current?.isValid()) {
+        const data = bookingFormRef.current.getData();
+        handleSubmitBooking(data);
+      } else {
+        bookingFormRef.current?.validateAndShow();
+      }
+      return;
+    }
+    if (activeStep === 3) {
+      // Validate payment form and advance to confirmation if valid
+      if (paymentFormRef.current?.isValid()) {
+        // we could collect payment data here: const p = paymentFormRef.current.getData();
+        handleSubmitPayment();
+      } else {
+        paymentFormRef.current?.validateAndShow();
+      }
+      return;
+    }
+    // If on final step, finish the flow
+    if (activeStep === steps.length - 1) {
+      handleFinish();
+      return;
+    }
+
+    // For other steps advance one step
     setActiveStep((prev) => Math.min(steps.length - 1, prev + 1));
   }
 
@@ -187,7 +206,33 @@ const SteperComponent = () => {
   }
 
   function handleSubmitBooking(data: FormData) {
+    // save booking data and advance to payment step
     setBookingData(data);
+    setActiveStep(3);
+  }
+
+  function handleFinish() {
+    // reset flow and redirect to dashboard (or reset to step 0)
+    setSelectedHalls({});
+    setSelectedStalls({});
+    setSelectedHallIds([]);
+    setSelectedStallIds([]);
+    setBookingData(null);
+    setReservationId(null);
+    setReservationDate(null);
+    setBookingFormValid(false);
+    setPaymentFormValid(false);
+    setActiveStep(0);
+    // navigate to the reservations page on localhost:3000
+    try {
+      window.location.href = "http://localhost:3000/my-reservation";
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function handleSubmitPayment() {
+    // simulate payment success, create reservation and go to confirmation
     const id = Math.random().toString(36).slice(2, 14);
     const date = new Date().toLocaleDateString(undefined, {
       month: "long",
@@ -196,7 +241,35 @@ const SteperComponent = () => {
     });
     setReservationId(id);
     setReservationDate(date);
-    setActiveStep(4); // jump to confirmation
+    setActiveStep(4);
+  }
+
+  // compute whether the `Continue` button should be enabled for current step
+  const selectedHallCount = Object.keys(selectedHalls).filter((k) =>
+    Boolean(selectedHalls[k])
+  ).length;
+  const selectedStallCount = Object.keys(selectedStalls).filter((k) =>
+    Boolean(selectedStalls[k])
+  ).length;
+
+  let canContinue = true;
+  if (activeStep === 0) {
+    // require exactly one hall selected to proceed
+    canContinue = selectedHallCount === 1;
+  } else if (activeStep === 1) {
+    // require 1..3 stalls selected
+    canContinue = selectedStallCount >= 1 && selectedStallCount <= 3;
+  } else if (activeStep === 2) {
+    // require booking form to be valid before enabling Continue
+    canContinue = bookingFormValid;
+  } else if (activeStep === 3) {
+    // require payment form valid before enabling Continue
+    canContinue = paymentFormValid;
+  } else if (activeStep === steps.length - 1) {
+    // final step: enable Finish (Continue becomes Finish)
+    canContinue = true;
+  } else {
+    canContinue = activeStep < steps.length - 1;
   }
 
   return (
@@ -268,7 +341,17 @@ const SteperComponent = () => {
           )}
 
           {activeStep === 2 && (
-            <BookingForm onBack={handleBack} onSubmit={handleSubmitBooking} />
+            <BookingForm
+              ref={bookingFormRef}
+              onValidityChange={setBookingFormValid}
+            />
+          )}
+
+          {activeStep === 3 && (
+            <PaymentDetails
+              ref={paymentFormRef}
+              onValidityChange={setPaymentFormValid}
+            />
           )}
 
           {activeStep === 4 &&
@@ -297,38 +380,25 @@ const SteperComponent = () => {
             flexWrap: "wrap",
           }}
         >
-          <Button
-            onClick={handleBack}
-            disabled={activeStep === 0}
-            sx={{
-              backgroundColor: "#000000",
-              color: "#ffffff",
-              px: 4,
-              py: 1,
-              borderRadius: "8px",
-              textTransform: "none",
-              "&:hover": { backgroundColor: "#1f1f1f" },
-              fontSize: { xs: "13px", sm: "14px" },
-            }}
-          >
-            ← Back
-          </Button>
-          <Button
+          {activeStep > 0 && activeStep < steps.length - 1 && (
+            <CustomButton
+              onClick={handleBack}
+              color="#000"
+              textColor="#fff"
+              style={{ padding: "0 24px" }}
+            >
+              ← Back
+            </CustomButton>
+          )}
+          <CustomButton
             onClick={handleContinue}
-            disabled={activeStep === steps.length - 1 || activeStep === 2}
-            sx={{
-              backgroundColor: "#000000",
-              color: "#ffffff",
-              px: 4,
-              py: 1,
-              borderRadius: "8px",
-              textTransform: "none",
-              "&:hover": { backgroundColor: "#1f1f1f" },
-              fontSize: { xs: "13px", sm: "14px" },
-            }}
+            disabled={!canContinue}
+            color="#000"
+            textColor="#fff"
+            style={{ padding: "0 24px" }}
           >
-            Continue →
-          </Button>
+            {activeStep === steps.length - 1 ? "Finish" : "Continue →"}
+          </CustomButton>
         </Box>
       </Box>
     </ThemeProvider>
