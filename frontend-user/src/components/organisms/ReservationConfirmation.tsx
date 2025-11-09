@@ -1,5 +1,5 @@
 import { halls, stalls } from "../../utils/data";
-import type { ReservationConfirmationProps as Props } from "../../utils/types";
+import type { ReservationConfirmationProps } from "../../utils/types";
 import CustomButton from "../atoms/CustomButton";
 import "../../App.css";
 
@@ -18,7 +18,7 @@ export default function ReservationConfirmation({
   selectedStallIds,
   reservationId,
   reservationDate,
-}: Props) {
+}: ReservationConfirmationProps) {
   // Build readable reserved stalls list: [ { hallLabel, stallLabel, size } ]
   const reserved = selectedStallIds
     .map((sid) => {

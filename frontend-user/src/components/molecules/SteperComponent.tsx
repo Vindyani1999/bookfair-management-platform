@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -14,6 +15,11 @@ import {
 } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import theme from "../../utils/colorConfig";
+import MapWithSelector from "../organisms/MapWithSelector";
+import MapWithStalls from "../organisms/MapWithStalls";
+import BookingForm from "../organisms/BookingForm";
+import ReservationConfirmation from "../organisms/ReservationConfirmation";
+import type { FormData } from "../../utils/types";
 
 // ===== Custom Connector (line between steps) =====
 const CustomConnector = styled(StepConnector)(() => ({
@@ -98,7 +104,7 @@ const CustomStepper = styled(Stepper)(() => ({
 
 // ===== Component =====
 const SteperComponent = () => {
-  const [activeStep, setActiveStep] = useState(1);
+  const [activeStep, setActiveStep] = useState(0);
   const steps = [
     "Select Hall(s)",
     "Select Stall(s)",
@@ -106,6 +112,86 @@ const SteperComponent = () => {
     "Payment Details",
     "Confirmation",
   ];
+
+  // Booking flow state managed by the stepper (single source of truth)
+  const [selectedHalls, setSelectedHalls] = useState<Record<string, boolean>>({});
+  const [selectedStalls, setSelectedStalls] = useState<Record<string, boolean>>({});
+  const [selectedHallIds, setSelectedHallIds] = useState<string[]>([]);
+  const [selectedStallIds, setSelectedStallIds] = useState<string[]>([]);
+  const [bookingData, setBookingData] = useState<FormData | null>(null);
+  const [reservationId, setReservationId] = useState<string | null>(null);
+  const [reservationDate, setReservationDate] = useState<string | null>(null);
+
+  function toggleHall(id: string, checked: boolean) {
+    // Allow only one hall to be selected. Selecting a hall will deselect others.
+    if (checked) {
+      setSelectedHalls({ [id]: true });
+    } else {
+      setSelectedHalls({});
+    }
+  }
+
+  function toggleStall(id: string, checked: boolean) {
+    // Allow up to 3 stalls. If trying to select beyond limit, ignore and notify.
+    setSelectedStalls((s) => {
+      const current = Object.keys(s).filter((k) => s[k]).length;
+      if (checked && current >= 3) {
+        // Notify user; parent UI can replace with nicer toast
+        alert("You can select up to 3 stalls only.");
+        return s;
+      }
+      return { ...s, [id]: checked };
+    });
+  }
+
+  function handleContinue() {
+    // Behavior depends on current activeStep
+    if (activeStep === 0) {
+      const ids = Object.keys(selectedHalls).filter((k) => selectedHalls[k]);
+      // require exactly one hall
+      if (ids.length !== 1) {
+        alert("Please select exactly one hall to continue.");
+        return;
+      }
+      setSelectedHallIds(ids);
+      setActiveStep(1);
+      return;
+    }
+    if (activeStep === 1) {
+      const ids = Object.keys(selectedStalls).filter((k) => selectedStalls[k]);
+      // require at least one and at most 3 stalls
+      if (ids.length < 1) {
+        alert("Please select at least one stall before continuing.");
+        return;
+      }
+      if (ids.length > 3) {
+        alert("You can select up to 3 stalls only.");
+        return;
+      }
+      setSelectedStallIds(ids);
+      setActiveStep(2);
+      return;
+    }
+    // For booking step (2) we move forward when booking form submits
+    setActiveStep((prev) => Math.min(steps.length - 1, prev + 1));
+  }
+
+  function handleBack() {
+    setActiveStep((prev) => Math.max(0, prev - 1));
+  }
+
+  function handleSubmitBooking(data: FormData) {
+    setBookingData(data);
+    const id = Math.random().toString(36).slice(2, 14);
+    const date = new Date().toLocaleDateString(undefined, {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+    setReservationId(id);
+    setReservationDate(date);
+    setActiveStep(4); // jump to confirmation
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -139,18 +225,33 @@ const SteperComponent = () => {
           </CustomStepper>
         </Box>
 
-        {/* Example Step Text Area */}
-        <Box
-          sx={{
-            width: { xs: "90%", sm: "80%" },
-            textAlign: "center",
-            color: "#333",
-            fontSize: { xs: "15px", sm: "16px" },
-            fontWeight: 500,
-            mt: 4,
-          }}
-        >
-          Step {activeStep + 1}: {steps[activeStep]}
+        {/* Render the booking stepper content (controlled by this component) */}
+        <Box sx={{ width: { xs: "95%", sm: "85%", md: "70%" }, mt: 4 }}>
+          {activeStep === 0 && (
+            <MapWithSelector selected={selectedHalls} onToggle={toggleHall} />
+          )}
+
+          {activeStep === 1 && (
+            <MapWithStalls
+              selectedHallIds={selectedHallIds}
+              selected={selectedStalls}
+              onToggle={toggleStall}
+            />
+          )}
+
+          {activeStep === 2 && (
+            <BookingForm onBack={handleBack} onSubmit={handleSubmitBooking} />
+          )}
+
+          {activeStep === 4 && reservationId && reservationDate && bookingData && (
+            <ReservationConfirmation
+              booking={bookingData}
+              selectedHallIds={selectedHallIds}
+              selectedStallIds={selectedStallIds}
+              reservationId={reservationId}
+              reservationDate={reservationDate}
+            />
+          )}
         </Box>
 
         {/* Fixed Bottom Buttons */}
@@ -166,7 +267,7 @@ const SteperComponent = () => {
           }}
         >
           <Button
-            onClick={() => setActiveStep((prev) => Math.max(0, prev - 1))}
+            onClick={handleBack}
             disabled={activeStep === 0}
             sx={{
               backgroundColor: "#000000",
@@ -181,12 +282,9 @@ const SteperComponent = () => {
           >
             ← Back
           </Button>
-
           <Button
-            onClick={() =>
-              setActiveStep((prev) => Math.min(steps.length - 1, prev + 1))
-            }
-            disabled={activeStep === steps.length - 1}
+            onClick={handleContinue}
+            disabled={activeStep === steps.length - 1 || activeStep === 2}
             sx={{
               backgroundColor: "#000000",
               color: "#ffffff",

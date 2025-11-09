@@ -10,12 +10,20 @@ type Props = {
   selectedHallIds?: string[];
   /** Optional map image src to use instead of the default or hall-specific image */
   mapSrc?: string;
-  /** Called when user finishes stall selection and wants to go to next step */
-  onNext?: (selectedStallIds: string[]) => void;
+  /** Controlled selection map (optional). If provided, the component becomes controlled. */
+  selected?: Record<string, boolean>;
+  /** Called when a stall checkbox is toggled (controlled mode) */
+  onToggle?: (id: string, checked: boolean) => void;
 };
 
-export default function MapWithStalls({ selectedHallIds, onNext }: Props) {
-  const [selected, setSelected] = useState<Record<string, boolean>>({});
+export default function MapWithStalls({
+  selectedHallIds,
+  selected: controlledSelected,
+  onToggle: controlledOnToggle,
+  mapSrc,
+}: Props) {
+  const [internalSelected, setInternalSelected] = useState<Record<string, boolean>>({});
+  const selected = controlledSelected ?? internalSelected;
   const [zoom, setZoom] = useState<number>(1);
 
   // If previous step passed selected halls, only show stalls for those halls.
@@ -35,20 +43,17 @@ export default function MapWithStalls({ selectedHallIds, onNext }: Props) {
 
   // Prefer explicit mapSrc prop (e.g., provided by backend). If not provided
   // and exactly one hall was selected, try hall-specific image. Otherwise
-  // fall back to the overview map.
+  // fall back to the overview map. An explicit `mapSrc` prop overrides all.
   const chosenHallSrc =
-    (selectedHallIds &&
+    mapSrc ||
+    ((selectedHallIds &&
       selectedHallIds.length === 1 &&
       hallMapImages[selectedHallIds[0]]) ||
-    "/images/map.png";
+    "/images/map.png");
 
   function onToggle(id: string, checked: boolean) {
-    setSelected((s) => ({ ...s, [id]: checked }));
-  }
-
-  function handleNext() {
-    const ids = Object.keys(selected).filter((k) => selected[k]);
-    if (onNext) onNext(ids);
+    if (controlledOnToggle) return controlledOnToggle(id, checked);
+    setInternalSelected((s) => ({ ...s, [id]: checked }));
   }
 
   return (
@@ -100,16 +105,7 @@ export default function MapWithStalls({ selectedHallIds, onNext }: Props) {
           selected={selected}
           onToggle={onToggle}
         />
-        <div style={{ marginTop: 12, textAlign: "right" }}>
-          <button
-            className="zoom-btn"
-            onClick={handleNext}
-            aria-label="Next step"
-            type="button"
-          >
-            Next →
-          </button>
-        </div>
+        {/* Navigation (Next/Back) is handled by the parent stepper component */}
       </aside>
     </div>
   );

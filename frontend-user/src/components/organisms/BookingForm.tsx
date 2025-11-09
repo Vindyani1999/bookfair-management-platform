@@ -7,7 +7,7 @@ type Props = {
   onSubmit?: (data: FormData) => void;
 };
 
-export default function BookingForm({ onSubmit }: Props) {
+export default function BookingForm({ onSubmit, onBack }: Props) {
   const [data, setData] = useState<FormData>({
     fullName: "",
     contactNumber: "",
@@ -30,6 +30,7 @@ export default function BookingForm({ onSubmit }: Props) {
     const next: typeof errors = {};
     if (!data.fullName.trim()) next.fullName = "Full name is required";
     if (!data.email.trim()) next.email = "Email is required";
+    if (!data.contactNumber.trim()) next.contactNumber = "Contact number is required";
     // very small email check
     if (data.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email))
       next.email = "Enter a valid email";
@@ -110,6 +111,14 @@ export default function BookingForm({ onSubmit }: Props) {
           onChange={(e) => handleChange("note", e.target.value)}
           rows={4}
         />
+      </div>
+      <div className="booking-actions">
+        <button type="button" className="booking-back" onClick={() => onBack && onBack()}>
+          ← Back
+        </button>
+        <button type="submit" className="booking-submit">
+          Finish →
+        </button>
       </div>
     </form>
   );
