@@ -6,14 +6,15 @@ import TermsOfService from "./pages/info/TermsOfServicePage";
 import PrivacyPolicy from "./pages/info/PrivacyPolicyPage";
 import TemporaryStepperPage from "./pages/TemporaryStepperPage";
 import DrawerLayout from "./components/Layout/DrawerLayout";
+import Dashboard from "./pages/dash/Dashboard";
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/drawer/" element={<DrawerLayout/>}>
-          {/* <Route path="book" element={<TemporaryStepperPage />} /> */}
+        <Route path="/" element={<DrawerLayout/>}>
+          <Route path="dashboard" element={<Dashboard/>} />
         </Route>
         <Route path="/book" element={<TemporaryStepperPage />} />
         <Route path="/about" element={<About />} />
