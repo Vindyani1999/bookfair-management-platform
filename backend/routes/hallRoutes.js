@@ -1,18 +1,32 @@
 const express = require('express');
 const router = express.Router();
-const { 
-  getAllHalls, 
+const {
+  getAllHalls,
   getHallById,
   createHall,
   updateHall,
-  deleteHall 
+  deleteHall,
 } = require('../controllers/hallController');
 
-// All routes are protected with auth middleware
-router.get('/',  getAllHalls);
-router.get('/:id',  getHallById);
-router.post('/',  createHall);
-router.put('/:id',  updateHall);
-router.delete('/:id',  deleteHall);
+const {
+  authenticate,
+  authorizeRoles,
+} = require('../middleware/authMiddleware');
+
+
+// Access: user or admin
+router.get('/', authenticate, authorizeRoles('user', 'admin'), getAllHalls);
+
+// Access: user only
+router.get('/:id', authenticate, authorizeRoles('user'), getHallById);
+
+// Access: admin only
+router.post('/', authenticate, authorizeRoles('admin'), createHall);
+
+// Access: admin only
+router.put('/:id', authenticate, authorizeRoles('admin'), updateHall);
+
+// Access: admin only
+router.delete('/:id', authenticate, authorizeRoles('admin'), deleteHall);
 
 module.exports = router;
