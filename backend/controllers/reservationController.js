@@ -30,8 +30,9 @@ exports.getReservationById = async (req, res) => {
 
 exports.createReservation = async (req, res) => {
   try {
-    const newReservation = await Reservation.create(req.body);
-    res.status(201).send(newReservation);
+    const { id } = req.user
+    const newReservation = await Reservation.create({...req.body, userId: id});
+    res.status(201).send(newReservation,);
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: 'Internal Server Error' });

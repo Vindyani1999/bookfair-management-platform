@@ -8,7 +8,6 @@ const hallRoutes = require('./routes/hallRoutes');
 const stallRoutes = require('./routes/stallRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
 const reservationRoutes = require('./routes/reservationRoutes');
-const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
@@ -26,7 +25,6 @@ app.use('/api/v1/hall', hallRoutes);
 app.use('/api/v1/stall', stallRoutes);
 app.use('/api/v1/transaction', transactionRoutes);
 app.use('/api/v1/reservation', reservationRoutes);
-app.use('/api/v1/admin', adminRoutes);
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
