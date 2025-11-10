@@ -20,6 +20,8 @@ import MapWithStalls from "../organisms/MapWithStalls";
 import BookingForm from "../organisms/BookingForm";
 import PaymentDetails from "../organisms/PaymentDetails";
 import ReservationConfirmation from "../organisms/ReservationConfirmation";
+import StatCard from "../atoms/StatCard";
+import stats from "../../utils/data";
 import type { FormData } from "../../utils/types";
 
 // ===== Custom Connector (line between steps) =====
@@ -316,6 +318,23 @@ const SteperComponent = () => {
             ))}
           </CustomStepper>
         </Box>
+
+        {/* Stat cards row (visible only on the first step: Select Hall(s)) */}
+        {activeStep === 0 && (
+          <Box
+            sx={{
+              width: { xs: "95%", sm: "85%", md: "70%" },
+              display: "flex",
+              gap: 5,
+              justifyContent: "center",
+              mb: 3,
+            }}
+          >
+            <StatCard title="Total Stalls" value={stats.totalStalls} />
+            <StatCard title="Available Stalls" value={stats.availableStalls} />
+            <StatCard title="Reserved Stalls" value={stats.reservedStalls} />
+          </Box>
+        )}
 
         {/* Render the booking stepper content (controlled by this component) */}
         <Box

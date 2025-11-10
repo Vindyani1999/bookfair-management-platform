@@ -1,3 +1,11 @@
+// Temporary mock data until backend integration
+const stats = {
+  totalStalls: 250,
+  availableStalls: 120,
+  reservedStalls: 130,
+};
+
+export default stats;
 // Temporary mock data to simulate backend response for halls
 // Replace or remove when backend endpoint is wired up.
 
