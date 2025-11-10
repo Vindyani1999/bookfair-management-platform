@@ -8,10 +8,17 @@ const {
   deleteStall,
 } = require('../controllers/stallController');
 
-router.get('/', getAllStalls);
-router.get('/:id', getStallById);
-router.post('/', createStall);
-router.put('/:id', updateStall);
-router.delete('/:id', deleteStall);
+const {
+  authenticate,
+  authorizeRoles,
+} = require('../middleware/authMiddleware');
 
+// Access: user or admin
+router.get('/', authenticate, authorizeRoles('admin, user'), getAllStalls);
+router.get('/:id', authenticate, authorizeRoles('admin, user'), getStallById);
+
+// Access: admin
+router.post('/', authenticate, authorizeRoles('admin'), createStall);
+router.put('/:id', authenticate, authorizeRoles('admin'), updateStall);
+router.delete('/:id', authenticate, authorizeRoles('admin'), deleteStall);
 module.exports = router;
