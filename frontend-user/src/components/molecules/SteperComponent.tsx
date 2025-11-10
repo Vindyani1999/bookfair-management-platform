@@ -14,6 +14,8 @@ import {
 } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import theme from "../../utils/colorConfig";
+import Confirmation from "../../pages/dash/Confirmation";
+import PersonalDetails from "../../pages/dash/PersonalDetails";
 
 // ===== Custom Connector (line between steps) =====
 const CustomConnector = styled(StepConnector)(() => ({
@@ -107,6 +109,8 @@ const SteperComponent = () => {
     "Confirmation",
   ];
 
+
+
   return (
     <ThemeProvider theme={theme}>
       <Box
@@ -150,7 +154,7 @@ const SteperComponent = () => {
             mt: 4,
           }}
         >
-          Step {activeStep + 1}: {steps[activeStep]}
+         <PersonalDetails/>
         </Box>
 
         {/* Fixed Bottom Buttons */}
