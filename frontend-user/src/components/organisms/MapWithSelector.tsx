@@ -5,25 +5,30 @@ import { halls } from "../../utils/data";
 import "../../App.css";
 
 type Props = {
-  /** Called when user finishes selection and wants to go to next step */
-  onNext?: (selectedHallIds: string[]) => void;
+  /** Controlled selection map (optional). If provided, the component becomes controlled. */
+  selected?: Record<string, boolean>;
+  /** Called when a hall checkbox is toggled (controlled mode) */
+  onToggle?: (id: string, checked: boolean) => void;
   /** Optional map image src — if not provided we use the default overview map */
   mapSrc?: string;
 };
 
-export default function MapWithSelector({ onNext, mapSrc }: Props) {
-  const [selected, setSelected] = useState<Record<string, boolean>>({});
+export default function MapWithSelector({
+  selected: controlledSelected,
+  onToggle: controlledOnToggle,
+  mapSrc,
+}: Props) {
+  const [internalSelected, setInternalSelected] = useState<
+    Record<string, boolean>
+  >({});
+  const selected = controlledSelected ?? internalSelected;
   const [zoom, setZoom] = useState<number>(1);
 
   const allHalls = halls.map((h) => ({ id: h.id, label: h.label }));
 
   function onToggle(id: string, checked: boolean) {
-    setSelected((s) => ({ ...s, [id]: checked }));
-  }
-
-  function handleNext() {
-    const ids = Object.keys(selected).filter((k) => selected[k]);
-    if (onNext) onNext(ids);
+    if (controlledOnToggle) return controlledOnToggle(id, checked);
+    setInternalSelected((s) => ({ ...s, [id]: checked }));
   }
 
   return (
@@ -69,16 +74,7 @@ export default function MapWithSelector({ onNext, mapSrc }: Props) {
           Select the halls you preferred for your halls
         </h3>
         <HallList halls={allHalls} selected={selected} onToggle={onToggle} />
-        <div style={{ marginTop: 12, textAlign: "right" }}>
-          <button
-            className="zoom-btn"
-            onClick={handleNext}
-            aria-label="Next step"
-            type="button"
-          >
-            Next →
-          </button>
-        </div>
+        {/* Navigation handled by parent stepper */}
       </aside>
     </div>
   );

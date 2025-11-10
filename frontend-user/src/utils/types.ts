@@ -1,4 +1,4 @@
-import type { ImgHTMLAttributes } from "react";
+import type { ImgHTMLAttributes, JSX } from "react";
 import type { Hall, Stall } from "./data";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
@@ -56,3 +56,14 @@ export type CustomButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   iconRight?: ReactNode;
   iconLeft?: ReactNode;
 };
+
+export type DrawerItem = {
+  name: string;
+  icon: JSX.Element;
+  navPath: string;
+};
+
+export type StepCount = {
+  step: number
+};
+

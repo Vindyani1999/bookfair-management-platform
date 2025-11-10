@@ -50,7 +50,7 @@ export default function PrivacyPolicy() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg border border-amber-200 p-8 md:p-12">
+          <div className="bg-white rounded-2xl shadow-lg border border-amber-200 p-8 md:p-12 text-left">
 
             <section className="mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Introduction</h2>
