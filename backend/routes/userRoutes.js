@@ -7,10 +7,12 @@ const {
   authorizeRoles,
 } = require('../middleware/authMiddleware');
 
-
-router.get('/', authenticate, authorizeRoles('admin'), getAllUsers);         
-router.get('/:id', authenticate, authorizeRoles('admin, user'), getUserById);      
+// Access: admin
+router.get('/', authenticate, authorizeRoles('admin'), getAllUsers);   
 router.put('/:id', authenticate, authorizeRoles('admin'), updateUser);       
-router.delete('/:id', authenticate, authorizeRoles('admin'), deleteUser);    
+router.delete('/:id', authenticate, authorizeRoles('admin'), deleteUser);
 
+// Access: user or admin
+router.get('/:id', authenticate, authorizeRoles('admin, user'), getUserById);  
+    
 module.exports = router;
