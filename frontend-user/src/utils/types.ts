@@ -63,3 +63,7 @@ export type DrawerItem = {
   navPath: string;
 };
 
+export type StepCount = {
+  step: number
+};
+
