@@ -27,14 +27,6 @@ app.use(
 app.get("/", (req, res) => res.send("SIB-RMS Backend is running"));
 
 // Routes
-<<<<<<< HEAD
-app.use("/api/v1/users", userRoutes);
-app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/admins", adminRoutes);
-app.use("/api/v1/hall", hallRoutes);
-app.use("/api/v1/stall", stallRoutes);
-const PORT = process.env.PORT || 5001;
-=======
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/admins', adminRoutes);
@@ -42,8 +34,8 @@ app.use('/api/v1/hall', hallRoutes);
 app.use('/api/v1/stall', stallRoutes);
 app.use('/api/v1/transaction', transactionRoutes);
 app.use('/api/v1/reservation', reservationRoutes);
+
 const PORT = process.env.PORT || 5000;
->>>>>>> a10e60dfa03d7bbf89acbdb5a192d0ee016f80de
 
 const startServer = async () => {
   await connectDB();
