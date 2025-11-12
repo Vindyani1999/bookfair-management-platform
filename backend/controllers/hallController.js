@@ -7,7 +7,8 @@ exports.getAllHalls = async (req, res) => {
     const halls = await Hall.findAll({
       include: [{
         model: Stall,
-        attributes: ['id', 'name', 'status', 'imageUrl', 'description']
+        as: 'stalls',
+        attributes: ['id', 'name', 'status', 'description']
       }]
     });
     res.json(halls);
@@ -23,7 +24,7 @@ exports.getHallById = async (req, res) => {
       include: [{
         model: Stall,
         attributes: ['id', 'name','description'
-          , 'status','imageUrl']
+          , 'status']
       }]
     });
     
