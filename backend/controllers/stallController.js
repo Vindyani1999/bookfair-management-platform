@@ -10,20 +10,18 @@ exports.getAllStalls = async (req, res) => {
   try {
     const { size, hallId } = req.query;
     const where = {};
-    
-    if (size) {
-      where.size = size;
-    }
-    if (hallId) {
-      where.hallId = hallId;
-    }
+
+    if (size) where.size = size;
+    if (hallId) where.hallId = hallId;
 
     const stalls = await Stall.findAll({
       where,
-      include: [{
-        model: Hall,
-        attributes: ['name']
-      }],
+      include: [
+        {
+          model: Hall,
+          attributes: ['name']
+        }
+      ],
       order: [['name', 'ASC']]
     });
 
@@ -34,56 +32,56 @@ exports.getAllStalls = async (req, res) => {
 };
 
 /**
- * @desc    Get single stall
+ * @desc    Get single stall by ID
  * @route   GET /api/v1/stalls/:id
  * @access  Private
  */
 exports.getStallById = async (req, res) => {
   try {
     const stall = await Stall.findByPk(req.params.id, {
-      include: [{
-        model: Hall,
-        attributes: ['name']
-      }]
+      include: [
+        {
+          model: Hall,
+          attributes: ['name']
+        }
+      ]
     });
-    
+
     if (!stall) {
       return res.status(404).json({ message: 'Stall not found' });
     }
 
-    res.json({
-      ...stall.toJSON(),
-      dimensions: stall.dimensions,
-      area: stall.area
-    });
+    res.json(stall);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching stall', error: error.message });
   }
 };
 
 /**
- * @desc    Create a stall
+ * @desc    Create a new stall
  * @route   POST /api/v1/stalls
  * @access  Private
  */
 exports.createStall = async (req, res) => {
   try {
-    const { name, hallId, width, length, price, description } = req.body;
+    const { name, hallId, size, price, description } = req.body;
 
+    // Validation: hallId is required
     if (!hallId) {
       return res.status(400).json({ message: 'Hall ID is required' });
     }
 
+    // Check if hall exists
     const hall = await Hall.findByPk(hallId);
     if (!hall) {
       return res.status(404).json({ message: 'Hall not found' });
     }
 
+    // Create new stall
     const stall = await Stall.create({
       name,
       hallId,
-      width,
-      length,
+      size: size || 'small',
       price: price || 0,
       description
     });
@@ -96,7 +94,7 @@ exports.createStall = async (req, res) => {
     if (error.name === 'SequelizeValidationError') {
       return res.status(400).json({
         message: 'Invalid stall data',
-        error: error.message
+        error: error.errors.map((e) => e.message)
       });
     }
     res.status(500).json({ message: 'Error creating stall', error: error.message });
@@ -104,7 +102,7 @@ exports.createStall = async (req, res) => {
 };
 
 /**
- * @desc    Update stall
+ * @desc    Update a stall
  * @route   PUT /api/v1/stalls/:id
  * @access  Private
  */
@@ -115,26 +113,32 @@ exports.updateStall = async (req, res) => {
       return res.status(404).json({ message: 'Stall not found' });
     }
 
-    const { name, width, length, price, description, ownerId } = req.body;
+    const { name, size, price, description, hallId } = req.body;
 
-    const updated = await stall.update({
+    if (hallId) {
+      const hall = await Hall.findByPk(hallId);
+      if (!hall) {
+        return res.status(404).json({ message: 'Hall not found' });
+      }
+    }
+
+    const updatedStall = await stall.update({
       name: name ?? stall.name,
-      width: width ?? stall.width,
-      length: length ?? stall.length,
+      size: size ?? stall.size,
       price: price ?? stall.price,
       description: description ?? stall.description,
-      ownerId: ownerId ?? stall.ownerId
+      hallId: hallId ?? stall.hallId
     });
 
     res.json({
       message: 'Stall updated successfully',
-      stall: updated
+      stall: updatedStall
     });
   } catch (error) {
     if (error.name === 'SequelizeValidationError') {
       return res.status(400).json({
         message: 'Invalid stall data',
-        error: error.message
+        error: error.errors.map((e) => e.message)
       });
     }
     res.status(500).json({ message: 'Error updating stall', error: error.message });
@@ -142,13 +146,16 @@ exports.updateStall = async (req, res) => {
 };
 
 /**
- * Delete a stall
- * DELETE /api/v1/stalls/:id
+ * @desc    Delete a stall
+ * @route   DELETE /api/v1/stalls/:id
+ * @access  Private
  */
 exports.deleteStall = async (req, res) => {
   try {
     const stall = await Stall.findByPk(req.params.id);
-    if (!stall) return res.status(404).json({ message: 'Stall not found' });
+    if (!stall) {
+      return res.status(404).json({ message: 'Stall not found' });
+    }
 
     await stall.destroy();
     res.json({ message: 'Stall deleted successfully' });

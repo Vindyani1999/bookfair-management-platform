@@ -30,7 +30,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/admins", adminRoutes);
 app.use("/api/v1/hall", hallRoutes);
 app.use("/api/v1/stall", stallRoutes);
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 const startServer = async () => {
   await connectDB();

@@ -1,6 +1,6 @@
 const Hall = require('../models/hall');
 const Stall = require('../models/stall');
-
+const cloudinary = require('../config/cloudinary');
 
 exports.getAllHalls = async (req, res) => {
   try {
@@ -110,5 +110,63 @@ exports.deleteHall = async (req, res) => {
     res.json({ message: 'Hall deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting hall', error: error.message });
+  }
+};
+
+exports.uploadHallImage = async (req, res) => {
+  try {
+    const hallId = req.params.id;
+    const hall = await Hall.findByPk(hallId);
+    if (!hall) return res.status(404).json({ message: 'Hall not found' });
+
+    if (!req.file) return res.status(400).json({ message: 'No image file uploaded' });
+
+    // Upload to Cloudinary
+    const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+      folder: 'halls',
+      resource_type: 'image'
+    });
+
+    hall.imageUrl = uploadResult.secure_url;
+    await hall.save();
+
+    res.json({
+      message: 'Hall image uploaded successfully',
+      imageUrl: hall.imageUrl
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error uploading hall image', error: error.message });
+  }
+};
+
+// 🆕 Update hall image (replace existing)
+exports.updateHallImage = async (req, res) => {
+  try {
+    const hallId = req.params.id;
+    const hall = await Hall.findByPk(hallId);
+    if (!hall) return res.status(404).json({ message: 'Hall not found' });
+
+    if (!req.file) return res.status(400).json({ message: 'No image file uploaded' });
+
+    // (Optional) Delete old image from Cloudinary if exists
+    // Extract public_id from previous URL (if you want)
+    // const publicId = hall.imageUrl?.split('/').pop().split('.')[0];
+    // if (publicId) await cloudinary.uploader.destroy(`halls/${publicId}`);
+
+    // Upload new image
+    const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+      folder: 'halls',
+      resource_type: 'image'
+    });
+
+    hall.imageUrl = uploadResult.secure_url;
+    await hall.save();
+
+    res.json({
+      message: 'Hall image updated successfully',
+      imageUrl: hall.imageUrl
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating hall image', error: error.message });
   }
 };

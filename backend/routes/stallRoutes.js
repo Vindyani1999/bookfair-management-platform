@@ -18,7 +18,7 @@ router.get('/', authenticate, authorizeRoles('admin, user'), getAllStalls);
 router.get('/:id', authenticate, authorizeRoles('admin, user'), getStallById);
 
 // Access: admin
-router.post('/', authenticate, authorizeRoles('admin'), createStall);
+router.post('/', createStall);
 router.put('/:id', authenticate, authorizeRoles('admin'), updateStall);
 router.delete('/:id', authenticate, authorizeRoles('admin'), deleteStall);
 module.exports = router;
