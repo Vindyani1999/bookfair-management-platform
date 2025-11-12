@@ -18,6 +18,9 @@ import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import { styled, type CSSObject, type Theme } from "@mui/material";
 import type { DrawerItem } from "../../utils/types";
 import ImportContactsOutlinedIcon from "@mui/icons-material/ImportContactsOutlined";
+import { useAuth } from "../../context/AuthContext";
+import LogoutConfirmationModal from "../molecules/LogoutConfirmationModal";
+
 
 const drawerWidth = 240;
 
@@ -115,6 +118,10 @@ export default function DrawerLayout() {
     localStorage.getItem("tabMemory") || "Dashboard"
   );
 
+  const [showLogoutModal, setShowLogoutModal] = React.useState(false);
+
+  const { logout, user } = useAuth();
+
   // const navigate = useNavigate();
 
   const handleDrawerOpen = () => {
@@ -136,9 +143,24 @@ export default function DrawerLayout() {
   };
 
   const handleTabClick = (text: DrawerItem) => {
+
+    if (text.name === "Logout") {
+      setShowLogoutModal(true);
+      return;
+    }
+
     setSelectedTab(text.name);
     localStorage.setItem("tabMemory", text.name);
     // navigate(text.navPath);
+  };
+
+  const handleLogoutConfirm = () => {
+    setShowLogoutModal(false);
+    logout();
+  };
+
+  const handleLogoutCancel = () => {
+    setShowLogoutModal(false);
   };
 
   return (
@@ -206,11 +228,11 @@ export default function DrawerLayout() {
                     },
                     open
                       ? {
-                          justifyContent: "initial",
-                        }
+                        justifyContent: "initial",
+                      }
                       : {
-                          justifyContent: "center",
-                        },
+                        justifyContent: "center",
+                      },
                   ]}
                   onClick={() => handleTabClick(text)}
                 >
@@ -223,11 +245,11 @@ export default function DrawerLayout() {
                       },
                       open
                         ? {
-                            mr: 3,
-                          }
+                          mr: 3,
+                        }
                         : {
-                            mr: "auto",
-                          },
+                          mr: "auto",
+                        },
                     ]}
                   >
                     {text.icon}
@@ -242,11 +264,11 @@ export default function DrawerLayout() {
                     sx={[
                       open
                         ? {
-                            opacity: 1,
-                          }
+                          opacity: 1,
+                        }
                         : {
-                            opacity: 0,
-                          },
+                          opacity: 0,
+                        },
                     ]}
                   />
                 </ListItemButton>
@@ -277,6 +299,12 @@ export default function DrawerLayout() {
         {/* Removed the DrawerHeader spacer here so pages (like the stepper) can render flush at the top */}
         <Outlet />
       </Box>
+      <LogoutConfirmationModal
+        isOpen={showLogoutModal}
+        onClose={handleLogoutCancel}
+        onConfirm={handleLogoutConfirm}
+        userName={user?.contactPerson || 'User'}
+      />
     </div>
   );
 }

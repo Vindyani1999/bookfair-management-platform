@@ -67,3 +67,9 @@ export type StepCount = {
   step: number
 };
 
+export type LogoutConfirmationModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  userName?: string;
+};
