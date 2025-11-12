@@ -7,7 +7,7 @@ exports.getAllHalls = async (req, res) => {
     const halls = await Hall.findAll({
       include: [{
         model: Stall,
-        attributes: ['id', 'number', 'status']
+        attributes: ['id', 'name', 'status', 'imageUrl', 'description']
       }]
     });
     res.json(halls);
@@ -22,7 +22,8 @@ exports.getHallById = async (req, res) => {
     const hall = await Hall.findByPk(req.params.id, {
       include: [{
         model: Stall,
-        attributes: ['id', 'number', 'status', 'ownerId']
+        attributes: ['id', 'name','description'
+          , 'status','imageUrl']
       }]
     });
     
@@ -71,11 +72,13 @@ exports.updateHall = async (req, res) => {
       return res.status(404).json({ message: 'Hall not found' });
     }
 
-    const { name, description } = req.body;
+    const { name, description, status , imageUrl } = req.body;
 
     const updated = await hall.update({
       name: name ?? hall.name,
-      description: description ?? hall.description
+      description: description ?? hall.description,
+      status: status ?? hall.status, 
+      imageUrl: imageUrl ?? hall.imageUrl
     });
 
     res.json({ 
@@ -174,6 +177,17 @@ exports.updateHallImage = async (req, res) => {
 
     streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
 
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating hall image', error: error.message });
+  }
+};
+exports.getImageUrl = async (req, res) => {
+  try {
+    const hallId = req.params.id;
+    const hall = await Hall.findByPk(hallId);
+    if (!hall) return res.status(404).json({ message: 'Hall not found' });
+    res.json({ imageUrl: hall.imageUrl });
+  
   } catch (error) {
     res.status(500).json({ message: 'Error updating hall image', error: error.message });
   }

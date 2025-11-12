@@ -23,6 +23,11 @@ const Hall = sequelize.define('Hall', {
     type: DataTypes.TEXT,
     allowNull: true
   },
+  status: {
+	type: DataTypes.ENUM('booked', 'available'),
+	allowNull: false,
+	defaultValue: 'available'
+  },
   imageUrl: {
     type: DataTypes.STRING, // Cloudinary URL
     allowNull: true

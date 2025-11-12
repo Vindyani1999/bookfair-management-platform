@@ -8,7 +8,8 @@ const {
   updateHall,
   deleteHall,
   uploadHallImage,
-  updateHallImage
+  updateHallImage,
+  getImageUrl
 } = require('../controllers/hallController');
 
 const {
@@ -38,5 +39,5 @@ router.delete('/:id', authenticate, authorizeRoles('admin'), deleteHall);
 // ✅ Upload and Update Image routes
 router.post('/:id/image', authenticate, authorizeRoles('user', 'admin'), upload.single('image'), uploadHallImage);
 router.put('/:id/image', authenticate, authorizeRoles('user', 'admin'), upload.single('image'), updateHallImage);
-
+router.get('/:id/image', authenticate, authorizeRoles('user', 'admin'), getImageUrl);
 module.exports = router;

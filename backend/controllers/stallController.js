@@ -19,6 +19,7 @@ exports.getAllStalls = async (req, res) => {
       include: [
         {
           model: Hall,
+          as: 'hall', // ✅ MUST match the alias in Stall.belongsTo(Hall, { as: 'hall' })
           attributes: ['name']
         }
       ],
@@ -30,6 +31,7 @@ exports.getAllStalls = async (req, res) => {
     res.status(500).json({ message: 'Error fetching stalls', error: error.message });
   }
 };
+
 
 /**
  * @desc    Get single stall by ID
@@ -64,7 +66,7 @@ exports.getStallById = async (req, res) => {
  */
 exports.createStall = async (req, res) => {
   try {
-    const { name, hallId, size, price, description } = req.body;
+    const { name, hallId, size, price, description, status } = req.body;
 
     // Validation: hallId is required
     if (!hallId) {
@@ -83,7 +85,8 @@ exports.createStall = async (req, res) => {
       hallId,
       size: size || 'small',
       price: price || 0,
-      description
+      description,
+      status: status || 'available'
     });
 
     res.status(201).json({
@@ -113,7 +116,7 @@ exports.updateStall = async (req, res) => {
       return res.status(404).json({ message: 'Stall not found' });
     }
 
-    const { name, size, price, description, hallId } = req.body;
+    const { name, size, price, description, hallId, status} = req.body;
 
     if (hallId) {
       const hall = await Hall.findByPk(hallId);
@@ -127,7 +130,8 @@ exports.updateStall = async (req, res) => {
       size: size ?? stall.size,
       price: price ?? stall.price,
       description: description ?? stall.description,
-      hallId: hallId ?? stall.hallId
+      hallId: hallId ?? stall.hallId,
+      status: status ?? stall.status
     });
 
     res.json({
