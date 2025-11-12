@@ -27,7 +27,7 @@ router.get('/', authenticate, authorizeRoles('user', 'admin'), getAllHalls);
 router.get('/:id', authenticate, authorizeRoles('user'), getHallById);
 
 // Access: admin only
-router.post('/', authenticate, authorizeRoles('admin'), createHall);
+router.post('/', authenticate, authorizeRoles('user', 'admin'), createHall);
 
 // Access: admin only
 router.put('/:id', authenticate, authorizeRoles('admin'), updateHall);
@@ -36,7 +36,7 @@ router.put('/:id', authenticate, authorizeRoles('admin'), updateHall);
 router.delete('/:id', authenticate, authorizeRoles('admin'), deleteHall);
 
 // ✅ Upload and Update Image routes
-router.post('/:id/image', authenticate, authorizeRoles('admin'), upload.single('image'), uploadHallImage);
-router.put('/:id/image', authenticate, authorizeRoles('admin'), upload.single('image'), updateHallImage);
+router.post('/:id/image', authenticate, authorizeRoles('user', 'admin'), upload.single('image'), uploadHallImage);
+router.put('/:id/image', authenticate, authorizeRoles('user', 'admin'), upload.single('image'), updateHallImage);
 
 module.exports = router;

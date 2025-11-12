@@ -112,6 +112,7 @@ exports.deleteHall = async (req, res) => {
     res.status(500).json({ message: 'Error deleting hall', error: error.message });
   }
 };
+const streamifier = require('streamifier');
 
 exports.uploadHallImage = async (req, res) => {
   try {
@@ -121,25 +122,31 @@ exports.uploadHallImage = async (req, res) => {
 
     if (!req.file) return res.status(400).json({ message: 'No image file uploaded' });
 
-    // Upload to Cloudinary
-    const uploadResult = await cloudinary.uploader.upload(req.file.path, {
-      folder: 'halls',
-      resource_type: 'image'
-    });
+    // Upload buffer to Cloudinary
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { folder: 'halls', resource_type: 'image' },
+      async (error, result) => {
+        if (error) {
+          return res.status(500).json({ message: 'Cloudinary upload error', error: error.message });
+        }
 
-    hall.imageUrl = uploadResult.secure_url;
-    await hall.save();
+        hall.imageUrl = result.secure_url;
+        await hall.save();
 
-    res.json({
-      message: 'Hall image uploaded successfully',
-      imageUrl: hall.imageUrl
-    });
+        res.json({
+          message: 'Hall image uploaded successfully',
+          imageUrl: hall.imageUrl
+        });
+      }
+    );
+
+    // Convert memory buffer to readable stream and pipe to Cloudinary
+    streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+
   } catch (error) {
     res.status(500).json({ message: 'Error uploading hall image', error: error.message });
   }
 };
-
-// 🆕 Update hall image (replace existing)
 exports.updateHallImage = async (req, res) => {
   try {
     const hallId = req.params.id;
@@ -148,24 +155,25 @@ exports.updateHallImage = async (req, res) => {
 
     if (!req.file) return res.status(400).json({ message: 'No image file uploaded' });
 
-    // (Optional) Delete old image from Cloudinary if exists
-    // Extract public_id from previous URL (if you want)
-    // const publicId = hall.imageUrl?.split('/').pop().split('.')[0];
-    // if (publicId) await cloudinary.uploader.destroy(`halls/${publicId}`);
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { folder: 'halls', resource_type: 'image' },
+      async (error, result) => {
+        if (error) {
+          return res.status(500).json({ message: 'Cloudinary upload error', error: error.message });
+        }
 
-    // Upload new image
-    const uploadResult = await cloudinary.uploader.upload(req.file.path, {
-      folder: 'halls',
-      resource_type: 'image'
-    });
+        hall.imageUrl = result.secure_url;
+        await hall.save();
 
-    hall.imageUrl = uploadResult.secure_url;
-    await hall.save();
+        res.json({
+          message: 'Hall image updated successfully',
+          imageUrl: hall.imageUrl
+        });
+      }
+    );
 
-    res.json({
-      message: 'Hall image updated successfully',
-      imageUrl: hall.imageUrl
-    });
+    streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+
   } catch (error) {
     res.status(500).json({ message: 'Error updating hall image', error: error.message });
   }
