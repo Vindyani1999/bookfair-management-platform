@@ -9,6 +9,7 @@ import {
   Paper,
 } from '@mui/material';
 import { LogoutOutlined } from '@mui/icons-material';
+import SearchBar from '../components/SearchBar';
 
 export default function Dashboard() {
   const { admin, logout } = useAuth();
@@ -56,6 +57,7 @@ export default function Dashboard() {
             justifyContent: 'center'
           }}
         >
+          <SearchBar/>
           <Typography variant="h4" gutterBottom fontWeight={600}>
             Book Fair Management System
           </Typography>
