@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { BookOpen } from 'lucide-react';
-import ForgotPasswordModal from '../components/ForgotPasswordModal';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { BookOpen } from "lucide-react";
+import ForgotPasswordModal from "../components/ForgotPasswordModal";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
@@ -18,21 +19,23 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+      navigate("/dashboard");
     }
   }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       await login({ email, password, rememberMe });
-      const from = (location.state as any)?.from?.pathname || '/dashboard';
+      const from = (location.state as any)?.from?.pathname || "/dashboard";
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed. Please try again.');
+      setError(
+        err instanceof Error ? err.message : "Login failed. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -45,10 +48,10 @@ export default function LoginPage() {
           className="absolute inset-0 z-0"
           style={{
             backgroundImage: `url('/images/bgimg.png')`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            filter: 'blur(2px)',
-            transform: 'scale(1.1)',
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            filter: "blur(2px)",
+            transform: "scale(1.1)",
           }}
         />
 
@@ -65,7 +68,7 @@ export default function LoginPage() {
 
         <div className="absolute top-8 right-8 z-20">
           <button
-            onClick={() => navigate('/signup')}
+            onClick={() => navigate("/signup")}
             className="px-6 py-2 bg-slate-800/80 hover:bg-slate-900/80 backdrop-blur-sm text-white rounded-lg font-semibold transition-all duration-300 hover:scale-105"
           >
             Signup
@@ -77,11 +80,15 @@ export default function LoginPage() {
             <div
               className="backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-white/30"
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                backgroundColor: "rgba(255, 255, 255, 0.15)",
               }}
             >
               <div className="text-center mb-8">
-                <img src="/images/logo.png" alt="Book.me" className="h-16 mx-auto mb-4" />
+                <img
+                  src="/images/logo.png"
+                  alt="Book.me"
+                  className="h-16 mx-auto mb-4"
+                />
                 <p className="text-white text-sm font-medium">
                   Login to make your stall reservation
                 </p>
@@ -95,7 +102,10 @@ export default function LoginPage() {
 
               <form onSubmit={handleSubmit} className="space-y-5 text-left">
                 <div>
-                  <label htmlFor="email" className="block text-white text-sm font-medium mb-2">
+                  <label
+                    htmlFor="email"
+                    className="block text-white text-sm font-medium mb-2"
+                  >
                     Email
                   </label>
                   <input
@@ -111,7 +121,10 @@ export default function LoginPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="password" className="block text-white text-sm font-medium mb-2">
+                  <label
+                    htmlFor="password"
+                    className="block text-white text-sm font-medium mb-2"
+                  >
                     Password
                   </label>
                   <input
@@ -154,21 +167,39 @@ export default function LoginPage() {
                 >
                   {loading ? (
                     <span className="flex items-center justify-center">
-                      <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      <svg
+                        className="animate-spin h-5 w-5 mr-2"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
                       </svg>
                       Signing In...
                     </span>
                   ) : (
-                    'Sign In'
+                    "Sign In"
                   )}
                 </button>
               </form>
 
               <p className="mt-6 text-center text-white text-sm">
-                Don't have an account?{' '}
-                <Link to="/signup" className="font-semibold hover:underline transition-all">
+                Don't have an account?{" "}
+                <Link
+                  to="/signup"
+                  className="font-semibold hover:underline transition-all"
+                >
                   Register
                 </Link>
               </p>
