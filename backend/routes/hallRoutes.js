@@ -1,11 +1,15 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const {
   getAllHalls,
   getHallById,
   createHall,
   updateHall,
   deleteHall,
+  uploadHallImage,
+  updateHallImage,
+  getImageUrl
 } = require('../controllers/hallController');
 
 const {
@@ -13,6 +17,9 @@ const {
   authorizeRoles,
 } = require('../middleware/authMiddleware');
 
+// ✅ Add Multer setup
+const storage = multer.memoryStorage(); 
+const upload = multer({ storage });
 
 // Access: user or admin
 router.get('/', authenticate, authorizeRoles('user', 'admin'), getAllHalls);
@@ -21,7 +28,7 @@ router.get('/', authenticate, authorizeRoles('user', 'admin'), getAllHalls);
 router.get('/:id', authenticate, authorizeRoles('user'), getHallById);
 
 // Access: admin only
-router.post('/', authenticate, authorizeRoles('admin'), createHall);
+router.post('/', authenticate, authorizeRoles('user', 'admin'), createHall);
 
 // Access: admin only
 router.put('/:id', authenticate, authorizeRoles('admin'), updateHall);
@@ -29,4 +36,8 @@ router.put('/:id', authenticate, authorizeRoles('admin'), updateHall);
 // Access: admin only
 router.delete('/:id', authenticate, authorizeRoles('admin'), deleteHall);
 
+// ✅ Upload and Update Image routes
+router.post('/:id/image', authenticate, authorizeRoles('user', 'admin'), upload.single('image'), uploadHallImage);
+router.put('/:id/image', authenticate, authorizeRoles('user', 'admin'), upload.single('image'), updateHallImage);
+router.get('/:id/image', authenticate, authorizeRoles('user', 'admin'), getImageUrl);
 module.exports = router;
