@@ -15,7 +15,7 @@ async function sendOtpEmail(to, otp) {
   `;
 
   return transporter.sendMail({
-    from: 'noreply@bookfair.com', 
+    from: 'chamindu77nipun@gmail.com', 
     to,
     subject: 'Password reset code',
     text: `Your password reset code is: ${otp}`,
