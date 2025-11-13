@@ -44,7 +44,25 @@ const CustomConnector = styled(StepConnector)(() => ({
 }));
 
 // ===== Custom Step Icon (circle + tick) =====
-const StepIconRoot = styled("div")<{ active?: boolean; completed?: boolean }>(
+// const StepIconRoot = styled("div")<{ active?: boolean; completed?: boolean }>(
+//   ({ active, completed }) => ({
+//     backgroundColor: completed || active ? "#14b8a6" : "#d1d5db",
+//     color: "#fff",
+//     width: 18,
+//     height: 18,
+//     borderRadius: "50%",
+//     display: "flex",
+//     alignItems: "center",
+//     justifyContent: "center",
+//     transition: "all 0.3s ease",
+//     fontSize: "12px",
+//   })
+// );
+
+// ===== Custom Step Icon (circle + tick) =====
+const StepIconRoot = styled("div", {
+  shouldForwardProp: (prop) => prop !== "active" && prop !== "completed",
+})<{ active?: boolean; completed?: boolean }>(
   ({ active, completed }) => ({
     backgroundColor: completed || active ? "#0ea5a4" : "#ffffff",
     color: completed || active ? "#fff" : "#6b7280",

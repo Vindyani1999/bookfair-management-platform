@@ -51,3 +51,28 @@ export interface ResetPasswordRequest {
   otp: string;
   newPassword: string;
 }
+
+export interface UpdateProfileData {
+  contactPerson?: string;
+  email?: string;
+  phoneNumber?: string;
+  businessName?: string;
+  businessAddress?: string;
+  password?: string;
+}
+
+export interface SettingsFormData {
+  fullName: string;
+  email: string;
+  contactNumber: string;
+  businessName: string;
+  businessAddress: string;
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface SettingsUpdateResponse {
+  message: string;
+  user: User;
+}

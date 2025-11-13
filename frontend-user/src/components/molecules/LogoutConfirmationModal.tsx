@@ -57,7 +57,7 @@ export default function LogoutConfirmationModal({
 
                     <div className="text-center mb-6">
                         <h2 className="text-2xl font-bold text-slate-900 mb-3">
-                            Are you sure you want to logout?
+                            Are you sure, you want to logout?
                         </h2>
                         <p className="text-slate-700 text-sm mb-2">
                             Hi <span className="font-semibold">{userName}</span>,

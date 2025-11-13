@@ -19,6 +19,7 @@ import Dashboard from "./pages/Dashboard";
 import BookingsPage from "./pages/BookingsPage";
 import HelpPage from "./pages/HelpPage";
 import SettingsPage from "./pages/SettingsPage";
+import SettingsPage from "./pages/SettingsPage";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
             <Route path="bookings" element={<BookingsPage />} />
             <Route path="help" element={<HelpPage />} />
             <Route path="settings" element={<SettingsPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
           </Route>
           {/* <Route path="/book" element={<TemporaryStepperPage />} /> */}
           <Route path="/about" element={<About />} />
