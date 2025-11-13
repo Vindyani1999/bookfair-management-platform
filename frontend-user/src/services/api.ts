@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import type { LoginCredentials, RegisterData, AuthResponse } from "../types";
+import type { LoginCredentials, RegisterData, AuthResponse, UpdateProfileData, SettingsUpdateResponse } from "../types";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
@@ -98,10 +98,50 @@ export const userAPI = {
     return response;
   },
 
+  // updateOwnProfile: async (userData: UpdateProfileData) => {
+  //   return api.put<SettingsUpdateResponse>("/users/profile/me", userData);
+  // },
+
+  updateOwnProfile: async (userData: UpdateProfileData) => {
+    const userStr = sessionStorage.getItem("user") || localStorage.getItem("user");
+
+    if (!userStr) {
+      throw new Error("User not found. Please login again.");
+    }
+
+    const user = JSON.parse(userStr);
+    const userId = user.id;
+
+    if (!userId) {
+      throw new Error("User ID not found. Please login again.");
+    }
+    return api.put<SettingsUpdateResponse>(`/users/${userId}`, userData);
+  },
+
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    const userStr = sessionStorage.getItem("user") || localStorage.getItem("user");
+
+    if (!userStr) {
+      throw new Error("User not found. Please login again.");
+    }
+
+    const user = JSON.parse(userStr);
+    const userId = user.id;
+
+    if (!userId) {
+      throw new Error("User ID not found. Please login again.");
+    }
+
+    return api.put<SettingsUpdateResponse>(`/users/${userId}`, {
+      password: newPassword,
+    });
+  },
+
   updateProfile: async (userData: Partial<RegisterData>) => {
     const response = await api.put("/users/profile", userData);
     return response;
   },
+
 };
 
 export default api;

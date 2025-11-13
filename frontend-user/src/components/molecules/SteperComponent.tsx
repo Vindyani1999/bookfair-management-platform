@@ -20,49 +20,77 @@ import MapWithStalls from "../organisms/MapWithStalls";
 import BookingForm from "../organisms/BookingForm";
 import PaymentDetails from "../organisms/PaymentDetails";
 import ReservationConfirmation from "../organisms/ReservationConfirmation";
+import StatCard from "../atoms/StatCard";
+import stats from "../../utils/data";
 import type { FormData } from "../../utils/types";
 
 // ===== Custom Connector (line between steps) =====
 const CustomConnector = styled(StepConnector)(() => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
-    top: 14,
+    top: 18,
   },
   [`& .${stepConnectorClasses.line}`]: {
-    borderColor: "#a3a3a3",
-    borderTopWidth: 2,
-    borderRadius: 1,
+    borderColor: "#e6e6e6",
+    borderTopWidth: 3,
+    borderRadius: 2,
+    transition: "border-color 0.25s ease",
   },
   [`&.${stepConnectorClasses.active} .${stepConnectorClasses.line}`]: {
-    borderColor: "#14b8a6",
+    borderColor: "#0ea5a4",
   },
   [`&.${stepConnectorClasses.completed} .${stepConnectorClasses.line}`]: {
-    borderColor: "#14b8a6",
+    borderColor: "#0ea5a4",
   },
 }));
 
 // ===== Custom Step Icon (circle + tick) =====
-const StepIconRoot = styled("div")<{ active?: boolean; completed?: boolean }>(
+// const StepIconRoot = styled("div")<{ active?: boolean; completed?: boolean }>(
+//   ({ active, completed }) => ({
+//     backgroundColor: completed || active ? "#14b8a6" : "#d1d5db",
+//     color: "#fff",
+//     width: 18,
+//     height: 18,
+//     borderRadius: "50%",
+//     display: "flex",
+//     alignItems: "center",
+//     justifyContent: "center",
+//     transition: "all 0.3s ease",
+//     fontSize: "12px",
+//   })
+// );
+
+// ===== Custom Step Icon (circle + tick) =====
+const StepIconRoot = styled("div", {
+  shouldForwardProp: (prop) => prop !== "active" && prop !== "completed",
+})<{ active?: boolean; completed?: boolean }>(
   ({ active, completed }) => ({
-    backgroundColor: completed || active ? "#14b8a6" : "#d1d5db",
-    color: "#fff",
-    width: 18,
-    height: 18,
+    backgroundColor: completed || active ? "#0ea5a4" : "#ffffff",
+    color: completed || active ? "#fff" : "#6b7280",
+    width: 28,
+    height: 28,
     borderRadius: "50%",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    transition: "all 0.3s ease",
-    fontSize: "12px",
+    transition: "all 0.25s ease",
+    fontSize: "14px",
+    boxShadow:
+      completed || active
+        ? "0 4px 10px rgba(14,165,164,0.16)"
+        : "0 1px 2px rgba(15,23,42,0.04)",
+    border: completed || active ? "none" : "2px solid #eef2f7",
   })
 );
 
 function CustomStepIcon(props: any) {
-  const { active, completed } = props;
+  const { active, completed, icon } = props;
   return (
     <StepIconRoot active={active} completed={completed}>
       {completed ? (
-        <CheckIcon sx={{ fontSize: "12px", color: "#fff" }} />
-      ) : null}
+        <CheckIcon sx={{ fontSize: "14px", color: "#fff" }} />
+      ) : (
+        <span style={{ fontSize: 13, fontWeight: 700 }}>{icon}</span>
+      )}
     </StepIconRoot>
   );
 }
@@ -70,26 +98,28 @@ function CustomStepIcon(props: any) {
 // ===== Custom Step Label =====
 const CustomStepLabel = styled(StepLabel)(() => ({
   "& .MuiStepLabel-label": {
-    marginTop: "2px !important", // minimal spacing to circle
+    marginTop: "6px !important",
     fontSize: "13px",
     fontWeight: 600,
-    color: "#6b6b6b",
+    color: "#6b7280",
     textAlign: "center",
     whiteSpace: "normal",
+    lineHeight: 1.2,
+    maxWidth: 120,
   },
   "& .MuiStepLabel-label.Mui-active": {
-    color: "#14b8a6",
+    color: "#0f766e",
+    fontWeight: 700,
   },
   "& .MuiStepLabel-label.Mui-completed": {
-    color: "#14b8a6",
+    color: "#0f766e",
   },
 }));
 
 // ===== Custom Stepper =====
 const CustomStepper = styled(Stepper)(() => ({
-  backgroundColor: "#DACDC9",
-  padding: "24px 32px",
-  borderRadius: "12px",
+  backgroundColor: "transparent",
+  padding: "8px 0",
   "& .MuiStep-root": {
     flex: 1,
     display: "flex",
@@ -97,10 +127,10 @@ const CustomStepper = styled(Stepper)(() => ({
     alignItems: "center",
   },
   "@media (max-width: 600px)": {
-    padding: "16px 8px",
+    padding: "8px 4px",
     "& .MuiStepLabel-label": {
       fontSize: "11px",
-      maxWidth: "60px",
+      maxWidth: "72px",
     },
   },
 }));
@@ -316,6 +346,23 @@ const SteperComponent = () => {
             ))}
           </CustomStepper>
         </Box>
+
+        {/* Stat cards row (visible only on the first step: Select Hall(s)) */}
+        {activeStep === 0 && (
+          <Box
+            sx={{
+              width: { xs: "95%", sm: "85%", md: "70%" },
+              display: "flex",
+              gap: 5,
+              justifyContent: "center",
+              mb: 3,
+            }}
+          >
+            <StatCard title="Total Stalls" value={stats.totalStalls} />
+            <StatCard title="Available Stalls" value={stats.availableStalls} />
+            <StatCard title="Reserved Stalls" value={stats.reservedStalls} />
+          </Box>
+        )}
 
         {/* Render the booking stepper content (controlled by this component) */}
         <Box

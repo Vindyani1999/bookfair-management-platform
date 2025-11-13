@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
-const Hall = require('./hall'); // ✅ Import Hall model to define association
+const Hall = require('./hall'); 
 
 const Stall = sequelize.define('Stall', {
   id: {
@@ -17,10 +17,6 @@ const Stall = sequelize.define('Stall', {
       },
       isUppercase: {
         msg: 'Stall name must be uppercase'
-      },
-      is: {
-        args: /^[A-Z]$/,
-        msg: 'Stall name must be a single uppercase letter (A-Z)'
       }
     }
   },
@@ -60,7 +56,7 @@ const Stall = sequelize.define('Stall', {
   timestamps: true,
 });
 
-// ✅ Define association here
+// Define association here
 Stall.belongsTo(Hall, { foreignKey: 'hallId', as: 'hall' });
 Hall.hasMany(Stall, { foreignKey: 'hallId', as: 'stalls' });
 
