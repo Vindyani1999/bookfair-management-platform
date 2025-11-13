@@ -19,7 +19,6 @@ import Dashboard from "./pages/Dashboard";
 import BookingsPage from "./pages/BookingsPage";
 import HelpPage from "./pages/HelpPage";
 import SettingsPage from "./pages/SettingsPage";
-import SettingsPage from "./pages/SettingsPage";
 
 function App() {
   return (

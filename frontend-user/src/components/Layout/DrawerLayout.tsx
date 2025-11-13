@@ -7,12 +7,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import {
-  Outlet,
-  useNavigate,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
