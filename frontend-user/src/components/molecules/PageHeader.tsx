@@ -30,6 +30,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   return (
     <Box
       component="header"
+      className="app-page-header"
       sx={{
         width: "100%",
         height,
@@ -39,7 +40,13 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         background: bg,
         backgroundSize: "cover",
         backgroundPosition: "center",
-        boxShadow: "inset 0 -1px 0 rgba(0,0,0,0.1)",
+        boxShadow: "inset 0 -1px 0 rgba(0,0,0,0.06)",
+        // Make the header stick to the top of its scroll container so pages
+        // can keep it fixed while content below scrolls
+        position: "sticky",
+        top: 0,
+        zIndex: 1100,
+        backdropFilter: "saturate(120%) blur(4px)",
       }}
     >
       <Box sx={{ textAlign: "center", px: 2 }}>

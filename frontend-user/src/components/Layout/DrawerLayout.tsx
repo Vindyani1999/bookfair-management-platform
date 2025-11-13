@@ -323,8 +323,49 @@ export default function DrawerLayout() {
             : `calc(${theme.spacing(7)} + 1px)`,
         })}
       >
-        {/* Removed the DrawerHeader spacer here so pages (like the stepper) can render flush at the top */}
-        <Outlet />
+        {/* Page root: first child (PageHeader) will be sticky; the remaining area becomes scrollable */}
+        <Box
+          className="page-root"
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            // ensure the header stays visible while inner content scrolls
+            // keep header fixed horizontally by pinning left/right and full width
+            "& > :first-of-type": {
+              position: "sticky",
+              top: 0,
+              left: 0,
+              right: 0,
+              width: "100%",
+              zIndex: 1100,
+              // create a separate stacking context for smoother rendering
+              transform: "translateZ(0)",
+            },
+            // the content after the header should take remaining space and scroll
+            // allow both horizontal and vertical scrolling for wide content
+            "& > :not(:first-of-type)": {
+              flex: 1,
+              overflowX: "auto",
+              overflowY: "auto",
+              WebkitOverflowScrolling: "touch",
+            },
+          }}
+        >
+          {/* Scroll container: pages render inside here. Making this the scroll container
+              ensures `position: sticky` headers inside pages (like PageHeader) stick
+              while the content below scrolls both vertically and horizontally. */}
+          <Box
+            sx={{
+              flex: 1,
+              width: "100%",
+              overflowX: "auto",
+              overflowY: "auto",
+            }}
+          >
+            <Outlet />
+          </Box>
+        </Box>
       </Box>
       <LogoutConfirmationModal
         isOpen={showLogoutModal}

@@ -31,7 +31,6 @@ function App() {
             <Route path="bookings" element={<BookingsPage />} />
             <Route path="help" element={<HelpPage />} />
             <Route path="settings" element={<SettingsPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
           </Route>
           {/* <Route path="/book" element={<TemporaryStepperPage />} /> */}
           <Route path="/about" element={<About />} />
