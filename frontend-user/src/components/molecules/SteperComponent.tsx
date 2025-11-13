@@ -62,25 +62,23 @@ const CustomConnector = styled(StepConnector)(() => ({
 // ===== Custom Step Icon (circle + tick) =====
 const StepIconRoot = styled("div", {
   shouldForwardProp: (prop) => prop !== "active" && prop !== "completed",
-})<{ active?: boolean; completed?: boolean }>(
-  ({ active, completed }) => ({
-    backgroundColor: completed || active ? "#0ea5a4" : "#ffffff",
-    color: completed || active ? "#fff" : "#6b7280",
-    width: 28,
-    height: 28,
-    borderRadius: "50%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    transition: "all 0.25s ease",
-    fontSize: "14px",
-    boxShadow:
-      completed || active
-        ? "0 4px 10px rgba(14,165,164,0.16)"
-        : "0 1px 2px rgba(15,23,42,0.04)",
-    border: completed || active ? "none" : "2px solid #eef2f7",
-  })
-);
+})<{ active?: boolean; completed?: boolean }>(({ active, completed }) => ({
+  backgroundColor: completed || active ? "#0ea5a4" : "#ffffff",
+  color: completed || active ? "#fff" : "#6b7280",
+  width: 28,
+  height: 28,
+  borderRadius: "50%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  transition: "all 0.25s ease",
+  fontSize: "14px",
+  boxShadow:
+    completed || active
+      ? "0 4px 10px rgba(14,165,164,0.16)"
+      : "0 1px 2px rgba(15,23,42,0.04)",
+  border: completed || active ? "none" : "2px solid #eef2f7",
+}));
 
 function CustomStepIcon(props: any) {
   const { active, completed, icon } = props;
@@ -352,15 +350,35 @@ const SteperComponent = () => {
           <Box
             sx={{
               width: { xs: "95%", sm: "85%", md: "70%" },
-              display: "flex",
-              gap: 5,
-              justifyContent: "center",
+              display: "grid",
+              gap: 2,
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "repeat(3, minmax(0,1fr))",
+                md: "repeat(3, minmax(0,1fr))",
+              },
+              alignItems: "stretch",
               mb: 3,
             }}
           >
-            <StatCard title="Total Stalls" value={stats.totalStalls} />
-            <StatCard title="Available Stalls" value={stats.availableStalls} />
-            <StatCard title="Reserved Stalls" value={stats.reservedStalls} />
+            <StatCard
+              title="Total Stalls"
+              value={stats.totalStalls}
+              subtitle={`Total stalls allocated for reservation`}
+              colorKey="total"
+            />
+            <StatCard
+              title="Available Stalls"
+              value={stats.availableStalls}
+              subtitle={`Stalls available for booking`}
+              colorKey="available"
+            />
+            <StatCard
+              title="Reserved Stalls"
+              value={stats.reservedStalls}
+              subtitle={`Stalls currently reserved`}
+              colorKey="reserved"
+            />
           </Box>
         )}
 
