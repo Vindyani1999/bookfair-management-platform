@@ -1,6 +1,7 @@
 import type { ImgHTMLAttributes, JSX } from "react";
 import type { Hall, Stall } from "./data";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { User } from "../types";
 
 export type Props = ImgHTMLAttributes<HTMLImageElement> & {
   src: string;
@@ -73,3 +74,25 @@ export type LogoutConfirmationModalProps = {
   onConfirm: () => void;
   userName?: string;
 };
+
+export type UserProfileData = {
+  fullName: string;
+  contactNumber: string;
+  email: string;
+  businessName?: string;
+  businessAddress?: string;
+};
+
+export interface UpdateProfileData {
+  contactPerson?: string;
+  email?: string;
+  phoneNumber?: string;
+  businessName?: string;
+  businessAddress?: string;
+  password?: string;
+}
+
+export interface SettingsUpdateResponse {
+  message: string;
+  user: User;
+}

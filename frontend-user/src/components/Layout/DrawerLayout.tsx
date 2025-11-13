@@ -7,7 +7,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
@@ -28,7 +28,7 @@ const drawerData: DrawerItem[] = [
   {
     name: "Dashboard",
     icon: <DashboardOutlinedIcon />,
-    navPath: "",
+    navPath: "/dashboard",
   },
   {
     name: "Your Bookings",
@@ -43,7 +43,7 @@ const drawerData: DrawerItem[] = [
   {
     name: "Settings",
     icon: <SettingsIcon />,
-    navPath: "",
+    navPath: "/settings",
   },
   {
     name: "Logout",
@@ -121,7 +121,7 @@ export default function DrawerLayout() {
   const [showLogoutModal, setShowLogoutModal] = React.useState(false);
 
   const { logout, user } = useAuth();
-
+  const navigate = useNavigate();
   // const navigate = useNavigate();
 
   const handleDrawerOpen = () => {
@@ -149,9 +149,11 @@ export default function DrawerLayout() {
       return;
     }
 
-    setSelectedTab(text.name);
-    localStorage.setItem("tabMemory", text.name);
-    // navigate(text.navPath);
+    if (text.navPath) {
+      setSelectedTab(text.name);
+      localStorage.setItem("tabMemory", text.name);
+      navigate(text.navPath);
+    }
   };
 
   const handleLogoutConfirm = () => {

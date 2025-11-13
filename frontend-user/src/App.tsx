@@ -16,6 +16,7 @@ import PrivacyPolicy from "./pages/info/PrivacyPolicyPage";
 // import TemporaryStepperPage from "./pages/TemporaryStepperPage";
 import DrawerLayout from "./components/Layout/DrawerLayout";
 import Dashboard from "./pages/Dashboard";
+import SettingsPage from "./pages/SettingsPage";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/" element={<DrawerLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="/settings" element={<SettingsPage />} />
           </Route>
           {/* <Route path="/book" element={<TemporaryStepperPage />} /> */}
           <Route path="/about" element={<About />} />
