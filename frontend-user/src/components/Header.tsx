@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { BookOpen, LogOut, User, Menu, X } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { BookOpen, LogOut, User, Menu, X } from "lucide-react";
 
 export default function Header() {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ export default function Header() {
   const handleLogout = () => {
     logout();
     setMobileMenuOpen(false);
-    navigate('/');
+    navigate("/");
   };
 
   const handleNavigation = (path: string) => {
@@ -62,7 +62,7 @@ export default function Header() {
                 </div>
 
                 <button
-                  onClick={() => handleNavigation('/dashboard')}
+                  onClick={() => handleNavigation("/app/dashboard")}
                   className="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300"
                 >
                   Dashboard
@@ -79,13 +79,11 @@ export default function Header() {
             ) : (
               <>
                 <button
-                  onClick={() => handleNavigation('/login')}
+                  onClick={() => handleNavigation("/login")}
                   className="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300"
                 >
                   Login
                 </button>
-
-
               </>
             )}
           </div>
@@ -109,13 +107,15 @@ export default function Header() {
                 <div className="flex items-center space-x-2 px-4 py-3 bg-white/20 backdrop-blur-md rounded-lg">
                   <User className="w-5 h-5 text-slate-800" />
                   <div className="flex-1">
-                    <p className="text-slate-800 font-medium">{user?.contactPerson}</p>
+                    <p className="text-slate-800 font-medium">
+                      {user?.contactPerson}
+                    </p>
                     <p className="text-slate-600 text-sm">{user?.email}</p>
                   </div>
                 </div>
 
                 <button
-                  onClick={() => handleNavigation('/dashboard')}
+                  onClick={() => handleNavigation("/app/dashboard")}
                   className="w-full px-6 py-3 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-semibold transition-all duration-300"
                 >
                   Dashboard
@@ -132,14 +132,14 @@ export default function Header() {
             ) : (
               <>
                 <button
-                  onClick={() => handleNavigation('/login')}
+                  onClick={() => handleNavigation("/login")}
                   className="w-full px-6 py-3 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-semibold transition-all duration-300"
                 >
                   Login
                 </button>
 
                 <button
-                  onClick={() => handleNavigation('/signup')}
+                  onClick={() => handleNavigation("/signup")}
                   className="w-full px-6 py-3 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-semibold transition-all duration-300"
                 >
                   Sign Up
