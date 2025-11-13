@@ -1,0 +1,111 @@
+import { useState, useEffect } from "react";
+import Image from "../../../../frontend-user/src/components/atoms/MapImage";
+import type { CSSProperties, ReactNode } from "react";
+
+type Props = {
+  mapSrc: string;
+  alt?: string;
+  initialZoom?: number;
+  minZoom?: number;
+  maxZoom?: number;
+  children?: ReactNode;
+  style?: CSSProperties;
+  /** Preferred min height for the canvas (px). Defaults to 520. */
+  minHeight?: number;
+};
+
+export default function MapCanvas({
+  mapSrc,
+  alt,
+  initialZoom = 1,
+  minZoom = 0.5,
+  maxZoom = 2,
+  children,
+  style,
+  minHeight = 520,
+}: Props) {
+  const [zoom, setZoom] = useState<number>(initialZoom);
+  const [imgError, setImgError] = useState<boolean>(false);
+
+  // Reset image error / zoom when the source changes so switching halls reloads cleanly
+  useEffect(() => {
+    setImgError(false);
+    setZoom(initialZoom);
+  }, [mapSrc, initialZoom]);
+
+  return (
+    <div style={{ display: "flex", gap: 24, alignItems: "stretch", ...style }}>
+      <div style={{ flex: "1 1 0" }}>
+        <div className="map-canvas" style={{ position: "relative" }}>
+          <div
+            className="zoom-controls"
+            aria-hidden
+            style={{ position: "absolute", left: 8, top: 8, zIndex: 20, display: "flex", flexDirection: "column", gap: 6 }}
+          >
+            <button
+              className="zoom-btn"
+              onClick={() => setZoom((z) => Math.min(z + 0.25, maxZoom))}
+              disabled={zoom >= maxZoom}
+              aria-label="Zoom in"
+              style={{ width: 36, height: 28, borderRadius: 6 }}
+            >
+              +
+            </button>
+            <button
+              className="zoom-btn"
+              onClick={() => setZoom((z) => Math.max(z - 0.25, minZoom))}
+              disabled={zoom <= minZoom}
+              aria-label="Zoom out"
+              style={{ width: 36, height: 28, borderRadius: 6 }}
+            >
+              −
+            </button>
+          </div>
+
+          <div
+            className="map-viewport"
+            style={{ overflow: "hidden", height: minHeight, borderRadius: 8, background: "#fff", boxShadow: "0 2px 8px rgba(10,10,10,0.04)" }}
+          >
+            <div
+              className="map-inner"
+              style={{ transform: `scale(${zoom})`, transformOrigin: "center top", position: "relative", width: "100%" }}
+            >
+              {!imgError ? (
+                <Image
+                  src={mapSrc}
+                  alt={alt ?? "map"}
+                  style={{ width: "100%", height: "auto", display: "block" }}
+                  onError={() => setImgError(true)}
+                />
+              ) : (
+                <div
+                  role="img"
+                  aria-label="map placeholder"
+                  style={{
+                    minHeight,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#64748b",
+                    fontSize: 14,
+                    padding: 20,
+                    textAlign: "center",
+                    background: "linear-gradient(180deg,#fbfdff,#ffffff)",
+                  }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 700, marginBottom: 6 }}>Map not available</div>
+                    <div style={{ opacity: 0.85 }}>Unable to load {mapSrc || "map image"}. Put the hall map image in the app public folder at <code>/images/halls/</code> or set a valid URL.</div>
+                  </div>
+                </div>
+              )}
+
+              {/* children can be positioned absolutely inside this container to overlay stalls/markers */}
+              {children}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
