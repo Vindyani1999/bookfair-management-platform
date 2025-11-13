@@ -172,7 +172,7 @@ const BookingsPage: React.FC = () => {
       />
       <Box
         sx={{
-          pt: 22,
+          //   pt: 22,
           maxWidth: "1200px",
           mx: "auto",
           mt: { xs: 2, md: 3 },
