@@ -25,8 +25,8 @@ function App() {
     <Router>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/app" element={<DrawerLayout />}>
+          <Route path="/home" element={<LandingPage />} />
+          <Route path="/" element={<DrawerLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="bookings" element={<BookingsPage />} />
             <Route path="help" element={<HelpPage />} />

@@ -7,43 +7,43 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
-import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import DateRangeOutlinedIcon from "@mui/icons-material/DateRangeOutlined";
-import TelegramIcon from "@mui/icons-material/Telegram";
-import SettingsIcon from "@mui/icons-material/Settings";
+import MapIcon from "@mui/icons-material/Map";
+import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import { styled, type CSSObject, type Theme } from "@mui/material";
-import type { DrawerItem } from "../../utils/types";
+import type { DrawerItem } from "../../types/index";
 import ImportContactsOutlinedIcon from "@mui/icons-material/ImportContactsOutlined";
 import { useAuth } from "../../context/AuthContext";
 import LogoutConfirmationModal from "../molecules/LogoutConfirmationModal";
+import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
 
 const drawerData: DrawerItem[] = [
   {
-    name: "Dashboard",
-    icon: <DashboardOutlinedIcon />,
-    navPath: "/dashboard",
-  },
-  {
-    name: "Your Bookings",
-    icon: <DateRangeOutlinedIcon />,
-    // page not implemented yet; navigate to a placeholder route for now
+    name: "Bookings",
+    icon: <DateRangeOutlinedIcon />, // bookings/calendar icon
     navPath: "/bookings",
   },
   {
-    name: "Help",
-    icon: <TelegramIcon />,
-    navPath: "/help",
+    name: "Manage Maps",
+    icon: <MapIcon />,
+    navPath: "/manage-maps",
   },
   {
-    name: "Settings",
-    icon: <SettingsIcon />,
-    navPath: "/settings",
+    name: "Manage Stalls",
+    icon: <StorefrontOutlinedIcon />,
+    navPath: "/manage-stalls",
+  },
+  {
+    name: "Manage Admins",
+    icon: <AdminPanelSettingsIcon />,
+    navPath: "/manage-admins",
   },
   {
     name: "Logout",
@@ -59,7 +59,7 @@ const openedMixin = (theme: Theme): CSSObject => ({
     duration: theme.transitions.duration.enteringScreen,
   }),
   overflowX: "hidden",
-  backgroundColor: "#DACDC9",
+  backgroundColor: "#C9D8DA",
 });
 
 const closedMixin = (theme: Theme): CSSObject => ({
@@ -72,7 +72,7 @@ const closedMixin = (theme: Theme): CSSObject => ({
   [theme.breakpoints.up("sm")]: {
     width: `calc(${theme.spacing(8)} + 1px)`,
   },
-  backgroundColor: "#DACDC9",
+  backgroundColor: "#C9D8DA",
 });
 
 const DrawerHeader = styled("div")(({ theme }) => ({
@@ -115,39 +115,13 @@ export default function DrawerLayout() {
   const [open, setOpen] = React.useState(false);
   const [isOpneFullDash, setIsOpnetFullDash] = React.useState(false);
   const [selectedTab, setSelectedTab] = React.useState(
-    localStorage.getItem("tabMemory") || "Your Bookings"
+    localStorage.getItem("tabMemory") || "Bookings"
   );
 
   const [showLogoutModal, setShowLogoutModal] = React.useState(false);
 
-  const { logout, user } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  React.useEffect(() => {
-    // If the layout is mounted without a sub-route (i.e. path is exactly '/'),
-    // navigate to the dashboard by default so the dashboard content (stepper)
-    // is visible.
-    if (
-      location.pathname === "" ||
-      location.pathname === "/" ||
-      location.pathname === ""
-    ) {
-      navigate("/bookings", { replace: true });
-      setSelectedTab("Your Bookings");
-      return;
-    }
-
-    // If user navigates directly to a known sub-route, reflect it in the
-    // selected tab so the drawer highlights the current page.
-    const matched = drawerData.find((d) => d.navPath === location.pathname);
-    if (matched) {
-      setSelectedTab(matched.name);
-      localStorage.setItem("tabMemory", matched.name);
-    }
-  }, [location.pathname, navigate]);
-
-  // const navigate = useNavigate();
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -175,7 +149,6 @@ export default function DrawerLayout() {
 
     setSelectedTab(text.name);
     localStorage.setItem("tabMemory", text.name);
-    // navigate to the route if a navPath is provided (Logout handled above)
     if (text.navPath) {
       navigate(text.navPath);
     }
@@ -196,8 +169,8 @@ export default function DrawerLayout() {
         <Box
           sx={{
             height: "100%",
-            width: "100%",
-            m: 0,
+            width: "90%",
+            m: 1,
             bgcolor: "#EDF1F3", // hard corded
             borderRadius: "30px",
             boxShadow: "5px 5px 8px 0px rgba(0, 0, 0, 0.25)", // hard code
@@ -249,7 +222,7 @@ export default function DrawerLayout() {
                       minHeight: 48,
                       px: 2.5,
                       bgcolor:
-                        selectedTab === text.name ? "#DACDC9" : "#EDF1F3", // hardcoded
+                        selectedTab === text.name ? "#C9D8DA" : "#EDF1F3", // hardcoded
                       borderRadius: "0px 30px 30px 0px",
                       mr: 1,
                     },
@@ -284,7 +257,7 @@ export default function DrawerLayout() {
                   <ListItemText
                     primary={text.name}
                     primaryTypographyProps={{
-                      fontWeight: 700,
+                      fontWeight: 800,
                       color: "#000000", // hardcoded
                       fontFamily: "Roboto Slab", //hardcoded
                     }}
@@ -309,7 +282,7 @@ export default function DrawerLayout() {
         sx={(theme: Theme) => ({
           flexGrow: 1,
           // match the app's stepper/background so the toolbar spacer isn't white
-          backgroundColor: "#DACDC9",
+          backgroundColor: "#C9D8DA",
           // make the main area fill the viewport and prevent page scrolling
           height: "100vh",
           overflow: "hidden",
@@ -323,55 +296,14 @@ export default function DrawerLayout() {
             : `calc(${theme.spacing(7)} + 1px)`,
         })}
       >
-        {/* Page root: first child (PageHeader) will be sticky; the remaining area becomes scrollable */}
-        <Box
-          className="page-root"
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            height: "100%",
-            // ensure the header stays visible while inner content scrolls
-            // keep header fixed horizontally by pinning left/right and full width
-            "& > :first-of-type": {
-              position: "sticky",
-              top: 0,
-              left: 0,
-              right: 0,
-              width: "100%",
-              zIndex: 1100,
-              // create a separate stacking context for smoother rendering
-              transform: "translateZ(0)",
-            },
-            // the content after the header should take remaining space and scroll
-            // allow both horizontal and vertical scrolling for wide content
-            "& > :not(:first-of-type)": {
-              flex: 1,
-              overflowX: "auto",
-              overflowY: "auto",
-              WebkitOverflowScrolling: "touch",
-            },
-          }}
-        >
-          {/* Scroll container: pages render inside here. Making this the scroll container
-              ensures `position: sticky` headers inside pages (like PageHeader) stick
-              while the content below scrolls both vertically and horizontally. */}
-          <Box
-            sx={{
-              flex: 1,
-              width: "100%",
-              overflowX: "auto",
-              overflowY: "auto",
-            }}
-          >
-            <Outlet />
-          </Box>
-        </Box>
+        {/* Removed the DrawerHeader spacer here so pages (like the stepper) can render flush at the top */}
+        <Outlet />
       </Box>
       <LogoutConfirmationModal
         isOpen={showLogoutModal}
         onClose={handleLogoutCancel}
         onConfirm={handleLogoutConfirm}
-        userName={user?.contactPerson || "User"}
+        // userName={admin?.contactPerson || 'Admin'}
       />
     </div>
   );

@@ -1,3 +1,5 @@
+import type { JSX } from "react";
+
 export interface Admin {
   id: number;
   adminName: string;
@@ -28,3 +30,16 @@ export interface ApiError {
   message: string;
   errors?: Record<string, string>;
 }
+
+export type DrawerItem = {
+  name: string;
+  icon: JSX.Element;
+  navPath: string;
+};
+
+export type LogoutConfirmationModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  userName?: string;
+};
