@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
+import InputAdornment from "@mui/material/InputAdornment";
 import { type Props } from "../../types/types";
 
 function stableSort<T>(array: T[], comparator: (a: T, b: T) => number) {
@@ -107,7 +108,7 @@ export default function ReusableTable<T extends Record<string, unknown>>({
     <Paper
       className="reusable-table"
       elevation={2}
-      sx={{ width: "100%", overflow: "hidden" }}
+      sx={{ width: "100%", overflow: "hidden", backgroundColor: "transparent" }}
     >
       <Toolbar sx={{ position: "relative", minHeight: 76 }}>
         {/* centered search area */}
@@ -122,14 +123,33 @@ export default function ReusableTable<T extends Record<string, unknown>>({
               justifyContent: "center",
             }}
           >
-            <SearchIcon color="action" />
             <TextField
-              sx={{ width: "100%" }}
+              variant="outlined"
+              sx={{
+                width: "100%",
+                "& .MuiOutlinedInput-root": {
+                  height: 44,
+                  borderRadius: 12,
+                  // background: '#ffffff',
+                  boxShadow: "0 6px 16px rgba(16,24,40,0.06)",
+                  border: "2px solid #565656",
+                },
+                "& .MuiOutlinedInput-input": {
+                  padding: "10px 14px",
+                  fontSize: 14,
+                },
+              }}
               size="small"
               placeholder={searchPlaceholder}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              InputProps={{ disableUnderline: true }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon color="action" />
+                  </InputAdornment>
+                ),
+              }}
             />
             {query && (
               <IconButton
@@ -149,14 +169,25 @@ export default function ReusableTable<T extends Record<string, unknown>>({
 
       <TableContainer sx={{ maxHeight: 520 }}>
         <Table size={dense ? "small" : "medium"} stickyHeader>
-          <TableHead>
+          <TableHead
+            sx={{
+              backgroundColor: "transparent",
+              // add a subtle border under the header row to separate it from body
+              "& .MuiTableCell-root": {
+                borderBottom: "2px solid rgba(15,23,42,0.08)",
+              },
+            }}
+          >
             <TableRow>
               {columns.map((col) => (
                 <TableCell
                   key={col.id}
                   align={col.align || "left"}
                   sortDirection={orderBy === col.id ? order : false}
-                  sx={{ minWidth: col.width ?? 120 }}
+                  sx={{
+                    minWidth: col.width ?? 120,
+                    backgroundColor: "rgba(0,0,0,0.2) !important",
+                  }}
                 >
                   {col.sortable ? (
                     <TableSortLabel
@@ -194,10 +225,22 @@ export default function ReusableTable<T extends Record<string, unknown>>({
                   hover
                   key={idx}
                   onClick={() => onRowClick?.(row)}
-                  sx={{ cursor: onRowClick ? "pointer" : "default" }}
+                  sx={{
+                    cursor: onRowClick ? "pointer" : "default",
+                    // slightly tighter rows
+                    "& .MuiTableCell-root": { py: 0.75 },
+                  }}
                 >
                   {columns.map((col) => (
-                    <TableCell key={col.id} align={col.align || "left"}>
+                    <TableCell
+                      key={col.id}
+                      align={col.align || "left"}
+                      sx={{
+                        py: 0.75,
+                        px: 1.5,
+                        borderBottom: "1px solid rgba(15,23,42,0.3)",
+                      }}
+                    >
                       {col.render
                         ? col.render(row)
                         : String(
