@@ -23,11 +23,11 @@ exports.getHallById = async (req, res) => {
     const hall = await Hall.findByPk(req.params.id, {
       include: [{
         model: Stall,
-        attributes: ['id', 'name','description'
-          , 'status']
+        as: 'stalls', 
+        attributes: ['id', 'name', 'description', 'status']
       }]
     });
-    
+
     if (!hall) {
       return res.status(404).json({ message: 'Hall not found' });
     }
@@ -37,7 +37,6 @@ exports.getHallById = async (req, res) => {
     res.status(500).json({ message: 'Error fetching hall', error: error.message });
   }
 };
-
 
 exports.createHall = async (req, res) => {
   try {
