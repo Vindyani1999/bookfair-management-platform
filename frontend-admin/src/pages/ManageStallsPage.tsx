@@ -14,48 +14,12 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ReusableTable from "../components/atoms/ReusableTable";
 import type { Column } from "../types/types";
 
-type Stall = {
-  id: string;
-  name: string;
-  cost: number;
-  size: "Small" | "Medium" | "Large";
-};
-
-type Hall = {
-  id: string;
-  name: string;
-  stalls: Stall[];
-};
-
-const hallsMock: Hall[] = [
-  {
-    id: "hall-a",
-    name: "Hall A",
-    stalls: [
-      { id: "01", name: "Stall 1", cost: 1500, size: "Small" },
-      { id: "02", name: "Stall 2", cost: 2000, size: "Medium" },
-      { id: "03", name: "Stall 3", cost: 2500, size: "Large" },
-    ],
-  },
-  {
-    id: "hall-b",
-    name: "Hall B",
-    stalls: [
-      { id: "04", name: "Stall 4", cost: 1200, size: "Small" },
-      { id: "05", name: "Stall 5", cost: 2200, size: "Large" },
-    ],
-  },
-  {
-    id: "hall-c",
-    name: "Hall C",
-    stalls: [{ id: "06", name: "Stall 6", cost: 1800, size: "Medium" }],
-  },
-];
+import { halls as adminHalls, stalls as adminStalls } from "../data/halls";
 
 export default function ManageStallsPage() {
-  const [selectedHall, setSelectedHall] = useState<string>(hallsMock[0].id);
+  const [selectedHall, setSelectedHall] = useState<string>(adminHalls[0].id);
 
-  const halls = useMemo(() => hallsMock, []);
+  const halls = useMemo(() => adminHalls, []);
 
   const handleHallChange = (e: SelectChangeEvent<string>) => {
     setSelectedHall(e.target.value as string);
@@ -63,12 +27,16 @@ export default function ManageStallsPage() {
 
   const currentStalls = useMemo(() => {
     const hall = halls.find((h) => h.id === selectedHall);
+    const stallsForHall = adminStalls.filter((s) => s.hallId === selectedHall);
+    // If there are no explicit stalls, create placeholder numbered stalls up to the count
     return (
-      hall?.stalls.map((s) => ({
+      stallsForHall.map((s, idx) => ({
         id: s.id,
-        stall: `${hall.name} - ${s.name}`,
-        cost: s.cost,
-        size: s.size,
+        stall: `${hall?.label || hall?.name || "Hall"} - ${
+          s.label || `Stall ${idx + 1}`
+        }`,
+        cost: 0,
+        size: "Medium",
       })) || []
     );
   }, [halls, selectedHall]);
