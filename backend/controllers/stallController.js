@@ -60,6 +60,35 @@ exports.getStallById = async (req, res) => {
   }
 };
 
+
+exports.getStallsByHallId = async (req, res) => {
+  try {
+    const { hallId } = req.params;
+
+    const stalls = await Stall.findAll({
+      where: { hallId },
+      include: [
+        {
+          model: Hall,
+          as: 'hall',
+          attributes: ['name']
+        }
+      ],
+      order: [['name', 'ASC']]
+    });
+
+    if (!stalls.length) {
+      return res.status(404).json({ message: 'No stalls found for this hall' });
+    }
+
+    res.json(stalls);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching stalls by hall ID', error: error.message });
+  }
+};
+
+
 /**
  * @desc    Create a new stall
  * @route   POST /api/v1/stalls

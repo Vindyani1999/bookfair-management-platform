@@ -7,7 +7,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
@@ -21,29 +21,29 @@ import ImportContactsOutlinedIcon from "@mui/icons-material/ImportContactsOutlin
 import { useAuth } from "../../context/AuthContext";
 import LogoutConfirmationModal from "../molecules/LogoutConfirmationModal";
 
-
 const drawerWidth = 240;
 
 const drawerData: DrawerItem[] = [
   {
     name: "Dashboard",
     icon: <DashboardOutlinedIcon />,
-    navPath: "",
+    navPath: "/app/dashboard",
   },
   {
     name: "Your Bookings",
     icon: <DateRangeOutlinedIcon />,
-    navPath: "",
+    // page not implemented yet; navigate to a placeholder route for now
+    navPath: "/app/bookings",
   },
   {
     name: "Help",
     icon: <TelegramIcon />,
-    navPath: "",
+    navPath: "/app/help",
   },
   {
     name: "Settings",
     icon: <SettingsIcon />,
-    navPath: "",
+    navPath: "/app/settings",
   },
   {
     name: "Logout",
@@ -115,12 +115,37 @@ export default function DrawerLayout() {
   const [open, setOpen] = React.useState(false);
   const [isOpneFullDash, setIsOpnetFullDash] = React.useState(false);
   const [selectedTab, setSelectedTab] = React.useState(
-    localStorage.getItem("tabMemory") || "Dashboard"
+    localStorage.getItem("tabMemory") || "Your Bookings"
   );
 
   const [showLogoutModal, setShowLogoutModal] = React.useState(false);
 
   const { logout, user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  React.useEffect(() => {
+    // If the layout is mounted without a sub-route (i.e. path is exactly '/'),
+    // navigate to the dashboard by default so the dashboard content (stepper)
+    // is visible.
+    if (
+      location.pathname === "/app" ||
+      location.pathname === "/app/" ||
+      location.pathname === ""
+    ) {
+      navigate("/app/bookings", { replace: true });
+      setSelectedTab("Your Bookings");
+      return;
+    }
+
+    // If user navigates directly to a known sub-route, reflect it in the
+    // selected tab so the drawer highlights the current page.
+    const matched = drawerData.find((d) => d.navPath === location.pathname);
+    if (matched) {
+      setSelectedTab(matched.name);
+      localStorage.setItem("tabMemory", matched.name);
+    }
+  }, [location.pathname, navigate]);
 
   // const navigate = useNavigate();
 
@@ -143,7 +168,6 @@ export default function DrawerLayout() {
   };
 
   const handleTabClick = (text: DrawerItem) => {
-
     if (text.name === "Logout") {
       setShowLogoutModal(true);
       return;
@@ -151,7 +175,10 @@ export default function DrawerLayout() {
 
     setSelectedTab(text.name);
     localStorage.setItem("tabMemory", text.name);
-    // navigate(text.navPath);
+    // navigate to the route if a navPath is provided (Logout handled above)
+    if (text.navPath) {
+      navigate(text.navPath);
+    }
   };
 
   const handleLogoutConfirm = () => {
@@ -169,8 +196,8 @@ export default function DrawerLayout() {
         <Box
           sx={{
             height: "100%",
-            width: "90%",
-            m: 1,
+            width: "100%",
+            m: 0,
             bgcolor: "#EDF1F3", // hard corded
             borderRadius: "30px",
             boxShadow: "5px 5px 8px 0px rgba(0, 0, 0, 0.25)", // hard code
@@ -228,11 +255,11 @@ export default function DrawerLayout() {
                     },
                     open
                       ? {
-                        justifyContent: "initial",
-                      }
+                          justifyContent: "initial",
+                        }
                       : {
-                        justifyContent: "center",
-                      },
+                          justifyContent: "center",
+                        },
                   ]}
                   onClick={() => handleTabClick(text)}
                 >
@@ -245,11 +272,11 @@ export default function DrawerLayout() {
                       },
                       open
                         ? {
-                          mr: 3,
-                        }
+                            mr: 3,
+                          }
                         : {
-                          mr: "auto",
-                        },
+                            mr: "auto",
+                          },
                     ]}
                   >
                     {text.icon}
@@ -264,11 +291,11 @@ export default function DrawerLayout() {
                     sx={[
                       open
                         ? {
-                          opacity: 1,
-                        }
+                            opacity: 1,
+                          }
                         : {
-                          opacity: 0,
-                        },
+                            opacity: 0,
+                          },
                     ]}
                   />
                 </ListItemButton>
@@ -296,14 +323,55 @@ export default function DrawerLayout() {
             : `calc(${theme.spacing(7)} + 1px)`,
         })}
       >
-        {/* Removed the DrawerHeader spacer here so pages (like the stepper) can render flush at the top */}
-        <Outlet />
+        {/* Page root: first child (PageHeader) will be sticky; the remaining area becomes scrollable */}
+        <Box
+          className="page-root"
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            // ensure the header stays visible while inner content scrolls
+            // keep header fixed horizontally by pinning left/right and full width
+            "& > :first-of-type": {
+              position: "sticky",
+              top: 0,
+              left: 0,
+              right: 0,
+              width: "100%",
+              zIndex: 1100,
+              // create a separate stacking context for smoother rendering
+              transform: "translateZ(0)",
+            },
+            // the content after the header should take remaining space and scroll
+            // allow both horizontal and vertical scrolling for wide content
+            "& > :not(:first-of-type)": {
+              flex: 1,
+              overflowX: "auto",
+              overflowY: "auto",
+              WebkitOverflowScrolling: "touch",
+            },
+          }}
+        >
+          {/* Scroll container: pages render inside here. Making this the scroll container
+              ensures `position: sticky` headers inside pages (like PageHeader) stick
+              while the content below scrolls both vertically and horizontally. */}
+          <Box
+            sx={{
+              flex: 1,
+              width: "100%",
+              overflowX: "auto",
+              overflowY: "auto",
+            }}
+          >
+            <Outlet />
+          </Box>
+        </Box>
       </Box>
       <LogoutConfirmationModal
         isOpen={showLogoutModal}
         onClose={handleLogoutCancel}
         onConfirm={handleLogoutConfirm}
-        userName={user?.contactPerson || 'User'}
+        userName={user?.contactPerson || "User"}
       />
     </div>
   );

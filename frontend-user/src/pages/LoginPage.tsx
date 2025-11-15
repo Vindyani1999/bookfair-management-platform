@@ -19,7 +19,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/dashboard");
+      navigate("/app/dashboard");
     }
   }, [isAuthenticated, navigate]);
 
@@ -30,7 +30,7 @@ export default function LoginPage() {
 
     try {
       await login({ email, password, rememberMe });
-      const from = (location.state as any)?.from?.pathname || "/dashboard";
+      const from = (location.state as any)?.from?.pathname || "/app/dashboard";
       navigate(from, { replace: true });
     } catch (err) {
       setError(

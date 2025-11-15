@@ -37,10 +37,6 @@ const User = sequelize.define('User', {
     validate: {
       notEmpty: {
         msg: 'Phone number is required'
-      },
-      is: {
-        args: [/^\+94\s?\d{2}\s?\d{3}\s?\d{4}$/],
-        msg: 'Phone number must be in format +94 XX XXX XXXX'
       }
     }
   },
