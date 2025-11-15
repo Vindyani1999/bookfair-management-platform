@@ -25,7 +25,7 @@ export default function LoginDialog({ open, onClose }: Props) {
   useEffect(() => {
     if (isAuthenticated) {
       onClose();
-      navigate("/app/dashboard");
+      navigate("/dashboard");
     }
   }, [isAuthenticated, navigate, onClose]);
 
@@ -38,7 +38,7 @@ export default function LoginDialog({ open, onClose }: Props) {
       await login({ email, password, rememberMe });
       const from =
         (location.state as { from?: { pathname?: string } } | undefined)?.from
-          ?.pathname || "/app/dashboard";
+          ?.pathname || "/dashboard";
       navigate(from, { replace: true });
       onClose();
     } catch (err) {

@@ -62,7 +62,7 @@ export default function Header() {
                 </div>
 
                 <button
-                  onClick={() => handleNavigation("/app/dashboard")}
+                  onClick={() => handleNavigation("/dashboard")}
                   className="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300"
                 >
                   Dashboard
@@ -115,7 +115,7 @@ export default function Header() {
                 </div>
 
                 <button
-                  onClick={() => handleNavigation("/app/dashboard")}
+                  onClick={() => handleNavigation("/dashboard")}
                   className="w-full px-6 py-3 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-semibold transition-all duration-300"
                 >
                   Dashboard

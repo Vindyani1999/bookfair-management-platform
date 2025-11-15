@@ -5,6 +5,15 @@
   text-align: center;
 }
 
+/* Load Roboto Slab for the admin app and set it as the default */
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;700;800&display=swap");
+
+html,
+body,
+#root {
+  font-family: "Roboto Slab", Georgia, "Times New Roman", serif;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;

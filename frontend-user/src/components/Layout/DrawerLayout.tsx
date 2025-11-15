@@ -27,23 +27,23 @@ const drawerData: DrawerItem[] = [
   {
     name: "Dashboard",
     icon: <DashboardOutlinedIcon />,
-    navPath: "/app/dashboard",
+    navPath: "/dashboard",
   },
   {
     name: "Your Bookings",
     icon: <DateRangeOutlinedIcon />,
     // page not implemented yet; navigate to a placeholder route for now
-    navPath: "/app/bookings",
+    navPath: "/bookings",
   },
   {
     name: "Help",
     icon: <TelegramIcon />,
-    navPath: "/app/help",
+    navPath: "/help",
   },
   {
     name: "Settings",
     icon: <SettingsIcon />,
-    navPath: "/app/settings",
+    navPath: "/settings",
   },
   {
     name: "Logout",
@@ -129,11 +129,11 @@ export default function DrawerLayout() {
     // navigate to the dashboard by default so the dashboard content (stepper)
     // is visible.
     if (
-      location.pathname === "/app" ||
-      location.pathname === "/app/" ||
+      location.pathname === "" ||
+      location.pathname === "/" ||
       location.pathname === ""
     ) {
-      navigate("/app/bookings", { replace: true });
+      navigate("/bookings", { replace: true });
       setSelectedTab("Your Bookings");
       return;
     }

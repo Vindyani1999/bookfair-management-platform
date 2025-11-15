@@ -10,43 +10,40 @@ import ListItemText from "@mui/material/ListItemText";
 import { Outlet } from "react-router-dom";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
-import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import DateRangeOutlinedIcon from "@mui/icons-material/DateRangeOutlined";
-import TelegramIcon from "@mui/icons-material/Telegram";
-import SettingsIcon from "@mui/icons-material/Settings";
+import MapIcon from "@mui/icons-material/Map";
+import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import { styled, type CSSObject, type Theme } from "@mui/material";
 import type { DrawerItem } from "../../types/index";
 import ImportContactsOutlinedIcon from "@mui/icons-material/ImportContactsOutlined";
 import { useAuth } from "../../context/AuthContext";
 import LogoutConfirmationModal from "../molecules/LogoutConfirmationModal";
-import PersonIcon from '@mui/icons-material/Person';
-import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
-
-
+import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
 
 const drawerData: DrawerItem[] = [
   {
-    name: "Booking",
-    icon: <DashboardOutlinedIcon />,
-    navPath: "",
+    name: "Bookings",
+    icon: <DateRangeOutlinedIcon />, // bookings/calendar icon
+    navPath: "/bookings",
+  },
+  {
+    name: "Manage Maps",
+    icon: <MapIcon />,
+    navPath: "/manage-maps",
   },
   {
     name: "Manage Stalls",
-    icon: <SettingsIcon/>,
-    navPath: "",
+    icon: <StorefrontOutlinedIcon />,
+    navPath: "/manage-stalls",
   },
   {
-    name: "Manage Users",
-    icon: <PersonIcon />,
-    navPath: "",
-  },
-  {
-    name: "Notifications",
-    icon: <NotificationsActiveIcon />,
-    navPath: "",
+    name: "Manage Admins",
+    icon: <AdminPanelSettingsIcon />,
+    navPath: "/manage-admins",
   },
   {
     name: "Logout",
@@ -118,14 +115,13 @@ export default function DrawerLayout() {
   const [open, setOpen] = React.useState(false);
   const [isOpneFullDash, setIsOpnetFullDash] = React.useState(false);
   const [selectedTab, setSelectedTab] = React.useState(
-    localStorage.getItem("tabMemory") || "Dashboard"
+    localStorage.getItem("tabMemory") || "Bookings"
   );
 
   const [showLogoutModal, setShowLogoutModal] = React.useState(false);
 
-  const { logout, admin } = useAuth();
-
-  // const navigate = useNavigate();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -146,7 +142,6 @@ export default function DrawerLayout() {
   };
 
   const handleTabClick = (text: DrawerItem) => {
-
     if (text.name === "Logout") {
       setShowLogoutModal(true);
       return;
@@ -154,7 +149,9 @@ export default function DrawerLayout() {
 
     setSelectedTab(text.name);
     localStorage.setItem("tabMemory", text.name);
-    // navigate(text.navPath);
+    if (text.navPath) {
+      navigate(text.navPath);
+    }
   };
 
   const handleLogoutConfirm = () => {
@@ -231,11 +228,11 @@ export default function DrawerLayout() {
                     },
                     open
                       ? {
-                        justifyContent: "initial",
-                      }
+                          justifyContent: "initial",
+                        }
                       : {
-                        justifyContent: "center",
-                      },
+                          justifyContent: "center",
+                        },
                   ]}
                   onClick={() => handleTabClick(text)}
                 >
@@ -248,11 +245,11 @@ export default function DrawerLayout() {
                       },
                       open
                         ? {
-                          mr: 3,
-                        }
+                            mr: 3,
+                          }
                         : {
-                          mr: "auto",
-                        },
+                            mr: "auto",
+                          },
                     ]}
                   >
                     {text.icon}
@@ -267,11 +264,11 @@ export default function DrawerLayout() {
                     sx={[
                       open
                         ? {
-                          opacity: 1,
-                        }
+                            opacity: 1,
+                          }
                         : {
-                          opacity: 0,
-                        },
+                            opacity: 0,
+                          },
                     ]}
                   />
                 </ListItemButton>
@@ -285,7 +282,7 @@ export default function DrawerLayout() {
         sx={(theme: Theme) => ({
           flexGrow: 1,
           // match the app's stepper/background so the toolbar spacer isn't white
-          backgroundColor: "#DACDC9",
+          backgroundColor: "#C9D8DA",
           // make the main area fill the viewport and prevent page scrolling
           height: "100vh",
           overflow: "hidden",
