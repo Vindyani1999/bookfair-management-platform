@@ -31,3 +31,15 @@ export type StatCardProps = {
   subtitle?: string;
   colorKey?: string;
 };
+
+export type MapEditDialogProps = {
+  open: boolean;
+  hallId: string;
+  hallLabel?: string;
+  currentImage?: string;
+  currentStallCount?: number;
+  initialImage?: string;
+  initialStalls?: number;
+  onClose: () => void;
+  onSave: (data: { image?: string; stalls: number }) => void;
+};

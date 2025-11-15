@@ -75,9 +75,12 @@ export default function MapCanvas({
             style={{
               overflow: "hidden",
               height: minHeight,
-              borderRadius: 8,
-              background: "#fff",
-              boxShadow: "0 2px 8px rgba(10,10,10,0.04)",
+              borderRadius: 12,
+              background: "#f3f6f6",
+              boxShadow: "0 6px 20px rgba(16,24,40,0.06)",
+              padding: 14,
+              boxSizing: "border-box",
+              border: "1px solid rgba(15,23,42,0.04)",
             }}
           >
             <div
@@ -87,13 +90,26 @@ export default function MapCanvas({
                 transformOrigin: "center top",
                 position: "relative",
                 width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                // ensure rounded corners remain visible when zooming
+                borderRadius: 8,
+                overflow: "hidden",
               }}
             >
               {!imgError ? (
                 <Image
                   src={mapSrc}
                   alt={alt ?? "map"}
-                  style={{ width: "100%", height: "auto", display: "block" }}
+                  // make the image fill the viewport height so the map appears full-size
+                  style={{
+                    width: "auto",
+                    height: "100%",
+                    objectFit: "contain",
+                    display: "block",
+                  }}
                   onError={() => setImgError(true)}
                 />
               ) : (

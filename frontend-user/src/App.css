@@ -147,7 +147,7 @@ main {
   justify-content: center;
   align-items: center;
   box-shadow: 0 10px 30px rgba(16, 24, 40, 0.06);
-  height: 420px;
+  height: 600px !important;
 }
 .map-canvas {
   touch-action: none;
