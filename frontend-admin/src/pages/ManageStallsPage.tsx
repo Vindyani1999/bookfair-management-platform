@@ -48,9 +48,7 @@ const hallsMock: Hall[] = [
   {
     id: "hall-c",
     name: "Hall C",
-    stalls: [
-      { id: "06", name: "Stall 6", cost: 1800, size: "Medium" },
-    ],
+    stalls: [{ id: "06", name: "Stall 6", cost: 1800, size: "Medium" }],
   },
 ];
 
@@ -66,7 +64,12 @@ export default function ManageStallsPage() {
   const currentStalls = useMemo(() => {
     const hall = halls.find((h) => h.id === selectedHall);
     return (
-      hall?.stalls.map((s) => ({ id: s.id, stall: `${hall.name} - ${s.name}`, cost: s.cost, size: s.size })) || []
+      hall?.stalls.map((s) => ({
+        id: s.id,
+        stall: `${hall.name} - ${s.name}`,
+        cost: s.cost,
+        size: s.size,
+      })) || []
     );
   }, [halls, selectedHall]);
 
@@ -91,7 +94,12 @@ export default function ManageStallsPage() {
       width: 80,
       align: "center",
       render: (row: Row) => (
-        <IconButton size="small" color="success" onClick={() => console.log("edit", row.id)} aria-label={`edit-${row.id}`}>
+        <IconButton
+          size="small"
+          color="success"
+          onClick={() => console.log("edit", row.id)}
+          aria-label={`edit-${row.id}`}
+        >
           <EditIcon fontSize="small" />
         </IconButton>
       ),
@@ -102,7 +110,12 @@ export default function ManageStallsPage() {
       width: 80,
       align: "center",
       render: (row: Row) => (
-        <IconButton size="small" color="error" onClick={() => console.log("delete", row.id)} aria-label={`delete-${row.id}`}>
+        <IconButton
+          size="small"
+          color="error"
+          onClick={() => console.log("delete", row.id)}
+          aria-label={`delete-${row.id}`}
+        >
           <DeleteOutlineIcon fontSize="small" />
         </IconButton>
       ),
@@ -117,7 +130,12 @@ export default function ManageStallsPage() {
 
       <FormControl sx={{ minWidth: 220, mb: 2 }} size="small">
         <InputLabel id="hall-select-label">Select Hall</InputLabel>
-        <Select labelId="hall-select-label" value={selectedHall} label="Select Hall" onChange={handleHallChange}>
+        <Select
+          labelId="hall-select-label"
+          value={selectedHall}
+          label="Select Hall"
+          onChange={handleHallChange}
+        >
           {halls.map((h) => (
             <MenuItem key={h.id} value={h.id}>
               {h.name}
@@ -126,7 +144,13 @@ export default function ManageStallsPage() {
         </Select>
       </FormControl>
 
-      <ReusableTable columns={columns} rows={currentStalls as Row[]} showSearch searchPlaceholder="Search stalls..." defaultRowsPerPage={5} />
+      <ReusableTable
+        columns={columns}
+        rows={currentStalls as Row[]}
+        showSearch
+        searchPlaceholder="Search stalls..."
+        defaultRowsPerPage={5}
+      />
     </Box>
   );
 }

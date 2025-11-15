@@ -40,7 +40,15 @@ export default function MapCanvas({
           <div
             className="zoom-controls"
             aria-hidden
-            style={{ position: "absolute", left: 8, top: 8, zIndex: 20, display: "flex", flexDirection: "column", gap: 6 }}
+            style={{
+              position: "absolute",
+              left: 8,
+              top: 8,
+              zIndex: 20,
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
+            }}
           >
             <button
               className="zoom-btn"
@@ -64,11 +72,22 @@ export default function MapCanvas({
 
           <div
             className="map-viewport"
-            style={{ overflow: "hidden", height: minHeight, borderRadius: 8, background: "#fff", boxShadow: "0 2px 8px rgba(10,10,10,0.04)" }}
+            style={{
+              overflow: "hidden",
+              height: minHeight,
+              borderRadius: 8,
+              background: "#fff",
+              boxShadow: "0 2px 8px rgba(10,10,10,0.04)",
+            }}
           >
             <div
               className="map-inner"
-              style={{ transform: `scale(${zoom})`, transformOrigin: "center top", position: "relative", width: "100%" }}
+              style={{
+                transform: `scale(${zoom})`,
+                transformOrigin: "center top",
+                position: "relative",
+                width: "100%",
+              }}
             >
               {!imgError ? (
                 <Image
@@ -94,8 +113,14 @@ export default function MapCanvas({
                   }}
                 >
                   <div>
-                    <div style={{ fontWeight: 700, marginBottom: 6 }}>Map not available</div>
-                    <div style={{ opacity: 0.85 }}>Unable to load {mapSrc || "map image"}. Put the hall map image in the app public folder at <code>/images/halls/</code> or set a valid URL.</div>
+                    <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                      Map not available
+                    </div>
+                    <div style={{ opacity: 0.85 }}>
+                      Unable to load {mapSrc || "map image"}. Put the hall map
+                      image in the app public folder at{" "}
+                      <code>/images/halls/</code> or set a valid URL.
+                    </div>
                   </div>
                 </div>
               )}

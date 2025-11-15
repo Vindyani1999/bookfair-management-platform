@@ -8,7 +8,10 @@ interface Props extends Omit<ButtonProps, "color"> {
   status: Status;
 }
 
-const palette: Record<Status, { bg: string; hover: string; text: string; boxShadow?: string }> = {
+const palette: Record<
+  Status,
+  { bg: string; hover: string; text: string; boxShadow?: string }
+> = {
   delete: {
     bg: "linear-gradient(90deg,#fca5a5 0%,#ef4444 100%)",
     hover: "linear-gradient(90deg,#f87171 0%,#dc2626 100%)",
@@ -54,7 +57,7 @@ export default function StatusButton({ status, children, sx, ...rest }: Props) {
     boxShadow: theme.boxShadow,
     backgroundImage: theme.bg,
     color: theme.text,
-    '&:hover': {
+    "&:hover": {
       backgroundImage: theme.hover,
       boxShadow: theme.boxShadow,
     },
@@ -62,7 +65,10 @@ export default function StatusButton({ status, children, sx, ...rest }: Props) {
 
   const mergedSx = (theme: Theme) => {
     const base = baseStyles as SystemStyleObject<Theme>;
-  const extra = typeof sx === "function" ? (sx as (t: Theme) => SystemStyleObject<Theme>)(theme) : (sx as SystemStyleObject<Theme> | undefined);
+    const extra =
+      typeof sx === "function"
+        ? (sx as (t: Theme) => SystemStyleObject<Theme>)(theme)
+        : (sx as SystemStyleObject<Theme> | undefined);
     return { ...base, ...(extra || {}) } as SystemStyleObject<Theme>;
   };
 

@@ -104,14 +104,27 @@ export default function ReusableTable<T extends Record<string, unknown>>({
   };
 
   return (
-    <Paper className="reusable-table" elevation={2} sx={{ width: "100%", overflow: "hidden" }}>
+    <Paper
+      className="reusable-table"
+      elevation={2}
+      sx={{ width: "100%", overflow: "hidden" }}
+    >
       <Toolbar sx={{ position: "relative", minHeight: 76 }}>
         {/* centered search area */}
         {showSearch && (
-          <Box sx={{ width: { xs: '100%', sm: '60%' }, mx: 'auto', display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}>
+          <Box
+            sx={{
+              width: { xs: "100%", sm: "60%" },
+              mx: "auto",
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              justifyContent: "center",
+            }}
+          >
             <SearchIcon color="action" />
             <TextField
-              sx={{ width: '100%' }}
+              sx={{ width: "100%" }}
               size="small"
               placeholder={searchPlaceholder}
               value={query}
@@ -119,7 +132,11 @@ export default function ReusableTable<T extends Record<string, unknown>>({
               InputProps={{ disableUnderline: true }}
             />
             {query && (
-              <IconButton size="small" onClick={() => setQuery("")} aria-label="clear search">
+              <IconButton
+                size="small"
+                onClick={() => setQuery("")}
+                aria-label="clear search"
+              >
                 <ClearIcon fontSize="small" />
               </IconButton>
             )}
