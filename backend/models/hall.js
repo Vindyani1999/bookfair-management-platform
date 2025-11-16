@@ -24,7 +24,7 @@ const Hall = sequelize.define('Hall', {
     allowNull: true
   },
   status: {
-	type: DataTypes.ENUM('booked', 'available'),
+	type: DataTypes.ENUM('booked', 'available', 'unavailable'),
 	allowNull: false,
 	defaultValue: 'available'
   },
