@@ -23,7 +23,7 @@ export async function fetchHalls(): Promise<ApiHall[]> {
 }
 
 export async function fetchHall(id: string): Promise<any> {
-  const resp = await api.get(`/stall/hall/${encodeURIComponent(id)}`);
+  const resp = await api.get(`/hall/${encodeURIComponent(id)}`);
   return resp.data;
 }
 

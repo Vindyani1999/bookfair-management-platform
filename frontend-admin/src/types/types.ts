@@ -1,3 +1,5 @@
+import type { CSSProperties, ReactNode } from "react";
+
 export type Column<
   T extends Record<string, unknown> = Record<string, unknown>
 > = {
@@ -47,3 +49,15 @@ export type MapEditDialogProps = {
 };
 
 export type ApiHall = { id: string; label?: string; name?: string };
+
+export type MapCanvasProps = {
+  mapSrc: string;
+  alt?: string;
+  initialZoom?: number;
+  minZoom?: number;
+  maxZoom?: number;
+  children?: ReactNode;
+  style?: CSSProperties;
+  /** Preferred min height for the canvas (px). Defaults to 520. */
+  minHeight?: number;
+};

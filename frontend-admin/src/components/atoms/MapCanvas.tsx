@@ -1,19 +1,6 @@
 import { useState, useEffect } from "react";
 import Image from "../../../../frontend-user/src/components/atoms/MapImage";
-import type { CSSProperties, ReactNode } from "react";
-
-type Props = {
-  mapSrc: string;
-  alt?: string;
-  initialZoom?: number;
-  minZoom?: number;
-  maxZoom?: number;
-  children?: ReactNode;
-  style?: CSSProperties;
-  /** Preferred min height for the canvas (px). Defaults to 520. */
-  minHeight?: number;
-};
-
+import { type MapCanvasProps } from "../../types/types";
 export default function MapCanvas({
   mapSrc,
   alt,
@@ -23,11 +10,10 @@ export default function MapCanvas({
   children,
   style,
   minHeight = 520,
-}: Props) {
+}: MapCanvasProps) {
   const [zoom, setZoom] = useState<number>(initialZoom);
   const [imgError, setImgError] = useState<boolean>(false);
 
-  // Reset image error / zoom when the source changes so switching halls reloads cleanly
   useEffect(() => {
     setImgError(false);
     setZoom(initialZoom);
@@ -94,7 +80,6 @@ export default function MapCanvas({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                // ensure rounded corners remain visible when zooming
                 borderRadius: 8,
                 overflow: "hidden",
               }}
@@ -103,7 +88,6 @@ export default function MapCanvas({
                 <Image
                   src={mapSrc}
                   alt={alt ?? "map"}
-                  // make the image fill the viewport height so the map appears full-size
                   style={{
                     width: "auto",
                     height: "100%",
@@ -141,7 +125,6 @@ export default function MapCanvas({
                 </div>
               )}
 
-              {/* children can be positioned absolutely inside this container to overlay stalls/markers */}
               {children}
             </div>
           </div>
