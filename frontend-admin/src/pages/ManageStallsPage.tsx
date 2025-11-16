@@ -26,7 +26,7 @@ import type { SelectChangeEvent } from "@mui/material";
 import EditStallDialog from "../components/molecules/EditStallDialog";
 
 import { stalls as adminStalls } from "../data/halls";
-import { fetchHalls, fetchHall } from "../services/hallsApi";
+import { fetchHalls, fetchStallsByHall } from "../services/hallsApi";
 import { updateStall, createStall, deleteStall } from "../services/stallsApi";
 import type { ApiHall } from "../types/types";
 
@@ -83,12 +83,12 @@ export default function ManageStallsPage() {
   useEffect(() => {
     if (!selectedHall) return;
     let mounted = true;
-    fetchHall(selectedHall)
+    fetchStallsByHall(selectedHall)
       .then((data: any) => {
         // record raw response for debug panel
-        setLastFetchRaw?.(data);
-        console.debug("fetchHall raw response:", data);
-        console.group(`📥 fetchHall(${selectedHall}) — RAW DATA`);
+        setLastFetchRaw(data);
+        console.debug("fetchStallsByHall raw response:", data);
+        console.group(`📥 fetchStallsByHall(${selectedHall}) — RAW DATA`);
         console.log("Full response:", data);
         console.log("data.stalls:", data?.stalls);
         console.log("data.data?.stalls:", data?.data?.stalls);

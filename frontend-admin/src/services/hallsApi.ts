@@ -27,6 +27,11 @@ export async function fetchHall(id: string): Promise<any> {
   return resp.data;
 }
 
+export async function fetchStallsByHall(id: string): Promise<any> {
+  const resp = await api.get(`/stall/hall/${encodeURIComponent(id)}`);
+  return resp.data;
+}
+
 export async function updateHall(id: string, payload: Record<string, any>) {
   try {
     const resp = await api.put(`/hall/${encodeURIComponent(id)}`, payload);
