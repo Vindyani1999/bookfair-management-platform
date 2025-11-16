@@ -69,7 +69,6 @@ export default function ReusableTable<T extends Record<string, unknown>>({
   const [orderBy, setOrderBy] = useState<string>(columns[0]?.id || "");
 
   const searchableFields = useMemo(() => {
-    // fields that are safe to search: columns with `field` defined
     return columns.filter((c) => c.field).map((c) => String(c.field));
   }, [columns]);
 
@@ -77,7 +76,6 @@ export default function ReusableTable<T extends Record<string, unknown>>({
     const q = query.trim().toLowerCase();
     if (!q) return rows.slice();
     return rows.filter((r) => {
-      // if columns provide field names, search those; otherwise stringify row
       if (searchableFields.length) {
         return searchableFields.some((f) =>
           ("" + (r[f as keyof T] ?? "")).toLowerCase().includes(q)
@@ -111,7 +109,6 @@ export default function ReusableTable<T extends Record<string, unknown>>({
       sx={{ width: "100%", overflow: "hidden", backgroundColor: "transparent" }}
     >
       <Toolbar sx={{ position: "relative", minHeight: 76 }}>
-        {/* centered search area */}
         {showSearch && (
           <Box
             sx={{
@@ -130,7 +127,6 @@ export default function ReusableTable<T extends Record<string, unknown>>({
                 "& .MuiOutlinedInput-root": {
                   height: 44,
                   borderRadius: 12,
-                  // background: '#ffffff',
                   boxShadow: "0 6px 16px rgba(16,24,40,0.06)",
                   border: "2px solid #565656",
                 },
@@ -163,7 +159,6 @@ export default function ReusableTable<T extends Record<string, unknown>>({
           </Box>
         )}
 
-        {/* toolbar actions float to the right */}
         <Box className="toolbar-actions">{toolbarActions}</Box>
       </Toolbar>
 
@@ -172,7 +167,6 @@ export default function ReusableTable<T extends Record<string, unknown>>({
           <TableHead
             sx={{
               backgroundColor: "transparent",
-              // add a subtle border under the header row to separate it from body
               "& .MuiTableCell-root": {
                 borderBottom: "2px solid rgba(15,23,42,0.08)",
               },
@@ -227,7 +221,6 @@ export default function ReusableTable<T extends Record<string, unknown>>({
                   onClick={() => onRowClick?.(row)}
                   sx={{
                     cursor: onRowClick ? "pointer" : "default",
-                    // slightly tighter rows
                     "& .MuiTableCell-root": { py: 0.75 },
                   }}
                 >
@@ -242,7 +235,6 @@ export default function ReusableTable<T extends Record<string, unknown>>({
                       }}
                     >
                       {(() => {
-                        // Determine the raw field key we use for this column
                         const fieldKey = String(col.field ?? col.id);
                         const rawValue = (
                           row as unknown as Record<string, any>
@@ -251,7 +243,6 @@ export default function ReusableTable<T extends Record<string, unknown>>({
                           ? col.render(row)
                           : String(rawValue ?? "");
 
-                        // Temporary debug: log exact values used when rendering Price and Size cells
                         if (
                           col.id === "price" ||
                           fieldKey === "price" ||
