@@ -7,7 +7,6 @@ import {
   Button,
   Box,
   Typography,
-  TextField,
   IconButton,
 } from "@mui/material";
 import type { MapEditDialogProps } from "../../types/types";
@@ -19,19 +18,18 @@ export default function MapEditDialog({
   hallId,
   hallLabel,
   currentImage,
-  currentStallCount = 0,
   onClose,
   onSave,
+  availability,
+  onToggleAvailability,
 }: MapEditDialogProps) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | undefined>(currentImage);
-  const [stallCount, setStallCount] = useState<number>(currentStallCount);
 
   useEffect(() => {
     setPreview(currentImage);
-    setStallCount(currentStallCount);
     setFile(null);
-  }, [currentImage, currentStallCount, open]);
+  }, [currentImage, open]);
 
   useEffect(() => {
     if (!file) return;
@@ -119,21 +117,7 @@ export default function MapEditDialog({
           </Box>
 
           <Box sx={{ width: 220 }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>
-              Stall count
-            </Typography>
-            <TextField
-              type="number"
-              value={stallCount}
-              onChange={(e) =>
-                setStallCount(Math.max(0, parseInt(e.target.value || "0", 10)))
-              }
-              inputProps={{ min: 0 }}
-              fullWidth
-              size="small"
-            />
-
-            <Box sx={{ mt: 3 }}>
+            <Box sx={{ mt: 1 }}>
               <Typography variant="caption" color="text.secondary">
                 Note: uploading an image only updates local preview. Persisting
                 to server requires API integration.
@@ -145,10 +129,26 @@ export default function MapEditDialog({
 
       <DialogActions sx={{ px: 3, py: 2 }}>
         <Button onClick={onClose}>Cancel</Button>
+        {typeof availability === "boolean" && onToggleAvailability ? (
+          <StatusButton
+            status={availability ? "cancel" : "confirm"}
+            onClick={async () => {
+              try {
+                await onToggleAvailability(!availability);
+              } catch (e) {
+                // ignore — page will handle errors; keep dialog open
+                console.error(e);
+              }
+            }}
+            sx={{ mr: 1 }}
+          >
+            {availability ? "Disable hall" : "Enable hall"}
+          </StatusButton>
+        ) : null}
         <StatusButton
           status="confirm"
           onClick={() => {
-            onSave({ image: preview, stalls: stallCount });
+            onSave({ image: preview, imageFile: file ?? undefined });
             onClose();
           }}
         >

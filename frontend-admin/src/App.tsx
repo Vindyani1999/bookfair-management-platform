@@ -6,7 +6,7 @@ import {
   // Navigate,
 } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
-// import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./components/routes/ProtectedRoute";
 import LoginPage from "./pages/LoginPage";
 
 // import Dashboard from "./pages/Dashboard";
@@ -23,24 +23,18 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
 
-          <Route path="/" element={<DrawerLayout />}>
-            {/* <Route path="dashboard" element={<Dashboard />} /> */}
-            <Route index element={<Navigate to="bookings" replace />} />
-            <Route path="bookings" element={<BookingsPage />} />
-            <Route path="manage-stalls" element={<ManageStallsPage />} />
-            <Route path="manage-admins" element={<ManageAdminsPage />} />
-            <Route path="manage-maps" element={<ManageMapsPage />} />
-            {/* <Route
-              path="dashboard"
-              element={
-                <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
+          <Route element={<ProtectedRoute />}>
+            <Route path="/" element={<DrawerLayout />}>
+              {/* <Route path="dashboard" element={<Dashboard />} /> */}
+              <Route index element={<Navigate to="bookings" replace />} />
+              <Route path="bookings" element={<BookingsPage />} />
+              <Route path="manage-stalls" element={<ManageStallsPage />} />
+              <Route path="manage-admins" element={<ManageAdminsPage />} />
+              <Route path="manage-maps" element={<ManageMapsPage />} />
+            </Route>
 
-          /> */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
     </Router>

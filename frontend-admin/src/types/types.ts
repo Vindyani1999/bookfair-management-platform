@@ -37,9 +37,13 @@ export type MapEditDialogProps = {
   hallId: string;
   hallLabel?: string;
   currentImage?: string;
-  currentStallCount?: number;
   initialImage?: string;
-  initialStalls?: number;
   onClose: () => void;
-  onSave: (data: { image?: string; stalls: number }) => void;
+  onSave: (data: { image?: string; imageFile?: File }) => void;
+  /** Current availability of the hall (true = available) */
+  availability?: boolean;
+  /** Called when user toggles availability in the dialog */
+  onToggleAvailability?: (newValue: boolean) => Promise<void> | void;
 };
+
+export type ApiHall = { id: string; label?: string; name?: string };

@@ -54,8 +54,8 @@ export default function ReusableTable<T extends Record<string, unknown>>({
   rows,
   showSearch = true,
   searchPlaceholder = "Search…",
-  rowsPerPageOptions = [5, 10, 25],
-  defaultRowsPerPage = 10,
+  rowsPerPageOptions = [12, 24, 48],
+  defaultRowsPerPage = 12,
   onRowClick,
   toolbarActions,
   dense = false,
@@ -241,13 +241,38 @@ export default function ReusableTable<T extends Record<string, unknown>>({
                         borderBottom: "1px solid rgba(15,23,42,0.3)",
                       }}
                     >
-                      {col.render
-                        ? col.render(row)
-                        : String(
-                            (row as unknown as Record<string, unknown>)[
-                              String(col.field ?? col.id)
-                            ] ?? ""
-                          )}
+                      {(() => {
+                        // Determine the raw field key we use for this column
+                        const fieldKey = String(col.field ?? col.id);
+                        const rawValue = (
+                          row as unknown as Record<string, any>
+                        )[fieldKey];
+                        const display = col.render
+                          ? col.render(row)
+                          : String(rawValue ?? "");
+
+                        // Temporary debug: log exact values used when rendering Price and Size cells
+                        if (
+                          col.id === "price" ||
+                          fieldKey === "price" ||
+                          col.id === "size" ||
+                          fieldKey === "size"
+                        ) {
+                          try {
+                            console.debug("ReusableTable cell render", {
+                              rowId: (row as any).id ?? idx,
+                              colId: col.id,
+                              fieldKey,
+                              rawValue,
+                              display,
+                            });
+                          } catch {
+                            /* ignore logging errors */
+                          }
+                        }
+
+                        return display;
+                      })()}
                     </TableCell>
                   ))}
                 </TableRow>

@@ -1,7 +1,15 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import { authAPI } from '../services/api';
-import type { Admin, LoginCredentials } from '../types';
-import { AxiosError } from 'axios';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  type ReactNode,
+} from "react";
+import { authAPI } from "../services/api";
+import api from "../services/api";
+import type { Admin, LoginCredentials } from "../types";
+import { AxiosError } from "axios";
 
 interface AuthContextType {
   admin: Admin | null;
@@ -18,7 +26,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -40,19 +48,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const validateToken = useCallback((token: string): boolean => {
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const payload = JSON.parse(atob(token.split(".")[1]));
       const expirationTime = payload.exp * 1000;
       const currentTime = Date.now();
       return currentTime < expirationTime;
     } catch (error) {
-      console.error('Error validating token:', error);
+      console.error("Error validating token:", error);
       return false;
     }
   }, []);
 
   const getTimeUntilExpiry = useCallback((token: string): number => {
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const payload = JSON.parse(atob(token.split(".")[1]));
       const expirationTime = payload.exp * 1000;
       const currentTime = Date.now();
       return Math.max(0, expirationTime - currentTime);
@@ -65,70 +73,89 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setAdmin(null);
     setAccessToken(null);
     setRefreshToken(null);
-    sessionStorage.removeItem('accessToken');
-    sessionStorage.removeItem('refreshToken');
-    sessionStorage.removeItem('admin');
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('admin');
+    sessionStorage.removeItem("accessToken");
+    sessionStorage.removeItem("refreshToken");
+    sessionStorage.removeItem("admin");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("admin");
+    // ensure axios instance doesn't keep an authorization header after logout
+    try {
+      delete api.defaults.headers.common.Authorization;
+    } catch (e) {
+      // ignore
+    }
   }, []);
 
   const logout = useCallback(async () => {
     try {
-      const token = refreshToken ||
-        sessionStorage.getItem('refreshToken') ||
-        localStorage.getItem('refreshToken');
+      const token =
+        refreshToken ||
+        sessionStorage.getItem("refreshToken") ||
+        localStorage.getItem("refreshToken");
 
       if (token) {
         await authAPI.logout(token);
       }
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
       clearAuthData();
-      window.location.href = '/login';
+      window.location.href = "/login";
     }
   }, [refreshToken, clearAuthData]);
 
   const refreshAccessToken = useCallback(async (): Promise<boolean> => {
     try {
-      const storedRefreshToken = sessionStorage.getItem('refreshToken') ||
-        localStorage.getItem('refreshToken');
+      const storedRefreshToken =
+        sessionStorage.getItem("refreshToken") ||
+        localStorage.getItem("refreshToken");
 
       if (!storedRefreshToken) {
-        console.warn('No refresh token available');
+        console.warn("No refresh token available");
         clearAuthData();
         return false;
       }
 
-      console.log('Refreshing access token...');
+      console.log("Refreshing access token...");
       const response = await authAPI.refresh(storedRefreshToken);
 
-      const { accessToken: newAccessToken, refreshToken: newRefreshToken, admin: adminData } = response.data;
+      const {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+        admin: adminData,
+      } = response.data;
 
       if (!newAccessToken || !newRefreshToken) {
-        throw new Error('Invalid refresh response from server');
+        throw new Error("Invalid refresh response from server");
       }
 
       setAccessToken(newAccessToken);
       setRefreshToken(newRefreshToken);
       setAdmin(adminData);
 
-      const useSessionStorage = !!sessionStorage.getItem('accessToken');
-      if (useSessionStorage) {
-        sessionStorage.setItem('accessToken', newAccessToken);
-        sessionStorage.setItem('refreshToken', newRefreshToken);
-        sessionStorage.setItem('admin', JSON.stringify(adminData));
-      } else {
-        localStorage.setItem('accessToken', newAccessToken);
-        localStorage.setItem('refreshToken', newRefreshToken);
-        localStorage.setItem('admin', JSON.stringify(adminData));
+      // set default Authorization header for subsequent requests
+      try {
+        api.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
+      } catch (e) {
+        // ignore
       }
 
-      console.log('Token refresh successful');
+      const useSessionStorage = !!sessionStorage.getItem("accessToken");
+      if (useSessionStorage) {
+        sessionStorage.setItem("accessToken", newAccessToken);
+        sessionStorage.setItem("refreshToken", newRefreshToken);
+        sessionStorage.setItem("admin", JSON.stringify(adminData));
+      } else {
+        localStorage.setItem("accessToken", newAccessToken);
+        localStorage.setItem("refreshToken", newRefreshToken);
+        localStorage.setItem("admin", JSON.stringify(adminData));
+      }
+
+      console.log("Token refresh successful");
       return true;
     } catch (error) {
-      console.error('Token refresh failed:', error);
+      console.error("Token refresh failed:", error);
       clearAuthData();
       return false;
     }
@@ -137,33 +164,47 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const storedAccessToken = sessionStorage.getItem('accessToken') ||
-          localStorage.getItem('accessToken');
-        const storedRefreshToken = sessionStorage.getItem('refreshToken') ||
-          localStorage.getItem('refreshToken');
-        const storedAdmin = sessionStorage.getItem('admin') ||
-          localStorage.getItem('admin');
+        const storedAccessToken =
+          sessionStorage.getItem("accessToken") ||
+          localStorage.getItem("accessToken");
+        const storedRefreshToken =
+          sessionStorage.getItem("refreshToken") ||
+          localStorage.getItem("refreshToken");
+        const storedAdmin =
+          sessionStorage.getItem("admin") || localStorage.getItem("admin");
 
-        if (storedAccessToken && storedRefreshToken && storedAdmin) {
+        if (storedAccessToken && storedRefreshToken) {
           const isAccessTokenValid = validateToken(storedAccessToken);
 
           if (isAccessTokenValid) {
             setAccessToken(storedAccessToken);
             setRefreshToken(storedRefreshToken);
-            setAdmin(JSON.parse(storedAdmin));
-            console.log('Auth restored from storage');
+            if (storedAdmin) {
+              try {
+                setAdmin(JSON.parse(storedAdmin));
+              } catch (e) {
+                // ignore parse errors
+              }
+            }
+            // set axios header immediately so other requests use the token
+            try {
+              api.defaults.headers.common.Authorization = `Bearer ${storedAccessToken}`;
+            } catch (e) {
+              // ignore
+            }
+            console.log("Auth restored from storage");
           } else {
-            console.log('Access token expired, refreshing...');
+            console.log("Access token expired, attempting refresh...");
             const refreshed = await refreshAccessToken();
             if (!refreshed) {
-              console.log('Refresh failed, clearing auth data');
+              console.log("Refresh failed, clearing auth data");
             }
           }
         } else {
-          console.log('No auth data in storage');
+          console.log("No auth data in storage");
         }
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        console.error("Error initializing auth:", error);
         clearAuthData();
       } finally {
         setLoading(false);
@@ -173,7 +214,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     initializeAuth();
   }, [validateToken, refreshAccessToken, clearAuthData]);
 
-
   useEffect(() => {
     if (!accessToken || !refreshToken) return;
 
@@ -181,10 +221,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const timeRemaining = getTimeUntilExpiry(accessToken);
 
       if (timeRemaining > 0 && timeRemaining < REFRESH_BEFORE_EXPIRY) {
-        console.log(`Token expiring in ${Math.round(timeRemaining / 1000)}s, refreshing proactively...`);
+        console.log(
+          `Token expiring in ${Math.round(
+            timeRemaining / 1000
+          )}s, refreshing proactively...`
+        );
         await refreshAccessToken();
       } else if (timeRemaining === 0) {
-        console.log('Token expired, refreshing...');
+        console.log("Token expired, refreshing...");
         const refreshed = await refreshAccessToken();
         if (!refreshed) {
           await logout();
@@ -194,37 +238,57 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     checkAndRefreshToken();
 
-    const interval = setInterval(checkAndRefreshToken, ACCESS_TOKEN_CHECK_INTERVAL);
+    const interval = setInterval(
+      checkAndRefreshToken,
+      ACCESS_TOKEN_CHECK_INTERVAL
+    );
 
     return () => clearInterval(interval);
-  }, [accessToken, refreshToken, getTimeUntilExpiry, refreshAccessToken, logout]);
+  }, [
+    accessToken,
+    refreshToken,
+    getTimeUntilExpiry,
+    refreshAccessToken,
+    logout,
+  ]);
 
   const login = async (credentials: LoginCredentials) => {
     try {
       const response = await authAPI.login(credentials);
-      const { accessToken: authAccessToken, refreshToken: authRefreshToken, admin: adminData } = response.data;
+      const {
+        accessToken: authAccessToken,
+        refreshToken: authRefreshToken,
+        admin: adminData,
+      } = response.data;
 
       if (!authAccessToken || !authRefreshToken || !adminData) {
-        throw new Error('Invalid response from server');
+        throw new Error("Invalid response from server");
       }
 
       setAccessToken(authAccessToken);
       setRefreshToken(authRefreshToken);
       setAdmin(adminData);
 
-      sessionStorage.setItem('accessToken', authAccessToken);
-      sessionStorage.setItem('refreshToken', authRefreshToken);
-      sessionStorage.setItem('admin', JSON.stringify(adminData));
+      // ensure axios instance sends Authorization header for future requests
+      try {
+        api.defaults.headers.common.Authorization = `Bearer ${authAccessToken}`;
+      } catch (e) {
+        // ignore
+      }
 
-      console.log('Login successful');
+      sessionStorage.setItem("accessToken", authAccessToken);
+      sessionStorage.setItem("refreshToken", authRefreshToken);
+      sessionStorage.setItem("admin", JSON.stringify(adminData));
+
+      console.log("Login successful");
     } catch (error) {
       clearAuthData();
 
       if (error instanceof AxiosError) {
-        const message = error.response?.data?.message || 'Login failed';
+        const message = error.response?.data?.message || "Login failed";
         throw new Error(message);
       }
-      throw new Error('An unexpected error occurred');
+      throw new Error("An unexpected error occurred");
     }
   };
 

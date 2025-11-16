@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   FormControl,
@@ -8,51 +9,182 @@ import {
   Card,
   CardContent,
   Typography,
+  Avatar,
+  Divider,
+  Stack,
+  Chip,
 } from "@mui/material";
 import MapCanvas from "../components/atoms/MapCanvas";
-import { halls, hallMapImages, stalls } from "../data/halls";
-import { Avatar, Divider, Stack, Chip, Grid } from "@mui/material";
+import { hallMapImages, stalls as adminStalls } from "../data/halls";
+import {
+  fetchHalls,
+  fetchHall,
+  updateHall,
+  uploadHallImage,
+} from "../services/hallsApi";
+import type { ApiHall } from "../services/hallsApi";
 import MapIcon from "@mui/icons-material/Map";
+// import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import StatusButton from "../components/atoms/StatusButton";
 import MapEditDialog from "../components/molecules/MapEditDialog";
-import { stalls as adminStalls } from "../data/halls";
 
 export default function ManageMapsPage() {
-  const [selectedHall, setSelectedHall] = useState<string>(halls[0]?.id ?? "");
-  const [availability, setAvailability] = useState<Record<string, boolean>>(
-    () => Object.fromEntries(halls.map((h) => [h.id, true]))
-  );
+  const [halls, setHalls] = useState<ApiHall[]>([]);
+  const [selectedHall, setSelectedHall] = useState<string>("");
+  const [availability, setAvailability] = useState<Record<string, boolean>>({});
   const hallLabel = useMemo(
     () => halls.find((h) => h.id === selectedHall)?.label || "",
-    [selectedHall]
+    [selectedHall, halls]
   );
 
   // local state for images and stall counts so admin edits can be previewed immediately
-  const [hallImages, setHallImages] = useState<Record<string, string>>(() => {
-    // prefer explicit thumbnails, then the hallMapImages mapping, finally a fallback image
-    const map: Record<string, string> = {};
-    for (const h of halls) {
-      map[h.id] =
-        (hallMapImages[h.id as keyof typeof hallMapImages] as string) ||
-        (halls.find((x) => x.id === h.id)
-          ? (hallMapImages[h.label as keyof typeof hallMapImages] as string)
-          : undefined) ||
-        `/maps/${h.label.replace(/\s+/g, "") || h.id}.png` ||
-        "/maps/hallD.png";
-    }
-    return map;
-  });
+  const [hallImages, setHallImages] = useState<Record<string, string>>({});
 
-  const [stallCounts, setStallCounts] = useState<Record<string, number>>(() =>
-    Object.fromEntries(
-      halls.map((h) => [h.id, stalls.filter((s) => s.hallId === h.id).length])
-    )
-  );
+  // `stallCounts` was previously used to show and edit counts in the dialog.
+  // Since stall counts are no longer editable from the map edit popup, keep
+  // a lightweight store for any server-provided counts but avoid editing it
+  // from this page.
+  const [, setStallCounts] = useState<Record<string, number>>({});
 
   const [editOpen, setEditOpen] = useState(false);
-  const [lastUpload, setLastUpload] = useState<Record<string, string>>(() =>
-    Object.fromEntries(halls.map((h) => [h.id, "-"]))
-  );
+  const [lastUpload, setLastUpload] = useState<Record<string, string>>({});
+
+  const navigate = useNavigate();
+
+  function formatUploadDate(value?: string) {
+    if (!value) return "";
+    const parsed = Date.parse(value);
+    if (Number.isNaN(parsed)) return value;
+    const d = new Date(parsed);
+    const now = new Date();
+
+    const isToday = d.toDateString() === now.toDateString();
+    const yesterday = new Date();
+    yesterday.setDate(now.getDate() - 1);
+    const isYesterday = d.toDateString() === yesterday.toDateString();
+
+    const time = d.toLocaleTimeString(undefined, {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+
+    if (isToday) return `Today at ${time}`;
+    if (isYesterday) return `Yesterday at ${time}`;
+
+    return (
+      d.toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }) + ` — ${time}`
+    );
+  }
+
+  useEffect(() => {
+    let mounted = true;
+    fetchHalls()
+      .then((list) => {
+        if (!mounted) return;
+        setHalls(list);
+        // initialize selected hall if empty
+        if (!selectedHall && list.length > 0) setSelectedHall(list[0].id);
+
+        // init availability, images, stalls and lastUpload for each hall
+        const avail: Record<string, boolean> = {};
+        const imgs: Record<string, string> = {};
+        const counts: Record<string, number> = {};
+        const last: Record<string, string> = {};
+        for (const h of list) {
+          avail[h.id] = true;
+          imgs[h.id] =
+            (hallMapImages[h.id as keyof typeof hallMapImages] as string) ||
+            (hallMapImages[h.label as keyof typeof hallMapImages] as string) ||
+            `/maps/${(h.label || h.id).replace(/\s+/g, "")}.png` ||
+            "/maps/hallD.png";
+          counts[h.id] = adminStalls.filter((s) => s.hallId === h.id).length;
+          last[h.id] = "-";
+        }
+        setAvailability(avail);
+        setHallImages(imgs);
+        setStallCounts(counts);
+        setLastUpload(last);
+      })
+      .catch(() => {
+        // fallback to local data/hardcoded halls if API fails
+        const fallback = Object.keys(hallMapImages).map((k) => ({
+          id: k,
+          label: k,
+        }));
+        if (!mounted) return;
+        setHalls(fallback);
+        if (!selectedHall && fallback.length > 0)
+          setSelectedHall(fallback[0].id);
+      });
+    return () => {
+      mounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // When selectedHall changes, fetch detailed hall data from backend
+  useEffect(() => {
+    if (!selectedHall) return;
+    let mounted = true;
+    fetchHall(selectedHall)
+      .then((data) => {
+        if (!mounted) return;
+        if (!data) return;
+
+        const image = data.imageUrl || data.image || undefined;
+        if (image) setHallImages((m) => ({ ...m, [selectedHall]: image }));
+
+        const stallsCount = Array.isArray(data.stalls) ? data.stalls.length : 0;
+        setStallCounts((s) => ({ ...s, [selectedHall]: stallsCount }));
+
+        if (data.status) {
+          setAvailability((a) => ({
+            ...a,
+            [selectedHall]: data.status === "available",
+          }));
+        }
+
+        if (data.updatedAt) {
+          setLastUpload((l) => ({
+            ...l,
+            [selectedHall]: new Date(data.updatedAt).toLocaleString(),
+          }));
+        }
+
+        // Sync provided stalls into adminStalls store so ManageStallsPage reflects backend
+        if (Array.isArray(data.stalls)) {
+          for (let i = adminStalls.length - 1; i >= 0; i--) {
+            if (adminStalls[i].hallId === selectedHall)
+              adminStalls.splice(i, 1);
+          }
+          data.stalls.forEach((s: unknown) => {
+            const si = s as Record<string, unknown>;
+            adminStalls.push({
+              id: String(si.id),
+              hallId: selectedHall,
+              label:
+                (si.name as string) || (si.label as string) || String(si.id),
+            });
+          });
+        }
+      })
+      .catch((err: unknown) => {
+        const e = err as { status?: number };
+        if (e && (e.status === 401 || e.status === 404)) {
+          navigate("/login");
+          return;
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [selectedHall, navigate]);
 
   return (
     <Box sx={{ p: 3 }}>
@@ -103,9 +235,7 @@ export default function ManageMapsPage() {
                     {hallLabel || "Select a hall"}
                   </Typography>
                   <Chip
-                    label={
-                      availability[selectedHall] ? "Available" : "Not available"
-                    }
+                    label={availability[selectedHall] ? "Available" : "Booked"}
                     color={availability[selectedHall] ? "success" : "default"}
                     size="small"
                     sx={{ mt: 0.5 }}
@@ -115,24 +245,54 @@ export default function ManageMapsPage() {
 
               <Divider sx={{ my: 1 }} />
 
-              <Grid container spacing={1} sx={{ mb: 2 }}>
-                <Grid size={{ xs: 6 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    Total stalls
-                  </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    {stallCounts[selectedHall] ?? 0}
-                  </Typography>
-                </Grid>
-                <Grid size={{ xs: 6 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    Last upload
-                  </Typography>
-                  <Typography variant="body2">
-                    {lastUpload[selectedHall]}
-                  </Typography>
-                </Grid>
-              </Grid>
+              <Box sx={{ mb: 2 }}>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: "block", mb: 1 }}
+                >
+                  Last upload
+                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    bgcolor: "#f6fffb",
+                    px: 2,
+                    py: 1,
+                    borderRadius: 1,
+                    border: "1px solid rgba(0,0,0,0.04)",
+                  }}
+                >
+                  {/* <Avatar
+                    sx={{
+                      bgcolor: "transparent",
+                      color: "primary.main",
+                      width: 40,
+                      height: 40,
+                      border: "1px solid rgba(16,185,129,0.08)",
+                      boxShadow: "none",
+                      mr: 1,
+                    }}
+                    variant="rounded"
+                  >
+                    <AccessTimeIcon fontSize="small" />
+                  </Avatar> */}
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      {lastUpload[selectedHall]
+                        ? formatUploadDate(lastUpload[selectedHall])
+                        : "No uploads yet"}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {lastUpload[selectedHall]
+                        ? "Most recent map upload"
+                        : "You can upload a map from Edit"}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
 
               <StatusButton
                 status="confirm"
@@ -144,73 +304,88 @@ export default function ManageMapsPage() {
               </StatusButton>
 
               <StatusButton
-                status={availability[selectedHall] ? "cancel" : "confirm"}
+                status="info"
                 fullWidth
-                onClick={() =>
-                  setAvailability((a) => ({
-                    ...a,
-                    [selectedHall]: !a[selectedHall],
-                  }))
-                }
+                onClick={() => {
+                  const src = hallImages[selectedHall] ?? "/maps/hallD.png";
+                  try {
+                    // open image in new tab for quick preview
+                    window.open(src, "_blank");
+                  } catch (e) {
+                    console.warn("Unable to open map preview", e);
+                  }
+                }}
+                sx={{ mt: 1 }}
+                startIcon={<VisibilityIcon />}
               >
-                {availability[selectedHall] ? "Disable hall" : "Enable hall"}
+                View map
               </StatusButton>
+
+              {/* moved Disable/Enable control into the Edit dialog for clearer UX */}
             </CardContent>
           </Card>
 
           <MapEditDialog
             open={editOpen}
             hallId={selectedHall}
-            initialImage={hallImages[selectedHall]}
-            initialStalls={stallCounts[selectedHall]}
+            hallLabel={hallLabel}
+            currentImage={hallImages[selectedHall]}
             onClose={() => setEditOpen(false)}
-            onSave={({ image, stalls: newCount }) => {
+            availability={availability[selectedHall]}
+            onToggleAvailability={async (newVal: boolean) => {
               const id = selectedHall;
-              // update stall counts in local state
-              setStallCounts((s) => ({ ...s, [id]: newCount }));
+              // optimistic UI
+              setAvailability((a) => ({ ...a, [id]: newVal }));
+              try {
+                // backend expects 'available' or 'booked'
+                await updateHall(id, {
+                  status: newVal ? "available" : "booked",
+                });
+              } catch (err: unknown) {
+                const e = err as { status?: number };
+                if (e && (e.status === 401 || e.status === 404)) {
+                  navigate("/login");
+                  return;
+                }
+                // revert on error
+                setAvailability((a) => ({ ...a, [id]: !newVal }));
+                throw err;
+              }
+            }}
+            onSave={async ({ image, imageFile }) => {
+              const id = selectedHall;
+              // immediate optimistic UI updates: record last upload and image preview
               setLastUpload((l) => ({
                 ...l,
                 [id]: new Date().toLocaleDateString(),
               }));
 
-              // update image preview if provided
-              if (image) {
-                setHallImages((m) => ({ ...m, [id]: image }));
-              }
+              if (image) setHallImages((m) => ({ ...m, [id]: image }));
 
-              // Mutate the adminStalls array exported from data/halls so other pages can read the changes.
-              // Ensure there are exactly `newCount` stalls for this hall.
-              const existing = adminStalls.filter((s) => s.hallId === id);
-              const existingCount = existing.length;
-              if (newCount > existingCount) {
-                // add new stalls
-                const toAdd = newCount - existingCount;
-                for (let i = 0; i < toAdd; i++) {
-                  const newId = `stall-${Date.now()}-${Math.floor(
-                    Math.random() * 1000
-                  )}`;
-                  adminStalls.push({
-                    id: newId,
-                    hallId: id,
-                    label: `Stall ${existingCount + i + 1}`,
-                  });
+              // Persist changes to backend
+              try {
+                // If a file was selected, upload it first to the dedicated endpoint
+                if (imageFile) {
+                  const uploadResp = await uploadHallImage(id, imageFile);
+                  // If backend returns a new image URL, update it
+                  const newUrl =
+                    uploadResp?.imageUrl ||
+                    uploadResp?.url ||
+                    uploadResp?.data?.imageUrl;
+                  if (newUrl) setHallImages((m) => ({ ...m, [id]: newUrl }));
                 }
-              } else if (newCount < existingCount) {
-                // remove extra stalls (remove from end)
-                let removed = 0;
-                for (
-                  let i = adminStalls.length - 1;
-                  i >= 0 && removed < existingCount - newCount;
-                  i--
-                ) {
-                  if (adminStalls[i].hallId === id) {
-                    adminStalls.splice(i, 1);
-                    removed++;
-                  }
-                }
-              }
 
-              setEditOpen(false);
+                // Note: stall counts are not managed from this dialog anymore.
+              } catch (err: unknown) {
+                const e2 = err as { status?: number };
+                if (e2 && (e2.status === 401 || e2.status === 404)) {
+                  navigate("/login");
+                  return;
+                }
+                console.error("Failed to persist hall changes", err);
+              } finally {
+                setEditOpen(false);
+              }
             }}
           />
         </aside>
