@@ -9,7 +9,15 @@ export const halls: Hall[] = [
   { id: "hall-5", label: "Hall E" },
 ];
 
-export type Stall = { id: string; hallId: string; label: string };
+export type Stall = {
+  id: string;
+  hallId: string;
+  label: string;
+  price?: number;
+  size?: string;
+  description?: string;
+  status?: string;
+};
 export const stalls: Stall[] = [
   { id: "stall-1", hallId: "hall-1", label: "Stall 1" },
   { id: "stall-2", hallId: "hall-1", label: "Stall 2" },

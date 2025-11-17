@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -15,11 +15,20 @@ import {
   TextField,
   IconButton,
   Typography,
+  Button,
+  Popover,
+  ListItemButton,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  // Divider,
+  Skeleton,
 } from "@mui/material";
+import { Checkbox } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import InputAdornment from "@mui/material/InputAdornment";
-import { type Props } from "../../types/types";
+import type { Props, Column } from "../../types/types";
 
 function stableSort<T>(array: T[], comparator: (a: T, b: T) => number) {
   const stabilized = array.map((el, index) => [el, index] as [T, number]);
@@ -54,13 +63,19 @@ export default function ReusableTable<T extends Record<string, unknown>>({
   rows,
   showSearch = true,
   searchPlaceholder = "Search…",
-  rowsPerPageOptions = [5, 10, 25],
-  defaultRowsPerPage = 10,
+  rowsPerPageOptions = [12, 24, 48],
+  defaultRowsPerPage = 12,
   onRowClick,
   toolbarActions,
   dense = false,
   showPagination = true,
   emptyState,
+  showAllFields = false,
+  allowColumnSelector = false,
+  initialVisibleColumns,
+  excludedColumnIds = [],
+  headerMappings = {},
+  loading = false,
 }: Props<T>) {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(0);
@@ -68,24 +83,110 @@ export default function ReusableTable<T extends Record<string, unknown>>({
   const [order, setOrder] = useState<"asc" | "desc">("desc");
   const [orderBy, setOrderBy] = useState<string>(columns[0]?.id || "");
 
+  // derive columns: include provided columns + optionally fields found on rows
+  const detectedExtraColumns: Column<T>[] = useMemo(() => {
+    if (!showAllFields || !rows || rows.length === 0) return [];
+    const keys = new Set<string>();
+    rows.forEach((r) => {
+      Object.keys(r).forEach((k) => keys.add(k));
+    });
+    // exclude existing column ids and explicitly excluded ids
+    const existing = new Set(columns.map((c) => c.id));
+    const extras: Column<T>[] = [];
+    keys.forEach((k) => {
+      if (existing.has(k)) return;
+      if (excludedColumnIds.includes(k)) return;
+      const header = headerMappings[k] ?? k;
+      extras.push({
+        id: k,
+        header,
+        field: k,
+        hidden: undefined,
+      });
+    });
+    return extras;
+  }, [showAllFields, rows, columns, excludedColumnIds, headerMappings]);
+
+  const allColumns = useMemo<Column<T>[]>(() => {
+    return [...columns, ...detectedExtraColumns].filter(
+      (c) => !excludedColumnIds.includes(c.id)
+    );
+  }, [columns, detectedExtraColumns, excludedColumnIds]);
+
+  // visible columns state (ids)
+  const [visibleColumnIds, setVisibleColumnIds] = useState<
+    string[] | undefined
+  >(
+    () =>
+      initialVisibleColumns ??
+      allColumns.filter((c) => !c.hidden).map((c) => c.id)
+  );
+
+  // keep a stable key for column ids to use in deps
+  const allColumnIdsKey = useMemo(
+    () => allColumns.map((c) => c.id).join(","),
+    [allColumns]
+  );
+
+  useEffect(() => {
+    // if columns change, ensure visibleColumnIds includes them by default
+    setVisibleColumnIds((prev) => {
+      const defaultIds =
+        initialVisibleColumns ??
+        allColumns.filter((c) => !c.hidden).map((c) => c.id);
+      if (prev && prev.length > 0) {
+        const setPrev = new Set(prev);
+        defaultIds.forEach((id) => setPrev.add(id));
+        return Array.from(setPrev);
+      }
+      return defaultIds;
+    });
+  }, [allColumnIdsKey, initialVisibleColumns, allColumns]);
+
+  const visibleColumns = useMemo(() => {
+    const ids =
+      visibleColumnIds ?? allColumns.filter((c) => !c.hidden).map((c) => c.id);
+    return allColumns.filter((c) => ids.includes(c.id));
+  }, [allColumns, visibleColumnIds]);
+
+  // compute column widths: respect numeric/string `column.width`, and distribute remaining space
+  const computedColWidths = useMemo(() => {
+    const fixedCols = visibleColumns.filter((c) => typeof c.width === "number");
+    const totalFixedPx = fixedCols.reduce(
+      (s, c) => s + (Number(c.width) || 0),
+      0
+    );
+    const remaining = visibleColumns.length - fixedCols.length;
+    return visibleColumns.map((c) => {
+      if (typeof c.width === "number") return `${c.width}px`;
+      if (typeof c.width === "string" && c.width.trim().length) return c.width;
+      if (remaining > 0)
+        return `calc((100% - ${totalFixedPx}px) / ${remaining})`;
+      return `${100 / Math.max(1, visibleColumns.length)}%`;
+    });
+  }, [visibleColumns]);
+
   const searchableFields = useMemo(() => {
-    // fields that are safe to search: columns with `field` defined
-    return columns.filter((c) => c.field).map((c) => String(c.field));
-  }, [columns]);
+    return visibleColumns.filter((c) => c.field).map((c) => String(c.field));
+  }, [visibleColumns]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return rows.slice();
     return rows.filter((r) => {
-      // if columns provide field names, search those; otherwise stringify row
       if (searchableFields.length) {
         return searchableFields.some((f) =>
-          ("" + (r[f as keyof T] ?? "")).toLowerCase().includes(q)
+          ("" + ((r as any)[f] ?? "")).toLowerCase().includes(q)
         );
       }
       return JSON.stringify(r).toLowerCase().includes(q);
     });
   }, [rows, query, searchableFields]);
+
+  useEffect(() => {
+    const firstId = allColumns[0]?.id;
+    setOrderBy((prev) => prev || firstId || "");
+  }, [allColumnIdsKey, allColumns]);
 
   const sorted = useMemo(() => {
     if (!orderBy) return filtered;
@@ -104,6 +205,92 @@ export default function ReusableTable<T extends Record<string, unknown>>({
     setOrderBy(id);
   };
 
+  // Column selector sub-component (kept here for single-file convenience)
+  function ColumnSelectorButton(props: {
+    allColumns: Column<T>[];
+    visibleColumnIds?: string[];
+    setVisibleColumnIds: (
+      ids?: string[] | ((ids?: string[]) => string[] | undefined)
+    ) => void;
+  }) {
+    const { allColumns, visibleColumnIds, setVisibleColumnIds } = props;
+    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+    const open = Boolean(anchorEl);
+    const handleOpen = (e: React.MouseEvent<HTMLElement>) =>
+      setAnchorEl(e.currentTarget);
+    const handleClose = () => setAnchorEl(null);
+
+    const toggle = (id: string) => {
+      setVisibleColumnIds((prev) => {
+        const set = new Set(prev ?? []);
+        if (set.has(id)) set.delete(id);
+        else set.add(id);
+        return Array.from(set);
+      });
+    };
+
+    const selectAll = () => setVisibleColumnIds(allColumns.map((c) => c.id));
+    const clearAll = () => setVisibleColumnIds([]);
+
+    return (
+      <>
+        <Button variant="outlined" size="small" onClick={handleOpen}>
+          Columns
+        </Button>
+        <Popover
+          open={open}
+          anchorEl={anchorEl}
+          onClose={handleClose}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        >
+          <Box sx={{ p: 1, maxHeight: 320, overflow: "auto", minWidth: 240 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 1,
+              }}
+            >
+              <Typography variant="subtitle2">Columns</Typography>
+              <Box>
+                <Button size="small" onClick={selectAll} sx={{ mr: 1 }}>
+                  All
+                </Button>
+                <Button size="small" onClick={clearAll}>
+                  None
+                </Button>
+              </Box>
+            </Box>
+            {allColumns.map((c) => (
+              <ListItem key={c.id} disablePadding sx={{ px: 0 }}>
+                <ListItemButton onClick={() => toggle(c.id)}>
+                  <ListItemIcon sx={{ minWidth: 40 }}>
+                    <Checkbox
+                      size="small"
+                      edge="start"
+                      checked={visibleColumnIds?.includes(c.id) ?? true}
+                      tabIndex={-1}
+                      disableRipple
+                      onChange={() => toggle(c.id)}
+                    />
+                  </ListItemIcon>
+                  <ListItemText primary={headerMappings[c.id] ?? c.header} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+
+            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
+              <Button size="small" onClick={handleClose}>
+                Close
+              </Button>
+            </Box>
+          </Box>
+        </Popover>
+      </>
+    );
+  }
+
   return (
     <Paper
       className="reusable-table"
@@ -111,7 +298,6 @@ export default function ReusableTable<T extends Record<string, unknown>>({
       sx={{ width: "100%", overflow: "hidden", backgroundColor: "transparent" }}
     >
       <Toolbar sx={{ position: "relative", minHeight: 76 }}>
-        {/* centered search area */}
         {showSearch && (
           <Box
             sx={{
@@ -130,7 +316,6 @@ export default function ReusableTable<T extends Record<string, unknown>>({
                 "& .MuiOutlinedInput-root": {
                   height: 44,
                   borderRadius: 12,
-                  // background: '#ffffff',
                   boxShadow: "0 6px 16px rgba(16,24,40,0.06)",
                   border: "2px solid #565656",
                 },
@@ -163,55 +348,99 @@ export default function ReusableTable<T extends Record<string, unknown>>({
           </Box>
         )}
 
-        {/* toolbar actions float to the right */}
-        <Box className="toolbar-actions">{toolbarActions}</Box>
+        <Box
+          className="toolbar-actions"
+          sx={{ display: "flex", gap: 1, alignItems: "center" }}
+        >
+          {toolbarActions}
+          {allowColumnSelector && (
+            <ColumnSelectorButton
+              allColumns={allColumns}
+              visibleColumnIds={visibleColumnIds}
+              setVisibleColumnIds={setVisibleColumnIds}
+            />
+          )}
+        </Box>
       </Toolbar>
 
-      <TableContainer sx={{ maxHeight: 520 }}>
-        <Table size={dense ? "small" : "medium"} stickyHeader>
+      <TableContainer sx={{ maxHeight: 520, overflowX: "hidden" }}>
+        <Table
+          size={dense ? "small" : "medium"}
+          stickyHeader
+          sx={{ tableLayout: "fixed", width: "100%" }}
+        >
           <TableHead
             sx={{
               backgroundColor: "transparent",
-              // add a subtle border under the header row to separate it from body
               "& .MuiTableCell-root": {
                 borderBottom: "2px solid rgba(15,23,42,0.08)",
               },
             }}
           >
             <TableRow>
-              {columns.map((col) => (
-                <TableCell
-                  key={col.id}
-                  align={col.align || "left"}
-                  sortDirection={orderBy === col.id ? order : false}
-                  sx={{
-                    minWidth: col.width ?? 120,
-                    backgroundColor: "rgba(0,0,0,0.2) !important",
-                  }}
-                >
-                  {col.sortable ? (
-                    <TableSortLabel
-                      active={orderBy === col.id}
-                      direction={orderBy === col.id ? order : "desc"}
-                      onClick={() => handleRequestSort(col.id)}
-                    >
-                      {col.header}
-                    </TableSortLabel>
-                  ) : (
-                    <Typography sx={{ fontWeight: 600 }}>
-                      {col.header}
-                    </Typography>
-                  )}
-                </TableCell>
-              ))}
+              {visibleColumns.map((col, idx) => {
+                const headerLabel = headerMappings[col.id] ?? col.header;
+                return (
+                  <TableCell
+                    key={col.id}
+                    align={col.align || "left"}
+                    sortDirection={orderBy === col.id ? order : false}
+                    sx={{
+                      width: computedColWidths[idx],
+                      maxWidth: computedColWidths[idx],
+                      backgroundColor: "rgba(0,0,0,0.2) !important",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "normal",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {col.sortable ? (
+                      <TableSortLabel
+                        active={orderBy === col.id}
+                        direction={orderBy === col.id ? order : "desc"}
+                        onClick={() => handleRequestSort(col.id)}
+                      >
+                        {headerLabel}
+                      </TableSortLabel>
+                    ) : (
+                      <Typography sx={{ fontWeight: 600 }}>
+                        {headerLabel}
+                      </Typography>
+                    )}
+                  </TableCell>
+                );
+              })}
             </TableRow>
           </TableHead>
 
           <TableBody>
-            {pageSlice.length === 0 ? (
+            {loading ? (
+              // skeleton rows while loading
+              Array.from({ length: Math.min(Math.max(3, rowsPerPage), 8) }).map(
+                (_, ridx) => (
+                  <TableRow key={`s-${ridx}`}>
+                    {visibleColumns.map((col, cidx) => (
+                      <TableCell
+                        key={`s-${ridx}-${col.id}`}
+                        sx={{
+                          py: 0.75,
+                          px: 1.5,
+                          borderBottom: "1px solid rgba(15,23,42,0.3)",
+                          width: computedColWidths[cidx],
+                          maxWidth: computedColWidths[cidx],
+                        }}
+                      >
+                        <Skeleton variant="text" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                )
+              )
+            ) : pageSlice.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={visibleColumns.length}
                   sx={{ py: 6, textAlign: "center" }}
                 >
                   {emptyState ?? (
@@ -227,11 +456,10 @@ export default function ReusableTable<T extends Record<string, unknown>>({
                   onClick={() => onRowClick?.(row)}
                   sx={{
                     cursor: onRowClick ? "pointer" : "default",
-                    // slightly tighter rows
                     "& .MuiTableCell-root": { py: 0.75 },
                   }}
                 >
-                  {columns.map((col) => (
+                  {visibleColumns.map((col, cidx) => (
                     <TableCell
                       key={col.id}
                       align={col.align || "left"}
@@ -239,15 +467,44 @@ export default function ReusableTable<T extends Record<string, unknown>>({
                         py: 0.75,
                         px: 1.5,
                         borderBottom: "1px solid rgba(15,23,42,0.3)",
+                        width: computedColWidths[cidx],
+                        maxWidth: computedColWidths[cidx],
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "normal",
+                        wordBreak: "break-word",
                       }}
                     >
-                      {col.render
-                        ? col.render(row)
-                        : String(
-                            (row as unknown as Record<string, unknown>)[
-                              String(col.field ?? col.id)
-                            ] ?? ""
-                          )}
+                      {(() => {
+                        const fieldKey = String(col.field ?? col.id);
+                        const rawValue = (
+                          row as unknown as Record<string, any>
+                        )[fieldKey];
+                        const display = col.render
+                          ? col.render(row)
+                          : String(rawValue ?? "");
+
+                        if (
+                          col.id === "price" ||
+                          fieldKey === "price" ||
+                          col.id === "size" ||
+                          fieldKey === "size"
+                        ) {
+                          try {
+                            console.debug("ReusableTable cell render", {
+                              rowId: (row as any).id ?? idx,
+                              colId: col.id,
+                              fieldKey,
+                              rawValue,
+                              display,
+                            });
+                          } catch {
+                            /* ignore logging errors */
+                          }
+                        }
+
+                        return display;
+                      })()}
                     </TableCell>
                   ))}
                 </TableRow>

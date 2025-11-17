@@ -1,68 +1,152 @@
-import { Box, Button } from "@mui/material";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Box } from "@mui/material";
 import ReusableTable from "../components/atoms/ReusableTable";
 import StatCard from "../components/atoms/StatCard";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import type { Column } from "../types/types";
+import { useEffect, useState } from "react";
+import { fetchReservations } from "../services/reservationsApi";
+import { computeStatsFromApis, type Stats } from "../services/statsService";
+import dayjs from "dayjs";
 
-type Row = {
-  id: string;
-  stall: string;
-  date: string;
-  name: string;
-  business?: string;
-};
-
-const mockRows: Row[] = [
-  {
-    id: "01",
-    stall: "Hall D - Stall 4",
-    date: "October 28, 2025",
-    name: "John Smith",
-    business: "-",
-  },
-  {
-    id: "02",
-    stall: "Hall D - Stall 7",
-    date: "October 28, 2025",
-    name: "John Smith",
-    business: "-",
-  },
-  {
-    id: "03",
-    stall: "Hall D - Stall 20",
-    date: "October 28, 2025",
-    name: "John Smith",
-    business: "-",
-  },
-];
+type RawRow = Record<string, any>;
 
 export default function BookingsPage() {
-  // derive stats from rows so cards stay in sync with the table
-  const total = mockRows.length + 247; // mimic larger pool (show 250)
-  const reserved = 130; // example static
-  const available = total - reserved;
+  const [rows, setRows] = useState<RawRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
 
-  const columns: Column<Row>[] = [
-    { id: "id", header: "ID", field: "id", width: 60 },
-    { id: "stall", header: "Stall", field: "stall" },
-    { id: "date", header: "Date", field: "date", width: 160 },
-    { id: "name", header: "Name", field: "name" },
-    { id: "business", header: "Business name", field: "business" },
+  // derive stats from computed stats so cards stay in sync with the table
+  const total = stats
+    ? stats.perHall
+      ? Object.keys(stats.perHall).length
+      : 0
+    : 0; // total halls
+  const reserved = stats ? stats.reservedStalls : rows.length;
+  const available = stats ? stats.availableStalls : Math.max(0, 250 - reserved);
+
+  useEffect(() => {
+    let mounted = true;
+
+    setLoading(true);
+    fetchReservations()
+      .then((data: any) => {
+        if (!mounted) return;
+        const raw: any[] = Array.isArray(data)
+          ? data
+          : data?.results || data?.data || [];
+        const list: RawRow[] = raw.map((r: any) => {
+          const obj = r || {};
+          obj.businessName =
+            obj.businessName ||
+            obj.business ||
+            obj.company ||
+            obj.business_name ||
+            null;
+          return obj;
+        });
+        setRows(list.length ? list : []);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch reservations", err);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
+    setStatsLoading(true);
+    computeStatsFromApis()
+      .then((s) => {
+        if (!mounted) return;
+        setStats(s);
+      })
+      .catch((err) => {
+        console.error("Failed to compute stats", err);
+        if (mounted) setStats(null);
+      })
+      .finally(() => {
+        if (mounted) setStatsLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const columns: Column<RawRow>[] = [
+    { id: "id", header: "ID", field: "id", width: 40, hidden: false },
+    { id: "fullName", header: "Full Name", field: "fullName", hidden: false },
     {
-      id: "remove",
-      header: "Remove",
-      align: "center",
-      width: 120,
-      render: (row: Row) => (
-        <Button
-          color="error"
-          size="small"
-          startIcon={<DeleteOutlineIcon />}
-          onClick={() => console.log("remove", row.id)}
-        >
-          Remove
-        </Button>
-      ),
+      id: "stallIds",
+      header: "Stall IDs",
+      field: "stallIds",
+      hidden: false,
+      render: (r: RawRow) => {
+        const mapHallToLetters = (hid: unknown) => {
+          let n = Number(hid);
+          if (!Number.isFinite(n) || n <= 0) {
+            const s = String(hid ?? "");
+            const m = s.match(/(\d+)$/);
+            n = m ? Number(m[1]) : NaN;
+          }
+          if (!Number.isFinite(n) || n <= 0) return String(hid ?? "");
+          let res = "";
+          while (n > 0) {
+            n -= 1;
+            const ch = String.fromCharCode((n % 26) + 65);
+            res = ch + res;
+            n = Math.floor(n / 26);
+          }
+          return res;
+        };
+
+        const hallLetter = mapHallToLetters(r.hallId ?? r.hall ?? r.hallId);
+        const raw = r.stallIds ?? r.stall ?? "";
+        const items: string[] = [];
+        const formatOne = (val: any) => {
+          const num = typeof val === "object" ? val.id ?? val._id ?? val : val;
+          const s = String(num ?? "").trim();
+          const n = Number(s);
+          if (Number.isFinite(n)) return `Hall ${hallLetter} - Stall ${n}`;
+          if (/stall/i.test(s)) return `Hall ${hallLetter} - ${s}`;
+          return `Hall ${hallLetter} - Stall ${s}`;
+        };
+
+        if (Array.isArray(raw)) {
+          for (const it of raw) items.push(formatOne(it));
+        } else if (typeof raw === "string") {
+          const parts = raw.split(/\s*,\s*/).filter(Boolean);
+          for (const p of parts) items.push(formatOne(p));
+        } else if (raw != null) {
+          items.push(formatOne(raw));
+        }
+
+        return items.join(", ");
+      },
+    },
+    {
+      id: "price",
+      header: "Price",
+      field: "price",
+      hidden: false,
+      render: (r: RawRow) =>
+        r.price ? `Rs. ${Number(r.price).toFixed(2)}` : "",
+    },
+    {
+      id: "createdAt",
+      header: "Created",
+      field: "createdAt",
+      width: 160,
+      hidden: false,
+      render: (r: RawRow) =>
+        r.createdAt ? dayjs(r.createdAt).format("MMMM D, YYYY HH:mm") : "",
+    },
+    {
+      id: "businessName",
+      header: "Business",
+      field: "businessName",
+      hidden: false,
     },
   ];
 
@@ -74,12 +158,13 @@ export default function BookingsPage() {
           display: "grid",
           gap: 2,
           gridTemplateColumns: { xs: "1fr", sm: "repeat(3,1fr)" },
+          px: 8,
         }}
       >
         <StatCard
-          title="Total Stalls"
+          title="Total Halls"
           value={total}
-          subtitle={`Halls allocated for reservation: 12`}
+          subtitle={`Halls allocated for reservation`}
           colorKey="total"
         />
         <StatCard
@@ -98,12 +183,35 @@ export default function BookingsPage() {
 
       <ReusableTable
         columns={columns}
-        rows={mockRows}
+        rows={rows}
         showSearch
         searchPlaceholder="Search stalls, names..."
         defaultRowsPerPage={5}
         rowsPerPageOptions={[5, 10, 25]}
         toolbarActions={null}
+        showAllFields={true}
+        allowColumnSelector={true}
+        excludedColumnIds={[
+          "userId",
+          "hallId",
+          "isPaid",
+          "updatedAt",
+          "businessadress",
+          "businessAddress",
+          "business_address",
+          "businessAdress",
+          "address",
+        ]}
+        headerMappings={{
+          contactNumber: "Phone",
+          contact: "Phone",
+          email: "Email",
+          note: "Note",
+          businessName: "Business",
+          createdAt: "Created",
+          stallIds: "Stall IDs",
+        }}
+        loading={loading}
       />
     </Box>
   );

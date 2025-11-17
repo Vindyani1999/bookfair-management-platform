@@ -82,7 +82,6 @@ export default function StatCard({
         )}
       </Box>
 
-      {/* Decorative bottom-right icon (faint) */}
       {(() => {
         const key = (colorKey || title || "").toString().toLowerCase();
         const map: Record<string, ReactElement> = {

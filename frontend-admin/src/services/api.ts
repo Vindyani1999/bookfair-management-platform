@@ -1,12 +1,16 @@
-import axios, { AxiosError } from 'axios';
-import type { LoginCredentials, AuthResponse, RefreshResponse } from '../types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import axios, { AxiosError } from "axios";
+import type { LoginCredentials, AuthResponse, RefreshResponse } from "../types";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+const API_BASE_URL =
+  (import.meta.env.VITE_API_BASE_URL as string) ||
+  (import.meta.env.VITE_API_URL as string) ||
+  "https://bookfair-management-platform-production.up.railway.app/api/v1";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   timeout: 10000,
 });
@@ -30,7 +34,9 @@ const processQueue = (error: any = null, token: string | null = null) => {
 
 api.interceptors.request.use(
   (config) => {
-    const token = sessionStorage.getItem('accessToken') || localStorage.getItem('accessToken');
+    const token =
+      sessionStorage.getItem("accessToken") ||
+      localStorage.getItem("accessToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -62,11 +68,12 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshToken = sessionStorage.getItem('refreshToken') ||
-          localStorage.getItem('refreshToken');
+        const refreshToken =
+          sessionStorage.getItem("refreshToken") ||
+          localStorage.getItem("refreshToken");
 
         if (!refreshToken) {
-          throw new Error('No refresh token available');
+          throw new Error("No refresh token available");
         }
 
         const response = await axios.post<RefreshResponse>(
@@ -74,17 +81,21 @@ api.interceptors.response.use(
           { refreshToken }
         );
 
-        const { accessToken, refreshToken: newRefreshToken, admin } = response.data;
+        const {
+          accessToken,
+          refreshToken: newRefreshToken,
+          admin,
+        } = response.data;
 
-        const useSessionStorage = !!sessionStorage.getItem('accessToken');
+        const useSessionStorage = !!sessionStorage.getItem("accessToken");
         if (useSessionStorage) {
-          sessionStorage.setItem('accessToken', accessToken);
-          sessionStorage.setItem('refreshToken', newRefreshToken);
-          sessionStorage.setItem('admin', JSON.stringify(admin));
+          sessionStorage.setItem("accessToken", accessToken);
+          sessionStorage.setItem("refreshToken", newRefreshToken);
+          sessionStorage.setItem("admin", JSON.stringify(admin));
         } else {
-          localStorage.setItem('accessToken', accessToken);
-          localStorage.setItem('refreshToken', newRefreshToken);
-          localStorage.setItem('admin', JSON.stringify(admin));
+          localStorage.setItem("accessToken", accessToken);
+          localStorage.setItem("refreshToken", newRefreshToken);
+          localStorage.setItem("admin", JSON.stringify(admin));
         }
 
         processQueue(null, accessToken);
@@ -96,8 +107,8 @@ api.interceptors.response.use(
         localStorage.clear();
         sessionStorage.clear();
 
-        if (window.location.pathname !== '/admins/login') {
-          window.location.href = '/admins/login';
+        if (window.location.pathname !== "/login") {
+          window.location.href = "/login";
         }
 
         return Promise.reject(refreshError);
@@ -109,8 +120,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.clear();
       sessionStorage.clear();
-      if (window.location.pathname !== '/admins/login') {
-        window.location.href = '/admins/login';
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
       }
     }
 
@@ -120,15 +131,15 @@ api.interceptors.response.use(
 
 export const authAPI = {
   login: async (credentials: LoginCredentials) => {
-    return api.post<AuthResponse>('/admins/login', credentials);
+    return api.post<AuthResponse>("/admins/login", credentials);
   },
 
   refresh: async (refreshToken: string) => {
-    return api.post<RefreshResponse>('/admins/refresh', { refreshToken });
+    return api.post<RefreshResponse>("/admins/refresh", { refreshToken });
   },
 
   logout: async (refreshToken: string) => {
-    return api.post('/admins/logout', { refreshToken });
+    return api.post("/admins/logout", { refreshToken });
   },
 };
 

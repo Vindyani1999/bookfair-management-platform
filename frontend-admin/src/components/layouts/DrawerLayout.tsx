@@ -27,7 +27,7 @@ const drawerWidth = 240;
 const drawerData: DrawerItem[] = [
   {
     name: "Bookings",
-    icon: <DateRangeOutlinedIcon />, // bookings/calendar icon
+    icon: <DateRangeOutlinedIcon />,
     navPath: "/bookings",
   },
   {
@@ -112,8 +112,16 @@ const Drawer = styled(MuiDrawer, {
 }));
 
 export default function DrawerLayout() {
-  const [open, setOpen] = React.useState(false);
-  const [isOpneFullDash, setIsOpnetFullDash] = React.useState(false);
+  const [open, setOpen] = React.useState<boolean>(() => {
+    const v = localStorage.getItem("drawerOpen");
+    if (v === "false") return false;
+    return true;
+  });
+  const [isOpneFullDash, setIsOpnetFullDash] = React.useState<boolean>(() => {
+    const v = localStorage.getItem("drawerFull");
+    if (v === "true") return true;
+    return true;
+  });
   const [selectedTab, setSelectedTab] = React.useState(
     localStorage.getItem("tabMemory") || "Bookings"
   );
@@ -125,19 +133,23 @@ export default function DrawerLayout() {
 
   const handleDrawerOpen = () => {
     setOpen(true);
+    localStorage.setItem("drawerOpen", "true");
   };
 
   const handleDrawerClose = () => {
     setOpen(false);
+    localStorage.setItem("drawerOpen", "false");
   };
 
   const handleDrawerVariation = () => {
     if (isOpneFullDash) {
       handleDrawerClose();
       setIsOpnetFullDash(false);
+      localStorage.setItem("drawerFull", "false");
     } else {
       handleDrawerOpen();
       setIsOpnetFullDash(true);
+      localStorage.setItem("drawerFull", "true");
     }
   };
 
@@ -171,9 +183,9 @@ export default function DrawerLayout() {
             height: "100%",
             width: "90%",
             m: 1,
-            bgcolor: "#EDF1F3", // hard corded
+            bgcolor: "#EDF1F3",
             borderRadius: "30px",
-            boxShadow: "5px 5px 8px 0px rgba(0, 0, 0, 0.25)", // hard code
+            boxShadow: "5px 5px 8px 0px rgba(0, 0, 0, 0.25)",
           }}
         >
           <DrawerHeader>
@@ -222,7 +234,7 @@ export default function DrawerLayout() {
                       minHeight: 48,
                       px: 2.5,
                       bgcolor:
-                        selectedTab === text.name ? "#C9D8DA" : "#EDF1F3", // hardcoded
+                        selectedTab === text.name ? "#C9D8DA" : "#EDF1F3",
                       borderRadius: "0px 30px 30px 0px",
                       mr: 1,
                     },
@@ -258,8 +270,8 @@ export default function DrawerLayout() {
                     primary={text.name}
                     primaryTypographyProps={{
                       fontWeight: 800,
-                      color: "#000000", // hardcoded
-                      fontFamily: "Roboto Slab", //hardcoded
+                      color: "#000000",
+                      fontFamily: "Roboto Slab",
                     }}
                     sx={[
                       open

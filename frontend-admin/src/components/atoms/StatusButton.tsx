@@ -1,8 +1,7 @@
 import { Button } from "@mui/material";
 import type { ButtonProps, Theme } from "@mui/material";
 import type { SystemStyleObject } from "@mui/system";
-
-type Status = "delete" | "confirm" | "cancel" | "info" | "warning";
+import type { Status } from "../../types/types";
 
 interface Props extends Omit<ButtonProps, "color"> {
   status: Status;

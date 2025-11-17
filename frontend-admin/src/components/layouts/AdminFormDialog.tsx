@@ -15,24 +15,7 @@ import StatusButton from "../atoms/StatusButton";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Close from "@mui/icons-material/Close";
-
-export type AdminFormValues = {
-  id?: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  contact: string;
-  password: string;
-  confirmPassword: string;
-};
-
-type Props = {
-  open: boolean;
-  mode?: "add" | "edit";
-  initial?: Partial<AdminFormValues>;
-  onClose: () => void;
-  onSave: (values: AdminFormValues) => void;
-};
+import type { AdminFormDialogProps, AdminFormValues } from "../../types/types";
 
 export default function AdminFormDialog({
   open,
@@ -40,7 +23,7 @@ export default function AdminFormDialog({
   initial = {},
   onClose,
   onSave,
-}: Props) {
+}: AdminFormDialogProps) {
   const [values, setValues] = useState<AdminFormValues>({
     firstName: "",
     lastName: "",
@@ -82,7 +65,6 @@ export default function AdminFormDialog({
     if (!values.firstName.trim()) e.firstName = "First name is required";
     if (!values.lastName.trim()) e.lastName = "Last name is required";
     if (!values.email.trim()) e.email = "Email is required";
-    // simple email regex
     if (values.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(values.email))
       e.email = "Invalid email";
     if (!values.contact.trim()) e.contact = "Contact number is required";
@@ -91,7 +73,6 @@ export default function AdminFormDialog({
       if (values.password !== values.confirmPassword)
         e.confirmPassword = "Passwords do not match";
     } else {
-      // in edit mode password is optional but if provided must match
       if (values.password && values.password !== values.confirmPassword)
         e.confirmPassword = "Passwords do not match";
     }
@@ -100,7 +81,6 @@ export default function AdminFormDialog({
   }
 
   function passwordStrength(pw: string) {
-    // Very small heuristic: length + variety of char classes
     let score = 0;
     if (!pw) return { score: 0, label: "" };
     if (pw.length >= 8) score += 30;
@@ -136,7 +116,6 @@ export default function AdminFormDialog({
             mb: 0.5,
           }}
         >
-          {/* absolute-positioned header icon (overlaps the top edge) */}
           <Box
             className="admin-dialog-header-icon"
             aria-hidden
@@ -278,7 +257,6 @@ export default function AdminFormDialog({
                 ),
               }}
             />
-            {/* password strength */}
             {values.password ? (
               <Box sx={{ mt: 1 }}>
                 <LinearProgress
@@ -326,7 +304,6 @@ export default function AdminFormDialog({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        {/* Primary full-width confirm button using StatusButton */}
         <StatusButton
           status="confirm"
           onClick={handleSubmit}

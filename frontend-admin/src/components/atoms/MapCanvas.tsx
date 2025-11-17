@@ -1,19 +1,7 @@
 import { useState, useEffect } from "react";
 import Image from "../../../../frontend-user/src/components/atoms/MapImage";
-import type { CSSProperties, ReactNode } from "react";
-
-type Props = {
-  mapSrc: string;
-  alt?: string;
-  initialZoom?: number;
-  minZoom?: number;
-  maxZoom?: number;
-  children?: ReactNode;
-  style?: CSSProperties;
-  /** Preferred min height for the canvas (px). Defaults to 520. */
-  minHeight?: number;
-};
-
+import { type MapCanvasProps } from "../../types/types";
+import { Box, CircularProgress, Skeleton } from "@mui/material";
 export default function MapCanvas({
   mapSrc,
   alt,
@@ -23,11 +11,11 @@ export default function MapCanvas({
   children,
   style,
   minHeight = 520,
-}: Props) {
+  loading = false,
+}: MapCanvasProps) {
   const [zoom, setZoom] = useState<number>(initialZoom);
   const [imgError, setImgError] = useState<boolean>(false);
 
-  // Reset image error / zoom when the source changes so switching halls reloads cleanly
   useEffect(() => {
     setImgError(false);
     setZoom(initialZoom);
@@ -75,9 +63,12 @@ export default function MapCanvas({
             style={{
               overflow: "hidden",
               height: minHeight,
-              borderRadius: 8,
-              background: "#fff",
-              boxShadow: "0 2px 8px rgba(10,10,10,0.04)",
+              borderRadius: 12,
+              background: "#f3f6f6",
+              boxShadow: "0 6px 20px rgba(16,24,40,0.06)",
+              padding: 14,
+              boxSizing: "border-box",
+              border: "1px solid rgba(15,23,42,0.04)",
             }}
           >
             <div
@@ -87,13 +78,53 @@ export default function MapCanvas({
                 transformOrigin: "center top",
                 position: "relative",
                 width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 8,
+                overflow: "hidden",
               }}
             >
-              {!imgError ? (
+              {loading ? (
+                <Box
+                  sx={{
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    position: "relative",
+                  }}
+                >
+                  <Skeleton
+                    variant="rectangular"
+                    width="100%"
+                    height={minHeight}
+                    animation="wave"
+                  />
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      inset: 0,
+                    }}
+                  >
+                    <CircularProgress />
+                  </Box>
+                </Box>
+              ) : !imgError ? (
                 <Image
                   src={mapSrc}
                   alt={alt ?? "map"}
-                  style={{ width: "100%", height: "auto", display: "block" }}
+                  style={{
+                    width: "auto",
+                    height: "100%",
+                    objectFit: "contain",
+                    display: "block",
+                  }}
                   onError={() => setImgError(true)}
                 />
               ) : (
@@ -125,7 +156,6 @@ export default function MapCanvas({
                 </div>
               )}
 
-              {/* children can be positioned absolutely inside this container to overlay stalls/markers */}
               {children}
             </div>
           </div>

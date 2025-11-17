@@ -1,9 +1,10 @@
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { Box, CircularProgress } from '@mui/material';
+import { Navigate, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { Box, CircularProgress } from "@mui/material";
 
 interface ProtectedRouteProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
@@ -14,11 +15,11 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     return (
       <Box
         sx={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          bgcolor: '#f5f5f5'
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "#f5f5f5",
         }}
       >
         <CircularProgress size={60} />
@@ -30,5 +31,10 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return <>{children}</>;
+  // Support both usage patterns:
+  // - <Route element={<ProtectedRoute/>}> nested routes </Route>
+  // - <ProtectedRoute> <SomeComponent/> </ProtectedRoute>
+  if (children) return <>{children}</>;
+
+  return <Outlet />;
 }

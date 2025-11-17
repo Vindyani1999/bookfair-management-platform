@@ -6,7 +6,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import type { Column } from "../types/types";
 import { useMemo, useState } from "react";
 import AdminFormDialog from "../components/layouts/AdminFormDialog";
-import type { AdminFormValues } from "../components/layouts/AdminFormDialog";
+import type { AdminFormValues } from "../types/types";
 
 type AdminRow = {
   id: string;
@@ -28,15 +28,22 @@ export default function ManageAdminsPage() {
   const [editing, setEditing] = useState<AdminRow | null>(null);
 
   const columns: Column<AdminRow>[] = [
-    { id: "id", header: "ID", field: "id", width: 60 },
-    { id: "fullName", header: "Full Name", field: "fullName" },
-    { id: "email", header: "Email Address", field: "email" },
-    { id: "contact", header: "Contact number", field: "contact" },
+    {
+      id: "id",
+      header: "ID",
+      field: "id",
+      width: 60,
+      hidden: false,
+    },
+    { id: "fullName", header: "Full Name", field: "fullName", hidden: false },
+    { id: "email", header: "Email Address", field: "email", hidden: false },
+    { id: "contact", header: "Phone", field: "contact", hidden: false },
     {
       id: "edit",
       header: "Edit",
       width: 100,
       align: "center",
+      hidden: false,
       render: (row: AdminRow) => (
         <Button
           variant="outlined"
@@ -54,6 +61,7 @@ export default function ManageAdminsPage() {
       header: "Remove",
       width: 120,
       align: "center",
+      hidden: false,
       render: (row: AdminRow) => (
         <Button
           variant="contained"
@@ -90,7 +98,6 @@ export default function ManageAdminsPage() {
 
   function handleSave(values: AdminFormValues) {
     if (editing) {
-      // update
       setAdmins((a) =>
         a.map((r) =>
           r.id === editing.id
@@ -104,7 +111,6 @@ export default function ManageAdminsPage() {
         )
       );
     } else {
-      // create new
       const nextId = String(admins.length + 1).padStart(2, "0");
       const newAdmin: AdminRow = {
         id: nextId,
