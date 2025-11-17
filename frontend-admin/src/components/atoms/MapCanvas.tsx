@@ -15,7 +15,6 @@ export default function MapCanvas({
 }: MapCanvasProps) {
   const [zoom, setZoom] = useState<number>(initialZoom);
   const [imgError, setImgError] = useState<boolean>(false);
-  
 
   useEffect(() => {
     setImgError(false);

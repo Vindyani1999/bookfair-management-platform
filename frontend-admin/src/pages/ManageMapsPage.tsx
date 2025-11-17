@@ -113,7 +113,8 @@ export default function ManageMapsPage() {
         setHalls(fallback);
         if (!selectedHall && fallback.length > 0)
           setSelectedHall(fallback[0].id);
-      }).finally(() => {
+      })
+      .finally(() => {
         if (mounted) setHallsLoading(false);
       });
     return () => {
@@ -173,7 +174,8 @@ export default function ManageMapsPage() {
           navigate("/login");
           return;
         }
-      }).finally(() => {
+      })
+      .finally(() => {
         if (mounted) setHallLoading(false);
       });
 
@@ -233,7 +235,12 @@ export default function ManageMapsPage() {
                   {hallsLoading || hallLoading ? (
                     <>
                       <Skeleton variant="text" width={160} height={28} />
-                      <Skeleton variant="rectangular" width={80} height={24} sx={{ mt: 0.5, borderRadius: 1 }} />
+                      <Skeleton
+                        variant="rectangular"
+                        width={80}
+                        height={24}
+                        sx={{ mt: 0.5, borderRadius: 1 }}
+                      />
                     </>
                   ) : (
                     <>
@@ -241,8 +248,12 @@ export default function ManageMapsPage() {
                         {hallLabel || "Select a hall"}
                       </Typography>
                       <Chip
-                        label={availability[selectedHall] ? "Available" : "Booked"}
-                        color={availability[selectedHall] ? "success" : "default"}
+                        label={
+                          availability[selectedHall] ? "Available" : "Booked"
+                        }
+                        color={
+                          availability[selectedHall] ? "success" : "default"
+                        }
                         size="small"
                         sx={{ mt: 0.5 }}
                       />
