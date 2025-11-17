@@ -62,25 +62,23 @@ const CustomConnector = styled(StepConnector)(() => ({
 // ===== Custom Step Icon (circle + tick) =====
 const StepIconRoot = styled("div", {
   shouldForwardProp: (prop) => prop !== "active" && prop !== "completed",
-})<{ active?: boolean; completed?: boolean }>(
-  ({ active, completed }) => ({
-    backgroundColor: completed || active ? "#0ea5a4" : "#ffffff",
-    color: completed || active ? "#fff" : "#6b7280",
-    width: 28,
-    height: 28,
-    borderRadius: "50%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    transition: "all 0.25s ease",
-    fontSize: "14px",
-    boxShadow:
-      completed || active
-        ? "0 4px 10px rgba(14,165,164,0.16)"
-        : "0 1px 2px rgba(15,23,42,0.04)",
-    border: completed || active ? "none" : "2px solid #eef2f7",
-  })
-);
+})<{ active?: boolean; completed?: boolean }>(({ active, completed }) => ({
+  backgroundColor: completed || active ? "#0ea5a4" : "#ffffff",
+  color: completed || active ? "#fff" : "#6b7280",
+  width: 28,
+  height: 28,
+  borderRadius: "50%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  transition: "all 0.25s ease",
+  fontSize: "14px",
+  boxShadow:
+    completed || active
+      ? "0 4px 10px rgba(14,165,164,0.16)"
+      : "0 1px 2px rgba(15,23,42,0.04)",
+  border: completed || active ? "none" : "2px solid #eef2f7",
+}));
 
 function CustomStepIcon(props: any) {
   const { active, completed, icon } = props;
@@ -358,7 +356,7 @@ const SteperComponent = () => {
               mb: 3,
             }}
           >
-            <StatCard title="Total Stalls" value={stats.totalStalls} />
+            <StatCard title="Total Halls" value={stats.totalStalls} />
             <StatCard title="Available Stalls" value={stats.availableStalls} />
             <StatCard title="Reserved Stalls" value={stats.reservedStalls} />
           </Box>

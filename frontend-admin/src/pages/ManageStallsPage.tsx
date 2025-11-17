@@ -37,8 +37,10 @@ import type { ApiHall } from "../types/types";
 
 export default function ManageStallsPage() {
   const [halls, setHalls] = useState<ApiHall[]>([]);
+  const [hallsLoading, setHallsLoading] = useState(false);
   const [selectedHall, setSelectedHall] = useState<string>("");
   const [stallsState, setStallsState] = useState(() => [...adminStalls]);
+  const [stallsLoading, setStallsLoading] = useState(false);
   const [editingStall, setEditingStall] = useState<{
     id: string;
     hallId: string;
@@ -54,6 +56,7 @@ export default function ManageStallsPage() {
   useEffect(() => {
     // fetch the list of halls using the hall API (used by hall management/map visuals)
     let mounted = true;
+    setHallsLoading(true);
     fetchHalls()
       .then((list) => {
         if (!mounted) return;
@@ -72,7 +75,8 @@ export default function ManageStallsPage() {
         setHalls(fallback);
         if (!selectedHall && fallback.length > 0)
           setSelectedHall(fallback[0].id);
-      });
+      })
+      .finally(() => setHallsLoading(false));
     return () => {
       mounted = false;
     };
@@ -86,9 +90,12 @@ export default function ManageStallsPage() {
   useEffect(() => {
     if (!selectedHall) return;
     let mounted = true;
+    setStallsLoading(true);
     // fetch stalls using the stall-by-hall API which returns stalls for the hall
-    fetchStallsByHall(selectedHall)
-      .then((data: any) => {
+    (async () => {
+      try {
+        const data: any = await fetchStallsByHall(selectedHall);
+        if (!mounted) return;
         if (!mounted) return;
         let stallsFromApi: any[] = [];
         if (Array.isArray(data)) stallsFromApi = data;
@@ -186,12 +193,14 @@ export default function ManageStallsPage() {
             return [...filtered, ...placeholders];
           });
         }
-      })
-      .catch((err: any) => {
+      } catch (err: any) {
         if (err && (err.status === 401 || err.status === 404)) {
           navigate("/login");
         }
-      });
+      } finally {
+        setStallsLoading(false);
+      }
+    })();
 
     return () => {
       mounted = false;
@@ -239,8 +248,8 @@ export default function ManageStallsPage() {
   };
 
   const columns: Column<Row>[] = [
-    { id: "id", header: "ID", field: "id", width: 60 },
-    { id: "stall", header: "Stall", field: "stall" },
+    { id: "id", header: "ID", field: "id", width: 60, hidden: false },
+    { id: "stall", header: "Stall", field: "stall", hidden: false },
     {
       id: "price",
       header: "Price",
@@ -249,8 +258,16 @@ export default function ManageStallsPage() {
       render: (row: Row) => `Rs. ${Number(row.price ?? 0).toFixed(2)}`,
       align: "right",
       sortable: true,
+      hidden: false,
     },
-    { id: "size", header: "Size", field: "size", width: 120, align: "center" },
+    {
+      id: "size",
+      header: "Size",
+      field: "size",
+      width: 120,
+      align: "center",
+      hidden: false,
+    },
     {
       id: "status",
       header: "Status",
@@ -273,6 +290,7 @@ export default function ManageStallsPage() {
           />
         );
       },
+      hidden: false,
     },
     {
       id: "edit",
@@ -289,6 +307,7 @@ export default function ManageStallsPage() {
           <EditIcon fontSize="small" />
         </IconButton>
       ),
+      hidden: false,
     },
     {
       id: "delete",
@@ -308,6 +327,7 @@ export default function ManageStallsPage() {
           <DeleteOutlineIcon fontSize="small" />
         </IconButton>
       ),
+      hidden: false,
     },
   ];
 
@@ -368,6 +388,7 @@ export default function ManageStallsPage() {
         defaultRowsPerPage={10}
         showAllFields={true}
         allowColumnSelector={true}
+        loading={hallsLoading || stallsLoading}
       />
 
       <EditStallDialog

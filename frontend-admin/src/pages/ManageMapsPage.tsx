@@ -13,6 +13,7 @@ import {
   Divider,
   Stack,
   Chip,
+  Skeleton,
 } from "@mui/material";
 import MapCanvas from "../components/atoms/MapCanvas";
 import { hallMapImages, stalls as adminStalls } from "../data/halls";
@@ -30,7 +31,9 @@ import MapEditDialog from "../components/molecules/MapEditDialog";
 
 export default function ManageMapsPage() {
   const [halls, setHalls] = useState<ApiHall[]>([]);
+  const [hallsLoading, setHallsLoading] = useState(false);
   const [selectedHall, setSelectedHall] = useState<string>("");
+  const [hallLoading, setHallLoading] = useState(false);
   const [availability, setAvailability] = useState<Record<string, boolean>>({});
   const hallLabel = useMemo(
     () => halls.find((h) => h.id === selectedHall)?.label || "",
@@ -75,6 +78,7 @@ export default function ManageMapsPage() {
 
   useEffect(() => {
     let mounted = true;
+    setHallsLoading(true);
     fetchHalls()
       .then((list) => {
         if (!mounted) return;
@@ -109,6 +113,8 @@ export default function ManageMapsPage() {
         setHalls(fallback);
         if (!selectedHall && fallback.length > 0)
           setSelectedHall(fallback[0].id);
+      }).finally(() => {
+        if (mounted) setHallsLoading(false);
       });
     return () => {
       mounted = false;
@@ -119,6 +125,7 @@ export default function ManageMapsPage() {
   useEffect(() => {
     if (!selectedHall) return;
     let mounted = true;
+    setHallLoading(true);
     fetchHall(selectedHall)
       .then((data) => {
         if (!mounted) return;
@@ -166,6 +173,8 @@ export default function ManageMapsPage() {
           navigate("/login");
           return;
         }
+      }).finally(() => {
+        if (mounted) setHallLoading(false);
       });
 
     return () => {
@@ -195,7 +204,10 @@ export default function ManageMapsPage() {
             </FormControl>
           </Box>
 
-          <MapCanvas mapSrc={hallImages[selectedHall] ?? "/maps/hallD.png"} />
+          <MapCanvas
+            mapSrc={hallImages[selectedHall] ?? "/maps/hallD.png"}
+            loading={hallsLoading || hallLoading}
+          />
         </Box>
 
         <aside style={{ width: 300 }}>
@@ -218,15 +230,24 @@ export default function ManageMapsPage() {
                   <MapIcon />
                 </Avatar>
                 <Box>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
-                    {hallLabel || "Select a hall"}
-                  </Typography>
-                  <Chip
-                    label={availability[selectedHall] ? "Available" : "Booked"}
-                    color={availability[selectedHall] ? "success" : "default"}
-                    size="small"
-                    sx={{ mt: 0.5 }}
-                  />
+                  {hallsLoading || hallLoading ? (
+                    <>
+                      <Skeleton variant="text" width={160} height={28} />
+                      <Skeleton variant="rectangular" width={80} height={24} sx={{ mt: 0.5, borderRadius: 1 }} />
+                    </>
+                  ) : (
+                    <>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+                        {hallLabel || "Select a hall"}
+                      </Typography>
+                      <Chip
+                        label={availability[selectedHall] ? "Available" : "Booked"}
+                        color={availability[selectedHall] ? "success" : "default"}
+                        size="small"
+                        sx={{ mt: 0.5 }}
+                      />
+                    </>
+                  )}
                 </Box>
               </Stack>
 
@@ -253,16 +274,25 @@ export default function ManageMapsPage() {
                   }}
                 >
                   <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                      {lastUpload[selectedHall]
-                        ? formatUploadDate(lastUpload[selectedHall])
-                        : "No uploads yet"}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {lastUpload[selectedHall]
-                        ? "Most recent map upload"
-                        : "You can upload a map from Edit"}
-                    </Typography>
+                    {hallsLoading || hallLoading ? (
+                      <>
+                        <Skeleton variant="text" width={160} />
+                        <Skeleton variant="text" width={220} />
+                      </>
+                    ) : (
+                      <>
+                        <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                          {lastUpload[selectedHall]
+                            ? formatUploadDate(lastUpload[selectedHall])
+                            : "No uploads yet"}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {lastUpload[selectedHall]
+                            ? "Most recent map upload"
+                            : "You can upload a map from Edit"}
+                        </Typography>
+                      </>
+                    )}
                   </Box>
                 </Box>
               </Box>

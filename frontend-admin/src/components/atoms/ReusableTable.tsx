@@ -17,10 +17,12 @@ import {
   Typography,
   Button,
   Popover,
+  ListItemButton,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Divider,
+  // Divider,
+  Skeleton,
 } from "@mui/material";
 import { Checkbox } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
@@ -73,6 +75,7 @@ export default function ReusableTable<T extends Record<string, unknown>>({
   initialVisibleColumns,
   excludedColumnIds = [],
   headerMappings = {},
+  loading = false,
 }: Props<T>) {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(0);
@@ -81,7 +84,7 @@ export default function ReusableTable<T extends Record<string, unknown>>({
   const [orderBy, setOrderBy] = useState<string>(columns[0]?.id || "");
 
   // derive columns: include provided columns + optionally fields found on rows
-  const detectedExtraColumns: Column[] = useMemo(() => {
+  const detectedExtraColumns: Column<T>[] = useMemo(() => {
     if (!showAllFields || !rows || rows.length === 0) return [];
     const keys = new Set<string>();
     rows.forEach((r) => {
@@ -89,17 +92,22 @@ export default function ReusableTable<T extends Record<string, unknown>>({
     });
     // exclude existing column ids and explicitly excluded ids
     const existing = new Set(columns.map((c) => c.id));
-    const extras: Column[] = [];
+    const extras: Column<T>[] = [];
     keys.forEach((k) => {
       if (existing.has(k)) return;
       if (excludedColumnIds.includes(k)) return;
       const header = headerMappings[k] ?? k;
-      extras.push({ id: k, header, field: k });
+      extras.push({
+        id: k,
+        header,
+        field: k,
+        hidden: undefined,
+      });
     });
     return extras;
   }, [showAllFields, rows, columns, excludedColumnIds, headerMappings]);
 
-  const allColumns = useMemo(() => {
+  const allColumns = useMemo<Column<T>[]>(() => {
     return [...columns, ...detectedExtraColumns].filter(
       (c) => !excludedColumnIds.includes(c.id)
     );
@@ -199,7 +207,7 @@ export default function ReusableTable<T extends Record<string, unknown>>({
 
   // Column selector sub-component (kept here for single-file convenience)
   function ColumnSelectorButton(props: {
-    allColumns: Column[];
+    allColumns: Column<T>[];
     visibleColumnIds?: string[];
     setVisibleColumnIds: (
       ids?: string[] | ((ids?: string[]) => string[] | undefined)
@@ -254,27 +262,24 @@ export default function ReusableTable<T extends Record<string, unknown>>({
                 </Button>
               </Box>
             </Box>
-            <Divider />
             {allColumns.map((c) => (
-              <ListItem
-                key={c.id}
-                button
-                onClick={() => toggle(c.id)}
-                sx={{ px: 0 }}
-              >
-                <ListItemIcon sx={{ minWidth: 40 }}>
-                  <Checkbox
-                    size="small"
-                    edge="start"
-                    checked={visibleColumnIds?.includes(c.id) ?? true}
-                    tabIndex={-1}
-                    disableRipple
-                    onChange={() => toggle(c.id)}
-                  />
-                </ListItemIcon>
-                <ListItemText primary={headerMappings[c.id] ?? c.header} />
+              <ListItem key={c.id} disablePadding sx={{ px: 0 }}>
+                <ListItemButton onClick={() => toggle(c.id)}>
+                  <ListItemIcon sx={{ minWidth: 40 }}>
+                    <Checkbox
+                      size="small"
+                      edge="start"
+                      checked={visibleColumnIds?.includes(c.id) ?? true}
+                      tabIndex={-1}
+                      disableRipple
+                      onChange={() => toggle(c.id)}
+                    />
+                  </ListItemIcon>
+                  <ListItemText primary={headerMappings[c.id] ?? c.header} />
+                </ListItemButton>
               </ListItem>
             ))}
+
             <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
               <Button size="small" onClick={handleClose}>
                 Close
@@ -410,7 +415,29 @@ export default function ReusableTable<T extends Record<string, unknown>>({
           </TableHead>
 
           <TableBody>
-            {pageSlice.length === 0 ? (
+            {loading ? (
+              // skeleton rows while loading
+              Array.from({ length: Math.min(Math.max(3, rowsPerPage), 8) }).map(
+                (_, ridx) => (
+                  <TableRow key={`s-${ridx}`}>
+                    {visibleColumns.map((col, cidx) => (
+                      <TableCell
+                        key={`s-${ridx}-${col.id}`}
+                        sx={{
+                          py: 0.75,
+                          px: 1.5,
+                          borderBottom: "1px solid rgba(15,23,42,0.3)",
+                          width: computedColWidths[cidx],
+                          maxWidth: computedColWidths[cidx],
+                        }}
+                      >
+                        <Skeleton variant="text" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                )
+              )
+            ) : pageSlice.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={visibleColumns.length}

@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { CSSProperties, ReactNode } from "react";
 
 export type Column<
   T extends Record<string, unknown> = Record<string, unknown>
 > = {
+  hidden: any;
   id: string; // unique id for column
   header: string; // header label
   field?: keyof T | string; // key in row object to display by default
@@ -49,6 +51,8 @@ export type Props<T extends Record<string, unknown> = Record<string, unknown>> =
      * names instead of raw keys.
      */
     headerMappings?: Record<string, string>;
+    /** Show a loading state (skeletons/spinner) while rows are being fetched */
+    loading?: boolean;
   };
 
 export type StatCardProps = {
@@ -84,6 +88,8 @@ export type MapCanvasProps = {
   style?: CSSProperties;
   /** Preferred min height for the canvas (px). Defaults to 520. */
   minHeight?: number;
+  /** When true, show a loading state (skeleton/spinner) instead of the map */
+  loading?: boolean;
 };
 
 export type Status = "delete" | "confirm" | "cancel" | "info" | "warning";

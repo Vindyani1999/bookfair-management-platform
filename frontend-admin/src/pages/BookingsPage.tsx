@@ -6,40 +6,36 @@ import StatCard from "../components/atoms/StatCard";
 import type { Column } from "../types/types";
 import { useEffect, useState } from "react";
 import { fetchReservations } from "../services/reservationsApi";
+import { computeStatsFromApis, type Stats } from "../services/statsService";
 import dayjs from "dayjs";
 
 type RawRow = Record<string, any>;
 
-const mockRows: RawRow[] = [
-  {
-    id: "01",
-    fullName: "John Smith",
-    stallIds: ["Hall D - Stall 4"],
-    createdAt: "2025-10-28T00:00:00.000Z",
-    businessName: "-",
-  },
-];
-
 export default function BookingsPage() {
-  const [rows, setRows] = useState<RawRow[]>(mockRows);
+  const [rows, setRows] = useState<RawRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
 
-  // derive stats from rows so cards stay in sync with the table
-  const total = rows.length; // assume reservations list contains total reserved items
-  const reserved = rows.length;
-  const available = Math.max(0, 250 - reserved);
+  // derive stats from computed stats so cards stay in sync with the table
+  const total = stats
+    ? stats.perHall
+      ? Object.keys(stats.perHall).length
+      : 0
+    : 0; // total halls
+  const reserved = stats ? stats.reservedStalls : rows.length;
+  const available = stats ? stats.availableStalls : Math.max(0, 250 - reserved);
 
   useEffect(() => {
     let mounted = true;
+
     setLoading(true);
     fetchReservations()
       .then((data: any) => {
         if (!mounted) return;
-        // keep raw objects so we can visualize all backend fields
         const raw: any[] = Array.isArray(data)
           ? data
           : data?.results || data?.data || [];
-        // normalize business name and ensure object shape
         const list: RawRow[] = raw.map((r: any) => {
           const obj = r || {};
           obj.businessName =
@@ -50,14 +46,27 @@ export default function BookingsPage() {
             null;
           return obj;
         });
-        setRows(list.length ? list : mockRows);
+        setRows(list.length ? list : []);
       })
       .catch((err) => {
         console.error("Failed to fetch reservations", err);
-        // keep mockRows on error
       })
       .finally(() => {
-        setLoading(false);
+        if (mounted) setLoading(false);
+      });
+
+    setStatsLoading(true);
+    computeStatsFromApis()
+      .then((s) => {
+        if (!mounted) return;
+        setStats(s);
+      })
+      .catch((err) => {
+        console.error("Failed to compute stats", err);
+        if (mounted) setStats(null);
+      })
+      .finally(() => {
+        if (mounted) setStatsLoading(false);
       });
 
     return () => {
@@ -66,24 +75,22 @@ export default function BookingsPage() {
   }, []);
 
   const columns: Column<RawRow>[] = [
-    { id: "id", header: "ID", field: "id", width: 40 },
-    { id: "fullName", header: "Full Name", field: "fullName" },
+    { id: "id", header: "ID", field: "id", width: 40, hidden: false },
+    { id: "fullName", header: "Full Name", field: "fullName", hidden: false },
     {
       id: "stallIds",
       header: "Stall IDs",
       field: "stallIds",
+      hidden: false,
       render: (r: RawRow) => {
-        // Map numeric/string hallId to letters: 1 -> A, 2 -> B, ... 27 -> AA
         const mapHallToLetters = (hid: unknown) => {
           let n = Number(hid);
           if (!Number.isFinite(n) || n <= 0) {
-            // try parse if string like 'hall-2'
             const s = String(hid ?? "");
             const m = s.match(/(\d+)$/);
             n = m ? Number(m[1]) : NaN;
           }
           if (!Number.isFinite(n) || n <= 0) return String(hid ?? "");
-          // convert to letters (spreadsheet-style)
           let res = "";
           while (n > 0) {
             n -= 1;
@@ -100,10 +107,8 @@ export default function BookingsPage() {
         const formatOne = (val: any) => {
           const num = typeof val === "object" ? val.id ?? val._id ?? val : val;
           const s = String(num ?? "").trim();
-          // if it's numeric, render as 'Hall X - Stall N'
           const n = Number(s);
           if (Number.isFinite(n)) return `Hall ${hallLetter} - Stall ${n}`;
-          // if already contains 'stall' or 'Stall', just prefix hall
           if (/stall/i.test(s)) return `Hall ${hallLetter} - ${s}`;
           return `Hall ${hallLetter} - Stall ${s}`;
         };
@@ -124,6 +129,7 @@ export default function BookingsPage() {
       id: "price",
       header: "Price",
       field: "price",
+      hidden: false,
       render: (r: RawRow) =>
         r.price ? `Rs. ${Number(r.price).toFixed(2)}` : "",
     },
@@ -132,11 +138,16 @@ export default function BookingsPage() {
       header: "Created",
       field: "createdAt",
       width: 160,
+      hidden: false,
       render: (r: RawRow) =>
         r.createdAt ? dayjs(r.createdAt).format("MMMM D, YYYY HH:mm") : "",
     },
-    // single business column — backend may use different keys (businessName/business/company)
-    { id: "businessName", header: "Business", field: "businessName" },
+    {
+      id: "businessName",
+      header: "Business",
+      field: "businessName",
+      hidden: false,
+    },
   ];
 
   return (
@@ -147,12 +158,13 @@ export default function BookingsPage() {
           display: "grid",
           gap: 2,
           gridTemplateColumns: { xs: "1fr", sm: "repeat(3,1fr)" },
+          px: 8,
         }}
       >
         <StatCard
-          title="Total Stalls"
+          title="Total Halls"
           value={total}
-          subtitle={`Halls allocated for reservation: 12`}
+          subtitle={`Halls allocated for reservation`}
           colorKey="total"
         />
         <StatCard
@@ -199,6 +211,7 @@ export default function BookingsPage() {
           createdAt: "Created",
           stallIds: "Stall IDs",
         }}
+        loading={loading}
       />
     </Box>
   );

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Image from "../../../../frontend-user/src/components/atoms/MapImage";
 import { type MapCanvasProps } from "../../types/types";
+import { Box, CircularProgress, Skeleton } from "@mui/material";
 export default function MapCanvas({
   mapSrc,
   alt,
@@ -10,9 +11,11 @@ export default function MapCanvas({
   children,
   style,
   minHeight = 520,
+  loading = false,
 }: MapCanvasProps) {
   const [zoom, setZoom] = useState<number>(initialZoom);
   const [imgError, setImgError] = useState<boolean>(false);
+  
 
   useEffect(() => {
     setImgError(false);
@@ -84,7 +87,36 @@ export default function MapCanvas({
                 overflow: "hidden",
               }}
             >
-              {!imgError ? (
+              {loading ? (
+                <Box
+                  sx={{
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    position: "relative",
+                  }}
+                >
+                  <Skeleton
+                    variant="rectangular"
+                    width="100%"
+                    height={minHeight}
+                    animation="wave"
+                  />
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      inset: 0,
+                    }}
+                  >
+                    <CircularProgress />
+                  </Box>
+                </Box>
+              ) : !imgError ? (
                 <Image
                   src={mapSrc}
                   alt={alt ?? "map"}
