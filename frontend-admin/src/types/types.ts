@@ -61,3 +61,53 @@ export type MapCanvasProps = {
   /** Preferred min height for the canvas (px). Defaults to 520. */
   minHeight?: number;
 };
+
+export type Status = "delete" | "confirm" | "cancel" | "info" | "warning";
+
+export type AdminFormValues = {
+  id?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  contact: string;
+  password: string;
+  confirmPassword: string;
+};
+
+export type AdminFormDialogProps = {
+  open: boolean;
+  mode?: "add" | "edit";
+  initial?: Partial<AdminFormValues>;
+  onClose: () => void;
+  onSave: (values: AdminFormValues) => void;
+};
+
+export type Stall = {
+  id: string;
+  hallId: string;
+  label: string;
+};
+
+export type EditStallDialogProps = {
+  open: boolean;
+  stall?: Stall | null;
+  initialHallId?: string;
+  onClose: () => void;
+  onSave: (
+    updated: Stall & {
+      price?: number;
+      size?: string;
+      name?: string;
+      description?: string;
+      status?: string;
+    }
+  ) => void;
+  saving?: boolean;
+};
+
+export interface LogoutConfirmationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  userName?: string;
+}

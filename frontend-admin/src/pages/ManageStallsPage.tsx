@@ -26,14 +26,13 @@ import type { SelectChangeEvent } from "@mui/material";
 import EditStallDialog from "../components/molecules/EditStallDialog";
 
 import { stalls as adminStalls } from "../data/halls";
-import { fetchHalls, fetchStallsByHall } from "../services/hallsApi";
+import { fetchHalls, fetchHall } from "../services/hallsApi";
 import { updateStall, createStall, deleteStall } from "../services/stallsApi";
 import type { ApiHall } from "../types/types";
 
 export default function ManageStallsPage() {
   const [halls, setHalls] = useState<ApiHall[]>([]);
   const [selectedHall, setSelectedHall] = useState<string>("");
-  // local editable copy of stalls so we can replace them when fetched from backend
   const [stallsState, setStallsState] = useState(() => [...adminStalls]);
   const [editingStall, setEditingStall] = useState<{
     id: string;
@@ -60,7 +59,6 @@ export default function ManageStallsPage() {
           navigate("/login");
           return;
         }
-        // fallback: use halls derived from adminStalls if available
         const fallback = Array.from(
           new Set(adminStalls.map((s) => s.hallId))
         ).map((id) => ({ id, label: id }));
@@ -79,21 +77,14 @@ export default function ManageStallsPage() {
     setSelectedHall(e.target.value as string);
   };
 
-  // When selected hall changes, try to fetch its details (including stalls) from backend
   useEffect(() => {
     if (!selectedHall) return;
     let mounted = true;
-    fetchStallsByHall(selectedHall)
+    fetchHall(selectedHall)
       .then((data: any) => {
-        // record raw response for debug panel
-        setLastFetchRaw(data);
-        console.debug("fetchStallsByHall raw response:", data);
-        console.group(`📥 fetchStallsByHall(${selectedHall}) — RAW DATA`);
-        console.log("Full response:", data);
-        console.log("data.stalls:", data?.stalls);
-        console.log("data.data?.stalls:", data?.data?.stalls);
+        // setLastFetchRaw?.(data);
+
         if (!mounted) return;
-        // Try to find stalls in common locations (also accept the response being the array itself)
         let stallsFromApi: any[] = [];
         if (Array.isArray(data)) stallsFromApi = data;
         else if (Array.isArray(data.stalls)) stallsFromApi = data.stalls;
@@ -103,7 +94,6 @@ export default function ManageStallsPage() {
 
         if (stallsFromApi.length > 0) {
           const normalized = stallsFromApi.map((s: any, idx: number) => {
-            // helper to read nested properties safely
             const lookup = (obj: any, path: string[]) => {
               for (const p of path) {
                 const parts = p.split(".");
@@ -129,7 +119,6 @@ export default function ManageStallsPage() {
               "data.price",
             ]);
 
-            // parse price robustly: treat non-finite values as missing
             const parsedPriceRaw =
               rawPrice == null ? undefined : Number(rawPrice);
             const parsedPrice = Number.isFinite(parsedPriceRaw)
@@ -145,7 +134,6 @@ export default function ManageStallsPage() {
               "data.size",
             ]);
 
-            // treat string 'undefined'/'null' as missing
             const normalizedSize =
               typeof rawSize === "string" &&
               (rawSize.toLowerCase() === "undefined" ||
@@ -157,7 +145,6 @@ export default function ManageStallsPage() {
               id: String(s.id || s._id || s.code || `s-${selectedHall}-${idx}`),
               hallId: selectedHall,
               label: s.label || s.name || s.title || `Stall ${idx + 1}`,
-              // preserve server-provided values when available (parse decimals)
               price: parsedPrice,
               size: normalizedSize || "Medium",
               description: lookup(s, [
@@ -198,7 +185,6 @@ export default function ManageStallsPage() {
         if (err && (err.status === 401 || err.status === 404)) {
           navigate("/login");
         }
-        // otherwise keep existing stallsState (fallback)
       });
 
     return () => {
@@ -207,26 +193,22 @@ export default function ManageStallsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedHall]);
 
-  // store the last raw fetch response for debugging in the UI
-  const [lastFetchRaw, setLastFetchRaw] = useState<any>(null);
+  // const [lastFetchRaw, setLastFetchRaw] = useState<any>(null);
 
   const currentStalls = useMemo(() => {
     const hall = halls.find((h) => h.id === selectedHall);
     const stallsForHall = stallsState.filter((s) => s.hallId === selectedHall);
-    // If there are no explicit stalls, create placeholder numbered stalls up to the count
     return (
       stallsForHall.map((s, idx) => ({
         id: s.id,
         stall: `${hall?.label || hall?.name || "Hall"} - ${
           s.label || `Stall ${idx + 1}`
         }`,
-        // ensure price is a finite number, fallback to 0
         price: (() => {
           const p = (s as any).price ?? (s as any).cost ?? 0;
           const pn = Number(p);
           return Number.isFinite(pn) ? pn : 0;
         })(),
-        // sanitize size: avoid literal 'undefined' strings and normalize capitalization
         size: (() => {
           const raw = (
             (s as any).size ||
@@ -249,12 +231,6 @@ export default function ManageStallsPage() {
     size: string;
     status?: string;
   };
-
-  // Debug: log rows passed to the table to verify visualization data
-  useEffect(() => {
-    const rows = currentStalls as unknown as Record<string, unknown>[];
-    console.debug("currentStalls for hall", selectedHall, rows);
-  }, [currentStalls, selectedHall]);
 
   const columns: Column<Row>[] = [
     { id: "id", header: "ID", field: "id", width: 60 },
@@ -386,39 +362,6 @@ export default function ManageStallsPage() {
         defaultRowsPerPage={10}
       />
 
-      {/* Debug panel: shows last raw fetch and current stalls (toggleable) */}
-      <Box sx={{ mt: 2 }}>
-        <details>
-          <summary style={{ cursor: "pointer" }}>
-            Debug: show last fetch & stall data
-          </summary>
-          <Box
-            sx={{ mt: 1, p: 1, bgcolor: "background.paper", borderRadius: 1 }}
-          >
-            <Typography variant="caption">Last raw fetch response:</Typography>
-            <pre style={{ maxHeight: 240, overflow: "auto" }}>
-              {JSON.stringify(lastFetchRaw, null, 2)}
-            </pre>
-
-            <Typography variant="caption">stallsState (filtered):</Typography>
-            <pre style={{ maxHeight: 240, overflow: "auto" }}>
-              {JSON.stringify(
-                stallsState.filter((s) => s.hallId === selectedHall),
-                null,
-                2
-              )}
-            </pre>
-
-            <Typography variant="caption">
-              currentStalls (table rows):
-            </Typography>
-            <pre style={{ maxHeight: 240, overflow: "auto" }}>
-              {JSON.stringify(currentStalls, null, 2)}
-            </pre>
-          </Box>
-        </details>
-      </Box>
-
       <EditStallDialog
         open={Boolean(editingStall) || addOpen}
         stall={editingStall ?? null}
@@ -429,12 +372,10 @@ export default function ManageStallsPage() {
           setAddOpen(false);
         }}
         onSave={async (updated) => {
-          // if editingStall is set, we are editing; otherwise creating
           const isEdit = Boolean(editingStall);
 
           if (isEdit) {
             const prev = stallsState.find((s) => s.id === updated.id);
-            // optimistic update
             setStallsState((prevState) =>
               prevState.map((s) =>
                 s.id === updated.id
@@ -448,7 +389,6 @@ export default function ManageStallsPage() {
               )
             );
 
-            // also update adminStalls in-memory store optimistically
             for (let i = 0; i < adminStalls.length; i++) {
               if (adminStalls[i].id === updated.id) {
                 adminStalls[i] = {
@@ -463,7 +403,6 @@ export default function ManageStallsPage() {
 
             setEditingStall(null);
 
-            // persist to backend and replace optimistic update with authoritative server response
             (async () => {
               try {
                 const resp = await updateStall(updated.id, {
@@ -475,13 +414,10 @@ export default function ManageStallsPage() {
                   status: (updated as any).status,
                 });
 
-                // server may return { message, stall } or a stall object
                 const container = resp || {};
                 const returned = (container.stall as any) || container;
 
-                // normalize returned stall to our UI shape
                 const normalizedReturned = (() => {
-                  // sanitize returned price and size
                   let rp = Number(
                     returned?.price ??
                       returned?.cost ??
@@ -516,7 +452,6 @@ export default function ManageStallsPage() {
                   };
                 })();
 
-                // replace the item in stallsState with authoritative values
                 setStallsState((prevState) =>
                   prevState.map((s) =>
                     s.id === normalizedReturned.id
@@ -525,7 +460,6 @@ export default function ManageStallsPage() {
                   )
                 );
 
-                // update adminStalls fallback store as well
                 for (let i = 0; i < adminStalls.length; i++) {
                   if (adminStalls[i].id === normalizedReturned.id) {
                     adminStalls[i] = {
@@ -536,7 +470,6 @@ export default function ManageStallsPage() {
                 }
               } catch (err: any) {
                 console.error("Failed to update stall on server", err);
-                // revert optimistic update on failure
                 if (prev) {
                   setStallsState((s) =>
                     s.map((x) => (x.id === prev.id ? prev : x))
@@ -551,7 +484,6 @@ export default function ManageStallsPage() {
             return;
           }
 
-          // Create new stall flow - persist first, then add to UI on success
           setSaving(true);
           try {
             const resp = await createStall({
@@ -563,7 +495,6 @@ export default function ManageStallsPage() {
               status: (updated as any).status ?? "available",
             });
 
-            // backend usually returns { message, stall } — normalize to the actual stall object
             const createdContainer = resp || {};
             const created = createdContainer.stall || createdContainer;
 
@@ -603,7 +534,6 @@ export default function ManageStallsPage() {
             setAddOpen(false);
           } catch (err: any) {
             console.error("Failed to create stall on server", err);
-            // optionally show user-facing error or keep dialog open
           } finally {
             setSaving(false);
           }
@@ -643,11 +573,9 @@ export default function ManageStallsPage() {
               setDeleting(true);
               try {
                 await deleteStall(deleteTargetId);
-                // remove from stallsState
                 setStallsState((prev) =>
                   prev.filter((s) => s.id !== deleteTargetId)
                 );
-                // remove from adminStalls fallback
                 for (let i = adminStalls.length - 1; i >= 0; i--) {
                   if (adminStalls[i].id === deleteTargetId)
                     adminStalls.splice(i, 1);

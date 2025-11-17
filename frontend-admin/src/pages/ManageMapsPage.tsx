@@ -24,7 +24,6 @@ import {
 } from "../services/hallsApi";
 import type { ApiHall } from "../services/hallsApi";
 import MapIcon from "@mui/icons-material/Map";
-// import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import StatusButton from "../components/atoms/StatusButton";
 import MapEditDialog from "../components/molecules/MapEditDialog";
@@ -38,15 +37,8 @@ export default function ManageMapsPage() {
     [selectedHall, halls]
   );
 
-  // local state for images and stall counts so admin edits can be previewed immediately
   const [hallImages, setHallImages] = useState<Record<string, string>>({});
-
-  // `stallCounts` was previously used to show and edit counts in the dialog.
-  // Since stall counts are no longer editable from the map edit popup, keep
-  // a lightweight store for any server-provided counts but avoid editing it
-  // from this page.
   const [, setStallCounts] = useState<Record<string, number>>({});
-
   const [editOpen, setEditOpen] = useState(false);
   const [lastUpload, setLastUpload] = useState<Record<string, string>>({});
 
@@ -87,10 +79,8 @@ export default function ManageMapsPage() {
       .then((list) => {
         if (!mounted) return;
         setHalls(list);
-        // initialize selected hall if empty
         if (!selectedHall && list.length > 0) setSelectedHall(list[0].id);
 
-        // init availability, images, stalls and lastUpload for each hall
         const avail: Record<string, boolean> = {};
         const imgs: Record<string, string> = {};
         const counts: Record<string, number> = {};
@@ -111,7 +101,6 @@ export default function ManageMapsPage() {
         setLastUpload(last);
       })
       .catch(() => {
-        // fallback to local data/hardcoded halls if API fails
         const fallback = Object.keys(hallMapImages).map((k) => ({
           id: k,
           label: k,
@@ -127,7 +116,6 @@ export default function ManageMapsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // When selectedHall changes, fetch detailed hall data from backend
   useEffect(() => {
     if (!selectedHall) return;
     let mounted = true;
@@ -156,7 +144,6 @@ export default function ManageMapsPage() {
           }));
         }
 
-        // Sync provided stalls into adminStalls store so ManageStallsPage reflects backend
         if (Array.isArray(data.stalls)) {
           for (let i = adminStalls.length - 1; i >= 0; i--) {
             if (adminStalls[i].hallId === selectedHall)
@@ -265,20 +252,6 @@ export default function ManageMapsPage() {
                     border: "1px solid rgba(0,0,0,0.04)",
                   }}
                 >
-                  {/* <Avatar
-                    sx={{
-                      bgcolor: "transparent",
-                      color: "primary.main",
-                      width: 40,
-                      height: 40,
-                      border: "1px solid rgba(16,185,129,0.08)",
-                      boxShadow: "none",
-                      mr: 1,
-                    }}
-                    variant="rounded"
-                  >
-                    <AccessTimeIcon fontSize="small" />
-                  </Avatar> */}
                   <Box>
                     <Typography variant="body2" sx={{ fontWeight: 700 }}>
                       {lastUpload[selectedHall]
@@ -320,8 +293,6 @@ export default function ManageMapsPage() {
               >
                 View map
               </StatusButton>
-
-              {/* moved Disable/Enable control into the Edit dialog for clearer UX */}
             </CardContent>
           </Card>
 
@@ -334,10 +305,8 @@ export default function ManageMapsPage() {
             availability={availability[selectedHall]}
             onToggleAvailability={async (newVal: boolean) => {
               const id = selectedHall;
-              // optimistic UI
               setAvailability((a) => ({ ...a, [id]: newVal }));
               try {
-                // backend expects 'available' or 'booked'
                 await updateHall(id, {
                   status: newVal ? "available" : "booked",
                 });
@@ -354,7 +323,6 @@ export default function ManageMapsPage() {
             }}
             onSave={async ({ image, imageFile }) => {
               const id = selectedHall;
-              // immediate optimistic UI updates: record last upload and image preview
               setLastUpload((l) => ({
                 ...l,
                 [id]: new Date().toLocaleDateString(),
@@ -362,20 +330,15 @@ export default function ManageMapsPage() {
 
               if (image) setHallImages((m) => ({ ...m, [id]: image }));
 
-              // Persist changes to backend
               try {
-                // If a file was selected, upload it first to the dedicated endpoint
                 if (imageFile) {
                   const uploadResp = await uploadHallImage(id, imageFile);
-                  // If backend returns a new image URL, update it
                   const newUrl =
                     uploadResp?.imageUrl ||
                     uploadResp?.url ||
                     uploadResp?.data?.imageUrl;
                   if (newUrl) setHallImages((m) => ({ ...m, [id]: newUrl }));
                 }
-
-                // Note: stall counts are not managed from this dialog anymore.
               } catch (err: unknown) {
                 const e2 = err as { status?: number };
                 if (e2 && (e2.status === 401 || e2.status === 404)) {

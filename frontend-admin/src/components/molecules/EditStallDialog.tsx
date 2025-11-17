@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -14,29 +14,7 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import StatusButton from "../atoms/StatusButton";
-
-type Stall = {
-  id: string;
-  hallId: string;
-  label: string;
-};
-
-type Props = {
-  open: boolean;
-  stall?: Stall | null;
-  initialHallId?: string;
-  onClose: () => void;
-  onSave: (
-    updated: Stall & {
-      price?: number;
-      size?: string;
-      name?: string;
-      description?: string;
-      status?: string;
-    }
-  ) => void;
-  saving?: boolean;
-};
+import type { EditStallDialogProps } from "../../types/types";
 
 export default function EditStallDialog({
   open,
@@ -45,7 +23,7 @@ export default function EditStallDialog({
   onClose,
   onSave,
   saving = false,
-}: Props) {
+}: EditStallDialogProps) {
   const [label, setLabel] = useState("");
   const [price, setPrice] = useState<number | "">("");
   const [size, setSize] = useState<string>("small");
@@ -80,7 +58,6 @@ export default function EditStallDialog({
     }
     const id = stall?.id ?? `s-${initialHallId ?? "new"}-${Date.now()}`;
     const hallId = stall?.hallId ?? initialHallId ?? "unknown";
-    // normalize price to a numeric value with two decimals
     const normalizedPrice =
       typeof price === "number" && !isNaN(price)
         ? Number(Number(price).toFixed(2))
@@ -89,7 +66,6 @@ export default function EditStallDialog({
     onSave({
       id,
       hallId,
-      // when creating, use the provided name as the label if label is empty
       label: label.trim() || name.trim(),
       price: normalizedPrice,
       size,

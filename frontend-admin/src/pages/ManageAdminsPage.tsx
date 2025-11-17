@@ -6,7 +6,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import type { Column } from "../types/types";
 import { useMemo, useState } from "react";
 import AdminFormDialog from "../components/layouts/AdminFormDialog";
-import type { AdminFormValues } from "../components/layouts/AdminFormDialog";
+import type { AdminFormValues } from "../types/types";
 
 type AdminRow = {
   id: string;
@@ -90,7 +90,6 @@ export default function ManageAdminsPage() {
 
   function handleSave(values: AdminFormValues) {
     if (editing) {
-      // update
       setAdmins((a) =>
         a.map((r) =>
           r.id === editing.id
@@ -104,7 +103,6 @@ export default function ManageAdminsPage() {
         )
       );
     } else {
-      // create new
       const nextId = String(admins.length + 1).padStart(2, "0");
       const newAdmin: AdminRow = {
         id: nextId,
