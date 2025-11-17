@@ -25,6 +25,30 @@ export type Props<T extends Record<string, unknown> = Record<string, unknown>> =
     dense?: boolean;
     showPagination?: boolean;
     emptyState?: React.ReactNode;
+    /**
+     * If true, ReusableTable will include any fields found on the row objects
+     * that are not already present in the `columns` prop. Useful to show all
+     * backend-provided fields without enumerating them.
+     */
+    showAllFields?: boolean;
+    /**
+     * Allow the user to toggle visible columns with a small column selector UI.
+     */
+    allowColumnSelector?: boolean;
+    /**
+     * Initial set of visible column ids. Defaults to all provided columns.
+     */
+    initialVisibleColumns?: string[];
+    /**
+     * Column ids to always exclude (hide) from the table and the column selector.
+     */
+    excludedColumnIds?: string[];
+    /**
+     * Optional map of backend column id -> friendly header label. Used when
+     * showing autodetected columns (via `showAllFields`) to provide nicer
+     * names instead of raw keys.
+     */
+    headerMappings?: Record<string, string>;
   };
 
 export type StatCardProps = {

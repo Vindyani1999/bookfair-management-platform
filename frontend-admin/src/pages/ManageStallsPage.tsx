@@ -26,8 +26,13 @@ import type { SelectChangeEvent } from "@mui/material";
 import EditStallDialog from "../components/molecules/EditStallDialog";
 
 import { stalls as adminStalls } from "../data/halls";
-import { fetchHalls, fetchHall } from "../services/hallsApi";
-import { updateStall, createStall, deleteStall } from "../services/stallsApi";
+import { fetchHalls } from "../services/hallsApi";
+import {
+  updateStall,
+  createStall,
+  deleteStall,
+  fetchStallsByHall,
+} from "../services/stallsApi";
 import type { ApiHall } from "../types/types";
 
 export default function ManageStallsPage() {
@@ -47,6 +52,7 @@ export default function ManageStallsPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // fetch the list of halls using the hall API (used by hall management/map visuals)
     let mounted = true;
     fetchHalls()
       .then((list) => {
@@ -80,10 +86,9 @@ export default function ManageStallsPage() {
   useEffect(() => {
     if (!selectedHall) return;
     let mounted = true;
-    fetchHall(selectedHall)
+    // fetch stalls using the stall-by-hall API which returns stalls for the hall
+    fetchStallsByHall(selectedHall)
       .then((data: any) => {
-        // setLastFetchRaw?.(data);
-
         if (!mounted) return;
         let stallsFromApi: any[] = [];
         if (Array.isArray(data)) stallsFromApi = data;
@@ -162,6 +167,7 @@ export default function ManageStallsPage() {
                 ]) ?? "available",
             };
           });
+
           setStallsState((prev) => {
             const filtered = prev.filter((p) => p.hallId !== selectedHall);
             return [...filtered, ...normalized];
@@ -360,6 +366,8 @@ export default function ManageStallsPage() {
         showSearch
         searchPlaceholder="Search stalls..."
         defaultRowsPerPage={10}
+        showAllFields={true}
+        allowColumnSelector={true}
       />
 
       <EditStallDialog

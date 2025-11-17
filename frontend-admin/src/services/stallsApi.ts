@@ -32,3 +32,8 @@ export async function createStall(payload: Record<string, any>) {
   const resp = await api.post(`/stall`, payload);
   return resp.data;
 }
+
+export async function fetchStallsByHall(id: string): Promise<any> {
+  const resp = await api.get(`/stall/hall/${encodeURIComponent(id)}`);
+  return resp.data;
+}

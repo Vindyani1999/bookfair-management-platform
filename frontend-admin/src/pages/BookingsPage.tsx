@@ -1,69 +1,142 @@
-import { Box, Button } from "@mui/material";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Box } from "@mui/material";
 import ReusableTable from "../components/atoms/ReusableTable";
 import StatCard from "../components/atoms/StatCard";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import type { Column } from "../types/types";
+import { useEffect, useState } from "react";
+import { fetchReservations } from "../services/reservationsApi";
+import dayjs from "dayjs";
 
-type Row = {
-  id: string;
-  stall: string;
-  date: string;
-  name: string;
-  business?: string;
-};
+type RawRow = Record<string, any>;
 
-const mockRows: Row[] = [
+const mockRows: RawRow[] = [
   {
     id: "01",
-    stall: "Hall D - Stall 4",
-    date: "October 28, 2025",
-    name: "John Smith",
-    business: "-",
-  },
-  {
-    id: "02",
-    stall: "Hall D - Stall 7",
-    date: "October 28, 2025",
-    name: "John Smith",
-    business: "-",
-  },
-  {
-    id: "03",
-    stall: "Hall D - Stall 20",
-    date: "October 28, 2025",
-    name: "John Smith",
-    business: "-",
+    fullName: "John Smith",
+    stallIds: ["Hall D - Stall 4"],
+    createdAt: "2025-10-28T00:00:00.000Z",
+    businessName: "-",
   },
 ];
 
 export default function BookingsPage() {
-  // derive stats from rows so cards stay in sync with the table
-  const total = mockRows.length + 247; // mimic larger pool (show 250)
-  const reserved = 130; // example static
-  const available = total - reserved;
+  const [rows, setRows] = useState<RawRow[]>(mockRows);
+  const [loading, setLoading] = useState(false);
 
-  const columns: Column<Row>[] = [
-    { id: "id", header: "ID", field: "id", width: 60 },
-    { id: "stall", header: "Stall", field: "stall" },
-    { id: "date", header: "Date", field: "date", width: 160 },
-    { id: "name", header: "Name", field: "name" },
-    { id: "business", header: "Business name", field: "business" },
+  // derive stats from rows so cards stay in sync with the table
+  const total = rows.length; // assume reservations list contains total reserved items
+  const reserved = rows.length;
+  const available = Math.max(0, 250 - reserved);
+
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    fetchReservations()
+      .then((data: any) => {
+        if (!mounted) return;
+        // keep raw objects so we can visualize all backend fields
+        const raw: any[] = Array.isArray(data)
+          ? data
+          : data?.results || data?.data || [];
+        // normalize business name and ensure object shape
+        const list: RawRow[] = raw.map((r: any) => {
+          const obj = r || {};
+          obj.businessName =
+            obj.businessName ||
+            obj.business ||
+            obj.company ||
+            obj.business_name ||
+            null;
+          return obj;
+        });
+        setRows(list.length ? list : mockRows);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch reservations", err);
+        // keep mockRows on error
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const columns: Column<RawRow>[] = [
+    { id: "id", header: "ID", field: "id", width: 40 },
+    { id: "fullName", header: "Full Name", field: "fullName" },
     {
-      id: "remove",
-      header: "Remove",
-      align: "center",
-      width: 120,
-      render: (row: Row) => (
-        <Button
-          color="error"
-          size="small"
-          startIcon={<DeleteOutlineIcon />}
-          onClick={() => console.log("remove", row.id)}
-        >
-          Remove
-        </Button>
-      ),
+      id: "stallIds",
+      header: "Stall IDs",
+      field: "stallIds",
+      render: (r: RawRow) => {
+        // Map numeric/string hallId to letters: 1 -> A, 2 -> B, ... 27 -> AA
+        const mapHallToLetters = (hid: unknown) => {
+          let n = Number(hid);
+          if (!Number.isFinite(n) || n <= 0) {
+            // try parse if string like 'hall-2'
+            const s = String(hid ?? "");
+            const m = s.match(/(\d+)$/);
+            n = m ? Number(m[1]) : NaN;
+          }
+          if (!Number.isFinite(n) || n <= 0) return String(hid ?? "");
+          // convert to letters (spreadsheet-style)
+          let res = "";
+          while (n > 0) {
+            n -= 1;
+            const ch = String.fromCharCode((n % 26) + 65);
+            res = ch + res;
+            n = Math.floor(n / 26);
+          }
+          return res;
+        };
+
+        const hallLetter = mapHallToLetters(r.hallId ?? r.hall ?? r.hallId);
+        const raw = r.stallIds ?? r.stall ?? "";
+        const items: string[] = [];
+        const formatOne = (val: any) => {
+          const num = typeof val === "object" ? val.id ?? val._id ?? val : val;
+          const s = String(num ?? "").trim();
+          // if it's numeric, render as 'Hall X - Stall N'
+          const n = Number(s);
+          if (Number.isFinite(n)) return `Hall ${hallLetter} - Stall ${n}`;
+          // if already contains 'stall' or 'Stall', just prefix hall
+          if (/stall/i.test(s)) return `Hall ${hallLetter} - ${s}`;
+          return `Hall ${hallLetter} - Stall ${s}`;
+        };
+
+        if (Array.isArray(raw)) {
+          for (const it of raw) items.push(formatOne(it));
+        } else if (typeof raw === "string") {
+          const parts = raw.split(/\s*,\s*/).filter(Boolean);
+          for (const p of parts) items.push(formatOne(p));
+        } else if (raw != null) {
+          items.push(formatOne(raw));
+        }
+
+        return items.join(", ");
+      },
     },
+    {
+      id: "price",
+      header: "Price",
+      field: "price",
+      render: (r: RawRow) =>
+        r.price ? `Rs. ${Number(r.price).toFixed(2)}` : "",
+    },
+    {
+      id: "createdAt",
+      header: "Created",
+      field: "createdAt",
+      width: 160,
+      render: (r: RawRow) =>
+        r.createdAt ? dayjs(r.createdAt).format("MMMM D, YYYY HH:mm") : "",
+    },
+    // single business column — backend may use different keys (businessName/business/company)
+    { id: "businessName", header: "Business", field: "businessName" },
   ];
 
   return (
@@ -98,12 +171,34 @@ export default function BookingsPage() {
 
       <ReusableTable
         columns={columns}
-        rows={mockRows}
+        rows={rows}
         showSearch
         searchPlaceholder="Search stalls, names..."
         defaultRowsPerPage={5}
         rowsPerPageOptions={[5, 10, 25]}
         toolbarActions={null}
+        showAllFields={true}
+        allowColumnSelector={true}
+        excludedColumnIds={[
+          "userId",
+          "hallId",
+          "isPaid",
+          "updatedAt",
+          "businessadress",
+          "businessAddress",
+          "business_address",
+          "businessAdress",
+          "address",
+        ]}
+        headerMappings={{
+          contactNumber: "Phone",
+          contact: "Phone",
+          email: "Email",
+          note: "Note",
+          businessName: "Business",
+          createdAt: "Created",
+          stallIds: "Stall IDs",
+        }}
       />
     </Box>
   );

@@ -31,7 +31,7 @@ export default function ManageAdminsPage() {
     { id: "id", header: "ID", field: "id", width: 60 },
     { id: "fullName", header: "Full Name", field: "fullName" },
     { id: "email", header: "Email Address", field: "email" },
-    { id: "contact", header: "Contact number", field: "contact" },
+    { id: "contact", header: "Phone", field: "contact" },
     {
       id: "edit",
       header: "Edit",
