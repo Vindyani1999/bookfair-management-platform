@@ -15,6 +15,7 @@ import MapIcon from "@mui/icons-material/Map";
 import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
+import PersonIcon from '@mui/icons-material/Person';
 import { styled, type CSSObject, type Theme } from "@mui/material";
 import type { DrawerItem } from "../../types/index";
 import ImportContactsOutlinedIcon from "@mui/icons-material/ImportContactsOutlined";
@@ -39,6 +40,11 @@ const drawerData: DrawerItem[] = [
     name: "Manage Stalls",
     icon: <StorefrontOutlinedIcon />,
     navPath: "/manage-stalls",
+  },
+  {
+    name: "Manage Users",
+    icon: <PersonIcon />,
+    navPath: "/manage-users",
   },
   {
     name: "Manage Admins",
@@ -80,7 +86,6 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   alignItems: "center",
   justifyContent: "flex-end",
   padding: theme.spacing(0, 1),
-
   ...theme.mixins.toolbar,
 }));
 
@@ -94,7 +99,6 @@ const Drawer = styled(MuiDrawer, {
   variants: [
     {
       props: (props: { open?: boolean }) => props.open,
-
       style: {
         ...openedMixin(theme),
         "& .MuiDrawer-paper": openedMixin(theme),
@@ -102,7 +106,6 @@ const Drawer = styled(MuiDrawer, {
     },
     {
       props: (props: { open?: boolean }) => !props.open,
-
       style: {
         ...closedMixin(theme),
         "& .MuiDrawer-paper": closedMixin(theme),
@@ -293,12 +296,9 @@ export default function DrawerLayout() {
         component="main"
         sx={(theme: Theme) => ({
           flexGrow: 1,
-          // match the app's stepper/background so the toolbar spacer isn't white
           backgroundColor: "#C9D8DA",
-          // make the main area fill the viewport and prevent page scrolling
           height: "100vh",
           overflow: "hidden",
-          // shift the main content to the right when drawer opens/closes
           transition: theme.transitions.create(["margin", "width"], {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen,
@@ -308,14 +308,12 @@ export default function DrawerLayout() {
             : `calc(${theme.spacing(7)} + 1px)`,
         })}
       >
-        {/* Removed the DrawerHeader spacer here so pages (like the stepper) can render flush at the top */}
         <Outlet />
       </Box>
       <LogoutConfirmationModal
         isOpen={showLogoutModal}
         onClose={handleLogoutCancel}
         onConfirm={handleLogoutConfirm}
-        // userName={admin?.contactPerson || 'Admin'}
       />
     </div>
   );

@@ -1,6 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosError } from "axios";
-import type { LoginCredentials, AuthResponse, RefreshResponse } from "../types";
+import type {
+  LoginCredentials,
+  AuthResponse,
+  RefreshResponse,
+  UsersResponse,
+  UserResponse,
+  User,
+  AdminCreateData,
+  AdminResponse
+} from '../types';
 
 const API_BASE_URL =
   (import.meta.env.VITE_API_BASE_URL as string) ||
@@ -140,6 +149,34 @@ export const authAPI = {
 
   logout: async (refreshToken: string) => {
     return api.post("/admins/logout", { refreshToken });
+  },
+};
+
+export const userAPI = {
+  getUsers: async () => {
+    return api.get<UsersResponse>('/users');
+  },
+
+  getUser: async (id: number) => {
+    return api.get<UserResponse>(`/users/${id}`);
+  },
+
+  createUser: async (userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>) => {
+    return api.post<UserResponse>('/users', userData);
+  },
+
+  updateUser: async (id: number, userData: Partial<User>) => {
+    return api.put<UserResponse>(`/users/${id}`, userData);
+  },
+
+  deleteUser: async (id: number) => {
+    return api.delete(`/users/${id}`);
+  },
+};
+
+export const adminAPI = {
+  registerAdmin: async (adminData: AdminCreateData) => {
+    return api.post<AdminResponse>('/admins/register', adminData);
   },
 };
 
