@@ -21,7 +21,6 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  // Divider,
   Skeleton,
 } from "@mui/material";
 import { Checkbox } from "@mui/material";
@@ -81,7 +80,7 @@ export default function ReusableTable<T extends Record<string, unknown>>({
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(defaultRowsPerPage);
   const [order, setOrder] = useState<"asc" | "desc">("desc");
-  const [orderBy, setOrderBy] = useState<string>(columns[0]?.id || "");
+  const [orderBy, setOrderBy] = useState<string>(() => columns[0]?.id || "");
 
   // derive columns: include provided columns + optionally fields found on rows
   const detectedExtraColumns: Column<T>[] = useMemo(() => {
@@ -90,7 +89,6 @@ export default function ReusableTable<T extends Record<string, unknown>>({
     rows.forEach((r) => {
       Object.keys(r).forEach((k) => keys.add(k));
     });
-    // exclude existing column ids and explicitly excluded ids
     const existing = new Set(columns.map((c) => c.id));
     const extras: Column<T>[] = [];
     keys.forEach((k) => {
@@ -113,23 +111,16 @@ export default function ReusableTable<T extends Record<string, unknown>>({
     );
   }, [columns, detectedExtraColumns, excludedColumnIds]);
 
-  // visible columns state (ids)
-  const [visibleColumnIds, setVisibleColumnIds] = useState<
-    string[] | undefined
-  >(
-    () =>
-      initialVisibleColumns ??
-      allColumns.filter((c) => !c.hidden).map((c) => c.id)
+  const [visibleColumnIds, setVisibleColumnIds] = useState<string[] | undefined>(
+    () => initialVisibleColumns ?? allColumns.filter((c) => !c.hidden).map((c) => c.id)
   );
 
-  // keep a stable key for column ids to use in deps
   const allColumnIdsKey = useMemo(
     () => allColumns.map((c) => c.id).join(","),
     [allColumns]
   );
 
   useEffect(() => {
-    // if columns change, ensure visibleColumnIds includes them by default
     setVisibleColumnIds((prev) => {
       const defaultIds =
         initialVisibleColumns ??
@@ -141,7 +132,7 @@ export default function ReusableTable<T extends Record<string, unknown>>({
       }
       return defaultIds;
     });
-  }, [allColumnIdsKey, initialVisibleColumns, allColumns]);
+  }, [allColumnIdsKey, initialVisibleColumns]);
 
   const visibleColumns = useMemo(() => {
     const ids =
@@ -149,7 +140,6 @@ export default function ReusableTable<T extends Record<string, unknown>>({
     return allColumns.filter((c) => ids.includes(c.id));
   }, [allColumns, visibleColumnIds]);
 
-  // compute column widths: respect numeric/string `column.width`, and distribute remaining space
   const computedColWidths = useMemo(() => {
     const fixedCols = visibleColumns.filter((c) => typeof c.width === "number");
     const totalFixedPx = fixedCols.reduce(
@@ -183,11 +173,6 @@ export default function ReusableTable<T extends Record<string, unknown>>({
     });
   }, [rows, query, searchableFields]);
 
-  useEffect(() => {
-    const firstId = allColumns[0]?.id;
-    setOrderBy((prev) => prev || firstId || "");
-  }, [allColumnIdsKey, allColumns]);
-
   const sorted = useMemo(() => {
     if (!orderBy) return filtered;
     return stableSort(filtered, getComparator<T>(order, orderBy));
@@ -205,7 +190,6 @@ export default function ReusableTable<T extends Record<string, unknown>>({
     setOrderBy(id);
   };
 
-  // Column selector sub-component (kept here for single-file convenience)
   function ColumnSelectorButton(props: {
     allColumns: Column<T>[];
     visibleColumnIds?: string[];
@@ -416,7 +400,6 @@ export default function ReusableTable<T extends Record<string, unknown>>({
 
           <TableBody>
             {loading ? (
-              // skeleton rows while loading
               Array.from({ length: Math.min(Math.max(3, rowsPerPage), 8) }).map(
                 (_, ridx) => (
                   <TableRow key={`s-${ridx}`}>
@@ -483,25 +466,6 @@ export default function ReusableTable<T extends Record<string, unknown>>({
                         const display = col.render
                           ? col.render(row)
                           : String(rawValue ?? "");
-
-                        if (
-                          col.id === "price" ||
-                          fieldKey === "price" ||
-                          col.id === "size" ||
-                          fieldKey === "size"
-                        ) {
-                          try {
-                            console.debug("ReusableTable cell render", {
-                              rowId: (row as any).id ?? idx,
-                              colId: col.id,
-                              fieldKey,
-                              rawValue,
-                              display,
-                            });
-                          } catch {
-                            /* ignore logging errors */
-                          }
-                        }
 
                         return display;
                       })()}
