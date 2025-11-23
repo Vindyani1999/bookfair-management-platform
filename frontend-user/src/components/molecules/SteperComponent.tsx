@@ -23,6 +23,8 @@ import ReservationConfirmation from "../organisms/ReservationConfirmation";
 import StatCard from "../atoms/StatCard";
 import stats from "../../utils/data";
 import type { FormData } from "../../utils/types";
+import { steperApi, updateReservation } from "../../services/api";
+import type { ReservationStep1 } from "../../types";
 
 // ===== Custom Connector (line between steps) =====
 const CustomConnector = styled(StepConnector)(() => ({
@@ -144,6 +146,24 @@ const SteperComponent = () => {
     "Confirmation",
   ];
 
+  const [hallId, setHallId] = useState('');
+  const [reserNo, setReserNo] = useState('');
+  const [firstStepData, setFirstStepData] =useState({
+    'userId':'',
+    'hallId':''
+  })
+  const [secondStepData, setSecondStepData] =useState({
+    'stallIds':[]
+  })
+  const [thirdStepData, setThirdStepData] =useState({
+    'fullName':'',
+    'contactNo':'',
+    'email':'',
+    'businessName':'',
+    'businessAddress':'',
+    'node':''
+  })
+
   // Booking flow state managed by the stepper (single source of truth)
   const [selectedHalls, setSelectedHalls] = useState<Record<string, boolean>>(
     {}
@@ -162,6 +182,11 @@ const SteperComponent = () => {
   // payment form ref & validity
   const paymentFormRef = useRef<any>(null);
   const [paymentFormValid, setPaymentFormValid] = useState<boolean>(false);
+
+ 
+
+  const userId = '1';
+
 
   function toggleHall(id: string, checked: boolean) {
     // Allow only one hall to be selected. Selecting a hall will deselect others.
@@ -185,18 +210,41 @@ const SteperComponent = () => {
     });
   }
 
-  function handleContinue() {
+  const  handleContinue = async() => {
+
+
     // Behavior depends on current activeStep
     if (activeStep === 0) {
       const ids = Object.keys(selectedHalls).filter((k) => selectedHalls[k]);
       setSelectedHallIds(ids);
       setActiveStep(1);
+      const hallData = await steperApi.getReservationById(ids)
+      console.log('hall response', hallData);
+
+      setHallId(hallData.hallId.toString());
+
+      
+
+      
+      setFirstStepData({
+        userId: hallData.userId.toString(),
+        hallId: hallData.hallId.toString(),
+      });
+
+      const addReservation = await steperApi.addReservation(hallData.userId.toString(), hallData.hallId.toString()); 
+      console.log('add resavation', addReservation);
+      setReserNo(addReservation.id)
       return;
     }
     if (activeStep === 1) {
       const ids = Object.keys(selectedStalls).filter((k) => selectedStalls[k]);
       setSelectedStallIds(ids);
       setActiveStep(2);
+      const response1 = await updateReservation.updateStep1(firstStepData, reserNo);
+      console.log('res 1', response1);
+      setSecondStepData({
+        stallIds:response1.stallIds.toString()
+    })
       return;
     }
     if (activeStep === 2) {
@@ -204,6 +252,7 @@ const SteperComponent = () => {
       if (bookingFormRef.current?.isValid()) {
         const data = bookingFormRef.current.getData();
         handleSubmitBooking(data);
+        console.log('user data', data);
       } else {
         bookingFormRef.current?.validateAndShow();
       }
@@ -233,10 +282,13 @@ const SteperComponent = () => {
     setActiveStep((prev) => Math.max(0, prev - 1));
   }
 
-  function handleSubmitBooking(data: FormData) {
+  const handleSubmitBooking = async(data: any) => {
     // save booking data and advance to payment step
     setBookingData(data);
     setActiveStep(3);
+
+    const response3 = await updateReservation.updateStep3(data, reserNo)
+    console.log('res 3', response3)
   }
 
   function handleFinish() {
@@ -436,7 +488,7 @@ const SteperComponent = () => {
             </CustomButton>
           )}
           <CustomButton
-            onClick={handleContinue}
+            onClick={() =>handleContinue()}
             disabled={!canContinue}
             color="#000"
             textColor="#fff"
