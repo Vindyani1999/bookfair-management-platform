@@ -34,6 +34,13 @@ app.use('/api/v1/hall', hallRoutes);
 app.use('/api/v1/stall', stallRoutes);
 app.use('/api/v1/transaction', transactionRoutes);
 app.use('/api/v1/reservation', reservationRoutes);
+app.get("/api/v1/health-check", (req, res) => {
+  return res.status(200).json({
+    success: true,
+    message: "Server is running",
+    data: null
+  });
+});
 
 const PORT = process.env.PORT || 5000;
 
