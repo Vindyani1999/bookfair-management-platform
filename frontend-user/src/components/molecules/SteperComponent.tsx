@@ -11,6 +11,7 @@ import {
   ThemeProvider,
   StepConnector,
   stepConnectorClasses,
+  Typography,
 } from "@mui/material";
 import CustomButton from "../atoms/CustomButton";
 import CheckIcon from "@mui/icons-material/Check";
@@ -23,8 +24,9 @@ import ReservationConfirmation from "../organisms/ReservationConfirmation";
 import StatCard from "../atoms/StatCard";
 import stats from "../../utils/data";
 import type { FormData } from "../../utils/types";
-import { steperApi, updateReservation } from "../../services/api";
+import api, { paymentApi, steperApi, updateReservation } from "../../services/api";
 import type { ReservationStep1 } from "../../types";
+import axios from "axios";
 
 // ===== Custom Connector (line between steps) =====
 const CustomConnector = styled(StepConnector)(() => ({
@@ -164,6 +166,10 @@ const SteperComponent = () => {
     'node':''
   })
 
+  const [paymentDtail, setPaymentDetail] = useState({
+    'url':'',
+    'sessionId':''
+  });
   // Booking flow state managed by the stepper (single source of truth)
   const [selectedHalls, setSelectedHalls] = useState<Record<string, boolean>>(
     {}
@@ -251,7 +257,8 @@ const SteperComponent = () => {
       // Validate booking form via ref and advance to payment if valid
       if (bookingFormRef.current?.isValid()) {
         const data = bookingFormRef.current.getData();
-        handleSubmitBooking(data);
+        await handleSubmitBooking(data);
+        
         console.log('user data', data);
       } else {
         bookingFormRef.current?.validateAndShow();
@@ -259,17 +266,19 @@ const SteperComponent = () => {
       return;
     }
     if (activeStep === 3) {
+
+      handleSubmitPayment();
       // Validate payment form and advance to confirmation if valid
       if (paymentFormRef.current?.isValid()) {
         // we could collect payment data here: const p = paymentFormRef.current.getData();
-        handleSubmitPayment();
+        
       } else {
         paymentFormRef.current?.validateAndShow();
       }
       return;
     }
     // If on final step, finish the flow
-    if (activeStep === steps.length - 1) {
+    if (activeStep === steps.length -1 ) {
       handleFinish();
       return;
     }
@@ -288,11 +297,14 @@ const SteperComponent = () => {
     setActiveStep(3);
 
     const response3 = await updateReservation.updateStep3(data, reserNo)
+    
     console.log('res 3', response3)
   }
 
-  function handleFinish() {
-    // reset flow and redirect to dashboard (or reset to step 0)
+  const handleFinish = async() => {
+    console.log('asdfghjkl')
+    const checkPayRes = await paymentApi.checkPayment(paymentDtail.sessionId);
+    console.log('check res', checkPayRes);
     setSelectedHalls({});
     setSelectedStalls({});
     setSelectedHallIds([]);
@@ -305,14 +317,23 @@ const SteperComponent = () => {
     setActiveStep(0);
     // navigate to the reservations page on localhost:3000
     try {
-      window.location.href = "http://localhost:3000/my-reservation";
+      window.location.href = "http://localhost:5173/dashboard";
     } catch {
       /* ignore */
     }
   }
 
-  function handleSubmitPayment() {
-    // simulate payment success, create reservation and go to confirmation
+  const handleSubmitPayment = async() => {
+
+    console.log('ruuuun', reserNo)
+    const response = await paymentApi.payForReservation('19', 150)
+    console.log('pay', response);
+    setPaymentDetail({
+      'url':response.data.transaction.sessionUrl,
+      'sessionId':response.data.transaction.sessionId
+    })
+    
+    window.location.href = response.data.transaction.sessionUrl;
     const id = Math.random().toString(36).slice(2, 14);
     const date = new Date().toLocaleDateString(undefined, {
       month: "long",
@@ -344,7 +365,7 @@ const SteperComponent = () => {
     canContinue = bookingFormValid;
   } else if (activeStep === 3) {
     // require payment form valid before enabling Continue
-    canContinue = paymentFormValid;
+    canContinue = true;
   } else if (activeStep === steps.length - 1) {
     // final step: enable Finish (Continue becomes Finish)
     canContinue = true;
@@ -445,10 +466,7 @@ const SteperComponent = () => {
           )}
 
           {activeStep === 3 && (
-            <PaymentDetails
-              ref={paymentFormRef}
-              onValidityChange={setPaymentFormValid}
-            />
+            <Typography>150</Typography>
           )}
 
           {activeStep === 4 &&

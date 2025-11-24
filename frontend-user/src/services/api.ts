@@ -5,7 +5,7 @@ import type { LoginCredentials, RegisterData, AuthResponse, UpdateProfileData, S
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || " https://bookfair-management-platform-production.up.railway.app/api/v1";
 
-export  const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJjaGFtaW5kdW5pcHVuOTlAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NjM5Mzg2MzIsImV4cCI6MTc2Mzk0MjIzMn0.uDXI4Bq1QEcntGdk8h6MLdVFYExuERRCBjA0jopJm9A";
+export  const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJjaGFtaW5kdW5pcHVuOTlAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NjQwMTY4MjUsImV4cCI6MTc2NDAyMDQyNX0.yBo98qIIuNrVV2CGYI8s0RRteFpwnS1SsvBiQzjbQNo";
 
 interface BackendRegisterData {
   contactPerson: string;
@@ -240,6 +240,41 @@ export const updateReservation = {
   },
 
 };
+
+export const paymentApi = {
+  payForReservation: async (reservationId: string, amount: number): Promise<any> => {
+    try {
+      const res = api.post('/transaction', {
+        reservationId: reservationId,
+        amount: amount
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      return res;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  checkPayment: async (sessionId: string): Promise<any> => {
+    try {
+      const res = api.put('/transaction', {
+        sessionId: sessionId
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      return res;
+    } catch (error) {
+      throw error;
+    }
+  }
+}
 
 
 
