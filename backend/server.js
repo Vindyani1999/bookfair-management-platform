@@ -37,7 +37,7 @@ app.use('/api/v1/reservation', reservationRoutes);
 app.get("/api/v1/health-check", (req, res) => {
   return res.status(200).json({
     success: true,
-    message: "Server is running",
+    message: "Server is running and healthy",
     data: null
   });
 });
