@@ -48,8 +48,8 @@ exports.updateReservation = async (req, res) => {
       res.status(404).send({ message: 'Reservation not found' });
     }
 
-    let price = 0;
-    if(req.body?.stallIds.length > 0){ {
+    let price;
+    if(req.body?.stallIds && req.body?.stallIds.length > 0) {
       price = await calculatePrice(req.body?.stallIds);
     }
     
@@ -63,12 +63,12 @@ exports.updateReservation = async (req, res) => {
       businessName: req.body?.businessName ?? resevation.businessName,
       businessAddress: req.body?.businessAddress ?? resevation.businessAddress,
       note: req.body?.note ?? resevation.note,
-      price: price,
+      price: price ?? resevation.price,
     });
     res.status(200).send(updatedReservation);
-  }} catch (error) {
+  } catch (error) {
     console.error(error);
-    res.status(500).send({ message: 'Internal Server Error' });
+    res.status(500).send({ message: error.message });
   }
 };
 
@@ -79,7 +79,7 @@ exports.deleteReservation = async (req, res) => {
     res.status(204).send({ message: 'Reservation deleted successfully' });
   } catch (error) {
     console.error(error);
-    res.status(500).send({ message: 'Internal Server Error' });
+    res.status(500).send({ message: error.message });
   }
 };
 
