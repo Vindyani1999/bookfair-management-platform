@@ -13,9 +13,9 @@ const QRCode = require('qrcode');
 const getAllTransactions = async (req, res) => {
   try {
     const transactions = await Transaction.findAll();
-    res.status(200).json({success: true, message: "Transactions fetched successfully", data: transactions});
+    res.status(200).json(transactions);
   } catch (error) {
-    res.status(500).json({success: false, message: 'Error fetching transactions', error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -24,11 +24,11 @@ const getTransactionById = async (req, res) => {
     const id = req.params.id;
     const transaction = await Transaction.findByPk(id);
     if (!transaction) {
-      return res.status(404).json({success: false, message: "Transaction not found", data: null });
+      return res.status(404).json({ message: "Transaction not found" });
     }
-    res.status(200).json({success: true, message: "Transaction fetched successfully", data: transaction});
+    res.status(200).json(transaction);
   } catch (error) {
-    res.status(500).json({success: false, message: 'Error fetching transaction', error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -38,7 +38,7 @@ const createTransaction = async (req, res) => {
     const { reservationId, amount } = req.body;
     const session = await createStripeSession(amount, "USD");
     if (!session) {
-      return res.status(404).json({ success: false, message: "Transaction not submitted",   data: null });
+      return res.status(404).json({ message: "Transaction not submitted" });
     }
 
     const transaction = await Transaction.create({
@@ -50,11 +50,11 @@ const createTransaction = async (req, res) => {
     });
 
     if (!transaction) {
-      return res.status(404).json({success: false, message: "Transaction not submitted", data: null });
+      return res.status(404).json({ message: "Transaction not submitted" });
     }
-    res.status(201).json({ success: true, message: "Transaction submitted successfully", data:{ transaction, session} });
+    res.status(201).json({ transaction, session });
   } catch (error) {
-    res.status(500).json({success: false, message: error.message, data: null });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -62,25 +62,25 @@ const updateTransaction = async (req, res) => {
   try {
     const { sessionId } = req.body;
     if (!sessionId) {
-      return res.status(400).json({success: false, message: "Session ID is required", data: null });
+      return res.status(400).json({ message: "Session ID is required" });
     }
     const transaction = await Transaction.findOne({
       where: { sessionId: sessionId },
     });
     if (!transaction) {
-      return res.status(404).json({ success: false, message: "Transaction not found", data: null });
+      return res.status(404).json({ message: "Transaction not found" });
     }
 
     //fetch the resevaton
     const reservation = await Resevation.findByPk(transaction.reservationId);
     if (!reservation) {
-      return res.status(404).json({ success: false, message: "Reservation not found", data: null });
+      return res.status(404).json({ message: "Reservation not found" });
     }
 
     // fetch the stripe session
     const session = await getSessionById(sessionId);
     if (session.payment_status !== "paid") {
-      return res.status(200).json({ success: false, message: "Payment not completed", data: null });
+      return res.status(200).json({ message: "Payment not completed" });
     }
 
     //update transaction
@@ -126,9 +126,9 @@ const updateTransaction = async (req, res) => {
     await sendResevationEmail(reservation.email, emailData);
 
 
-    res.status(200).json({success: true, message: "Transaction updated successfully", data:{...reservation, qrCodeDataURL}});
+    res.status(200).json({...reservation, qrCodeDataURL});
   } catch (error) {
-    res.status(500).json({success: false, message: 'Error updating transaction', error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -137,11 +137,11 @@ const deleteTransaction = async (req, res) => {
     const id = req.params.id;
     const transaction = await Transaction.findByIdAndDelete(id);
     if (!transaction) {
-      return res.status(404).json({success: false, message: "Transaction not found", data: null });
+      return res.status(404).json({ message: "Transaction not found" });
     }
-    res.status(200).json({ success: true, message: "Transaction deleted successfully", data: transaction });
+    res.status(200).json({ message: "Transaction deleted successfully" });
   } catch (error) {
-    res.status(500).json({success: false, message: error.message, data: null });
+    res.status(500).json({ message: error.message });
   }
 };
 
