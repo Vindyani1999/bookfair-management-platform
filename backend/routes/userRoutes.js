@@ -9,10 +9,10 @@ const {
 
 // Access: admin
 router.get('/', authenticate, authorizeRoles('admin'), getAllUsers);   
-router.put('/:id', authenticate, authorizeRoles('admin'), updateUser);       
 router.delete('/:id', authenticate, authorizeRoles('admin'), deleteUser);
 
 // Access: user or admin
-router.get('/:id', authenticate, authorizeRoles('admin, user'), getUserById);  
+router.put('/:id', authenticate, authorizeRoles('admin', 'user'), updateUser);       
+router.get('/:id', authenticate, authorizeRoles('admin', 'user'), getUserById);  
     
 module.exports = router;

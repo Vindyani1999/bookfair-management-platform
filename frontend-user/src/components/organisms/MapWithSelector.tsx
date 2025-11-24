@@ -59,12 +59,14 @@ export default function MapWithSelector({
             className="map-viewport"
             style={{ overflow: "hidden", height: "100%" }}
           >
-            <div className="map-inner" style={{ transform: `scale(${zoom})` }}>
-              <Image
-                src={mapSrc ?? "/images/map.png"}
-                alt="Bookfair map"
-                style={{ height: "90%" }}
-              />
+            <div
+              className="map-inner"
+              style={{
+                transform: `scale(${zoom})`,
+                transformOrigin: "center center",
+              }}
+            >
+              <Image src={mapSrc ?? "/images/map.png"} alt="Bookfair map" />
             </div>
           </div>
         </div>
