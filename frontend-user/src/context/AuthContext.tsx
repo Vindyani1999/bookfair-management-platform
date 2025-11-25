@@ -56,6 +56,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const elapsedTime = currentTime - parseInt(loginTime, 10);
 
     return elapsedTime > REMEMBER_ME_DURATION;
+   
   }, []);
 
   const clearAuthData = useCallback(() => {
@@ -126,6 +127,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           }
         } else if (storedTokenSession && storedUserSession) {
           const isTokenValid = validateToken(storedTokenSession);
+          
 
           if (isTokenValid) {
             setToken(storedTokenSession);
@@ -194,6 +196,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const login = async (credentials: LoginCredentials) => {
     try {
       const response = await authAPI.login(credentials);
+      console.log('response', response);
       const { token: authToken, user: userData } = response.data;
 
       if (!authToken || !userData) {
@@ -202,6 +205,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       setToken(authToken);
       setUser(userData);
+      
 
       const currentTime = Date.now();
 
