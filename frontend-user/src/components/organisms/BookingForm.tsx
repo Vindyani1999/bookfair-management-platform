@@ -139,7 +139,7 @@ function BookingFormInner(_props: Props, ref: React.Ref<BookingFormHandle>) {
 
           <Box>
             <TextField
-              label="Contact Number"
+              label="Phone"
               value={data.contactNumber}
               onChange={(e) => handleChange("contactNumber", e.target.value)}
               onBlur={() => handleBlur("contactNumber")}

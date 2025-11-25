@@ -62,6 +62,8 @@ export default function UserProfileForm() {
     }
   }, [user]);
 
+  console.log(resetToken)
+
   const handleChange = (field: keyof UserProfileData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setError("");
