@@ -5,7 +5,7 @@ import type { LoginCredentials, RegisterData, AuthResponse, UpdateProfileData, S
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || " https://bookfair-management-platform-production.up.railway.app/api/v1";
 
-export  const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJjaGFtaW5kdW5pcHVuOTlAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NjQwMTY4MjUsImV4cCI6MTc2NDAyMDQyNX0.yBo98qIIuNrVV2CGYI8s0RRteFpwnS1SsvBiQzjbQNo";
+export  const token =localStorage.getItem('token');
 
 
 
