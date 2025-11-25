@@ -169,9 +169,17 @@ export default function DrawerLayout() {
     }
   };
 
-  const handleLogoutConfirm = () => {
-    setShowLogoutModal(false);
-    logout();
+  const handleLogoutConfirm = async () => {
+    console.log('Logout confirm called');
+    try {
+      setShowLogoutModal(false);
+      // Call logout from auth context
+      await logout();
+    } catch (error) {
+      console.error('Logout error in drawer:', error);
+      // Force logout even if there's an error
+      logout();
+    }
   };
 
   const handleLogoutCancel = () => {

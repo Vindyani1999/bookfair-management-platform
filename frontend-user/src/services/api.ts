@@ -7,14 +7,6 @@ const API_BASE_URL =
 
 export  const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJjaGFtaW5kdW5pcHVuOTlAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NjQwMTY4MjUsImV4cCI6MTc2NDAyMDQyNX0.yBo98qIIuNrVV2CGYI8s0RRteFpwnS1SsvBiQzjbQNo";
 
-interface BackendRegisterData {
-  contactPerson: string;
-  email: string;
-  phoneNumber: string;
-  businessName?: string;
-  businessAddress?: string;
-  password: string;
-}
 
 
 const api = axios.create({
@@ -63,20 +55,45 @@ api.interceptors.response.use(
 
 export const authAPI = {
   login: async (credentials: LoginCredentials) => {
-    return api.post<AuthResponse>("/auth/login", credentials);
+    try {
+      // ✅ Ensure we only send email and password (no extra fields)
+      const response = await api.post<AuthResponse>("/auth/login", {
+        email: credentials.email,
+        password: credentials.password,
+      });
+
+      // ✅ Log response for debugging
+      console.log('Login response:', response.data);
+
+      if (!response.data.token || !response.data.user) {
+        throw new Error('Invalid response from server');
+      }
+
+      return response;
+    } catch (error) {
+      console.error('Login API error:', error);
+      throw error;
+    }
   },
 
   register: async (userData: RegisterData) => {
-    const backendData: BackendRegisterData = {
+    const backendData = {
       contactPerson: userData.fullName,
       email: userData.email,
       phoneNumber: userData.contactNumber,
-      businessName: userData.businessName,
-      businessAddress: userData.businessAddress,
+      businessName: userData.businessName || undefined,
+      businessAddress: userData.businessAddress || undefined,
       password: userData.password,
     };
 
-    return api.post<AuthResponse>("/auth/register", backendData);
+    try {
+      const response = await api.post<AuthResponse>("/auth/register", backendData);
+      console.log('Register response:', response.data);
+      return response;
+    } catch (error) {
+      console.error('Register API error:', error);
+      throw error;
+    }
   },
 
   requestPasswordReset: async (email: string) => {
@@ -122,7 +139,7 @@ export const userAPI = {
     return api.put<SettingsUpdateResponse>(`/users/${userId}`, userData);
   },
 
-  changePassword: async (currentPassword: string, newPassword: string) => {
+  changePassword: async ( newPassword: string) => {
     const userStr = sessionStorage.getItem("user") || localStorage.getItem("user");
 
     if (!userStr) {

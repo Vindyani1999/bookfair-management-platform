@@ -47,13 +47,9 @@ export type ReservationConfirmationProps = {
 };
 
 export type CustomButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  /** Visible label (if children not provided) */
   label?: string;
-  /** Background color (overrides default theme) */
   color?: string;
-  /** Text color (defaults to white) */
   textColor?: string;
-  /** Right-side icon (optional) */
   iconRight?: ReactNode;
   iconLeft?: ReactNode;
 };
