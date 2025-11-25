@@ -1,119 +1,225 @@
 import { useState } from "react";
-import { X, LogOut, AlertTriangle } from "lucide-react";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
+  Box,
+  IconButton,
+  CircularProgress,
+} from "@mui/material";
+import StatusButton from "../atoms/StatusButton";
+import LogoutIcon from "@mui/icons-material/Logout";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import Close from "@mui/icons-material/Close";
 import type { LogoutConfirmationModalProps } from "../../types/types";
 
 export default function LogoutConfirmationModal({
   isOpen,
   onClose,
   onConfirm,
-  userName = "User",
+  userName = "Admin",
 }: LogoutConfirmationModalProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutSuccess, setLogoutSuccess] = useState(false);
 
   const handleConfirmLogout = async () => {
     setIsLoggingOut(true);
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    
+    // Simulate logout process
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    setLogoutSuccess(true);
+    
+    // Show success message briefly
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    
     onConfirm();
   };
 
-  if (!isOpen) return null;
+  const handleClose = () => {
+    if (!isLoggingOut) {
+      setLogoutSuccess(false);
+      onClose();
+    }
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 backdrop-blur-xs"
-        onClick={!isLoggingOut ? onClose : undefined}
-        style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}
-      />
-
-      <div className="relative z-10 w-full max-w-md">
-        <div
-          className="backdrop-blur-md rounded-2xl p-6 shadow-2xl border border-white/30 animate-fade-in"
-          style={{
-            backgroundColor: "rgba(218, 205, 201, 0.95)",
+    <Dialog
+      open={isOpen}
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: "24px",
+          boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
+          bgcolor: "#ffffff",
+          minHeight: "280px",
+          overflow: "hidden",
+        },
+      }}
+    >
+      <DialogTitle
+        sx={{
+          fontWeight: 800,
+          fontSize: "24px",
+          color: "#1F3A4A",
+          bgcolor: "#F8F9FA",
+          borderBottom: "none",
+          px: 4,
+          py: 3,
+          position: "relative",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 1.5,
           }}
         >
-          {!isLoggingOut && (
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 text-white hover:text-white/70 rounded-full p-1.5 transition-all duration-300 bg-gray-500! hover:bg-red-500/80!"
-              aria-label="Close modal"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          )}
+          <Box
+            sx={{
+              width: 64,
+              height: 64,
+              borderRadius: "50%",
+              background: logoutSuccess
+                ? "linear-gradient(135deg, #10b981 0%, #34d399 100%)"
+                : "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: logoutSuccess
+                ? "0 6px 16px rgba(16,185,129,0.3)"
+                : "0 6px 16px rgba(245,158,11,0.3)",
+              transition: "all 0.3s ease",
+            }}
+          >
+            {logoutSuccess ? (
+              <CheckCircleIcon sx={{ fontSize: 32, color: "#fff" }} />
+            ) : (
+              <WarningAmberIcon sx={{ fontSize: 32, color: "#fff" }} />
+            )}
+          </Box>
 
-          <div className="flex items-center justify-center mb-6">
-            <div className="flex items-center justify-center w-16 h-16 bg-amber-50 rounded-full">
-              <AlertTriangle className="w-8 h-8 text-yellow-300" />
-            </div>
-          </div>
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{
+              fontWeight: 700,
+              color: logoutSuccess ? "#10b981" : "#f59e0b",
+              transition: "color 0.3s ease",
+            }}
+          >
+            {logoutSuccess ? "Logout Successful" : "Confirm Logout"}
+          </Typography>
+        </Box>
 
-          <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-slate-900 mb-3">
-              Are you sure you want to logout?
-            </h2>
-            <p className="text-slate-700 text-sm mb-2">
-              Hi <span className="font-semibold">{userName}</span>,
-            </p>
-            <p className="text-slate-600 text-sm">
-              You will be signed out of your account and redirected to the home
-              page.
-            </p>
-          </div>
+        {!isLoggingOut && !logoutSuccess && (
+          <IconButton
+            aria-label="close"
+            onClick={handleClose}
+            sx={{
+              position: "absolute",
+              right: 12,
+              top: 12,
+              color: "#64748b",
+              "&:hover": { bgcolor: "rgba(0,0,0,0.04)" },
+            }}
+          >
+            <Close />
+          </IconButton>
+        )}
+      </DialogTitle>
 
-          <div className="flex gap-3">
-            <button
-              onClick={onClose}
-              disabled={isLoggingOut}
-              className="flex-1 px-6 py-3 bg-white/80! hover:bg-white! text-black rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-300"
+      <DialogContent sx={{ pt: 3, pb: 3, bgcolor: "#F8F9FA", px: 4 }}>
+        {logoutSuccess ? (
+          <Box sx={{ textAlign: "center" }}>
+            <Typography
+              sx={{
+                color: "#10b981",
+                fontWeight: 600,
+                fontSize: "15px",
+                mb: 1,
+              }}
             >
-              Cancel
-            </button>
-            <button
-              onClick={handleConfirmLogout}
-              disabled={isLoggingOut}
-              className="flex-1 px-6 py-3  bg-red-500/80! hover:bg-red-700! text-white rounded-lg font-semibold transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              You have been successfully logged out
+            </Typography>
+            <Typography
+              sx={{
+                color: "#64748b",
+                fontSize: "14px",
+              }}
             >
-              {isLoggingOut ? (
-                <>
-                  <svg
-                    className="animate-spin h-5 w-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  Logging out...
-                </>
+              Redirecting to login page...
+            </Typography>
+          </Box>
+        ) : (
+          <>
+            <Typography
+              sx={{
+                color: "#475569",
+                mb: 2,
+                textAlign: "center",
+                fontSize: "15px",
+              }}
+            >
+              Are you sure you want to logout, {userName}?
+            </Typography>
+            <Typography
+              sx={{
+                color: "#94a3b8",
+                fontSize: "14px",
+                textAlign: "center",
+                lineHeight: 1.6,
+              }}
+            >
+              You will need to log in again to access the admin dashboard
+            </Typography>
+          </>
+        )}
+      </DialogContent>
+
+      {!logoutSuccess && (
+        <DialogActions
+          sx={{
+            p: 2.5,
+            gap: 2,
+            display: "flex",
+            justifyContent: "center",
+            bgcolor: "#F8F9FA",
+            borderTop: "1px solid #E2E8F0",
+          }}
+        >
+          <StatusButton
+            status="cancel"
+            onClick={handleClose}
+            disabled={isLoggingOut}
+            sx={{ minWidth: 120 }}
+          >
+            Cancel
+          </StatusButton>
+
+          <StatusButton
+            status="delete"
+            onClick={handleConfirmLogout}
+            disabled={isLoggingOut}
+            startIcon={
+              isLoggingOut ? (
+                <CircularProgress size={16} sx={{ color: "#fff" }} />
               ) : (
-                <>
-                  <LogOut className="w-4 h-4" />
-                  Logout
-                </>
-              )}
-            </button>
-          </div>
-
-          <div className="mt-4 pt-4 border-t border-slate-300">
-            <p className="text-xs text-slate-600 text-center">
-              Your session data will be cleared from this device
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+                <LogoutIcon />
+              )
+            }
+            sx={{ minWidth: 120 }}
+          >
+            {isLoggingOut ? "Logging out..." : "Logout"}
+          </StatusButton>
+        </DialogActions>
+      )}
+    </Dialog>
   );
 }
