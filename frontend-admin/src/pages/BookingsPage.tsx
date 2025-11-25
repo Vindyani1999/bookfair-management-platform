@@ -15,7 +15,7 @@ export default function BookingsPage() {
   const [rows, setRows] = useState<RawRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
-  const [statsLoading, setStatsLoading] = useState(false);
+  const [_statsLoading, setStatsLoading] = useState(false);
 
   // derive stats from computed stats so cards stay in sync with the table
   const total = stats
