@@ -17,10 +17,11 @@ app.use(express.json());
 
 // CORS Middleware
 app.use(
-  cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
-    credentials: true,
-  })
+   cors({
+      origin: "*",
+      methods: "*",
+      credentials: true,
+   })
 );
 
 // Test route
@@ -34,13 +35,6 @@ app.use('/api/v1/hall', hallRoutes);
 app.use('/api/v1/stall', stallRoutes);
 app.use('/api/v1/transaction', transactionRoutes);
 app.use('/api/v1/reservation', reservationRoutes);
-app.get("/api/v1/health-check", (req, res) => {
-  return res.status(200).json({
-    success: true,
-    message: "Server is running and healthy",
-    data: null
-  });
-});
 
 const PORT = process.env.PORT || 5000;
 
