@@ -47,7 +47,7 @@ export default function UserProfileForm() {
 
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
-  const [_resetToken, setResetToken] = useState("");
+  const [resetToken, setResetToken] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -61,6 +61,8 @@ export default function UserProfileForm() {
       setPasswordEmail(user.email || "");
     }
   }, [user]);
+
+  console.log(resetToken)
 
   const handleChange = (field: keyof UserProfileData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

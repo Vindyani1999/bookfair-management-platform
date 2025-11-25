@@ -19,6 +19,7 @@ import BookingsPage from "./pages/BookingsPage";
 import HelpPage from "./pages/HelpPage";
 import SettingsPage from "./pages/SettingsPage";
 
+
 function App() {
   return (
     <Router>
@@ -45,7 +46,6 @@ function App() {
             <Route path="help" element={<HelpPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
-
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>

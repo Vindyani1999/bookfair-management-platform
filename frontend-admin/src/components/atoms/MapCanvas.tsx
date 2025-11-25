@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Image from "../../../../frontend-user/src/components/atoms/MapImage";
+import Image from "./MapImage";
 import { type MapCanvasProps } from "../../types/types";
 import { Box, CircularProgress, Skeleton } from "@mui/material";
 export default function MapCanvas({

@@ -47,7 +47,7 @@ const drawerData: DrawerItem[] = [
   {
     name: "Logout",
     icon: <LogoutOutlinedIcon />,
-    navPath: "",
+    navPath: "/login",
   },
 ];
 
