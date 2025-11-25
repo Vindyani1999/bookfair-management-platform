@@ -32,7 +32,6 @@ const drawerData: DrawerItem[] = [
   {
     name: "Your Bookings",
     icon: <DateRangeOutlinedIcon />,
-    // page not implemented yet; navigate to a placeholder route for now
     navPath: "/bookings",
   },
   {
@@ -125,9 +124,6 @@ export default function DrawerLayout() {
   const location = useLocation();
 
   React.useEffect(() => {
-    // If the layout is mounted without a sub-route (i.e. path is exactly '/'),
-    // navigate to the dashboard by default so the dashboard content (stepper)
-    // is visible.
     if (
       location.pathname === "" ||
       location.pathname === "/" ||
@@ -138,8 +134,6 @@ export default function DrawerLayout() {
       return;
     }
 
-    // If user navigates directly to a known sub-route, reflect it in the
-    // selected tab so the drawer highlights the current page.
     const matched = drawerData.find((d) => d.navPath === location.pathname);
     if (matched) {
       setSelectedTab(matched.name);
@@ -147,7 +141,6 @@ export default function DrawerLayout() {
     }
   }, [location.pathname, navigate]);
 
-  // const navigate = useNavigate();
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -175,7 +168,6 @@ export default function DrawerLayout() {
 
     setSelectedTab(text.name);
     localStorage.setItem("tabMemory", text.name);
-    // navigate to the route if a navPath is provided (Logout handled above)
     if (text.navPath) {
       navigate(text.navPath);
     }
@@ -198,9 +190,9 @@ export default function DrawerLayout() {
             height: "100%",
             width: "100%",
             m: 0,
-            bgcolor: "#EDF1F3", // hard corded
+            bgcolor: "#EDF1F3",
             borderRadius: "30px",
-            boxShadow: "5px 5px 8px 0px rgba(0, 0, 0, 0.25)", // hard code
+            boxShadow: "5px 5px 8px 0px rgba(0, 0, 0, 0.25)",
           }}
         >
           <DrawerHeader>
@@ -249,17 +241,17 @@ export default function DrawerLayout() {
                       minHeight: 48,
                       px: 2.5,
                       bgcolor:
-                        selectedTab === text.name ? "#DACDC9" : "#EDF1F3", // hardcoded
+                        selectedTab === text.name ? "#DACDC9" : "#EDF1F3", 
                       borderRadius: "0px 30px 30px 0px",
                       mr: 1,
                     },
                     open
                       ? {
-                          justifyContent: "initial",
-                        }
+                        justifyContent: "initial",
+                      }
                       : {
-                          justifyContent: "center",
-                        },
+                        justifyContent: "center",
+                      },
                   ]}
                   onClick={() => handleTabClick(text)}
                 >
@@ -272,11 +264,11 @@ export default function DrawerLayout() {
                       },
                       open
                         ? {
-                            mr: 3,
-                          }
+                          mr: 3,
+                        }
                         : {
-                            mr: "auto",
-                          },
+                          mr: "auto",
+                        },
                     ]}
                   >
                     {text.icon}
@@ -291,11 +283,11 @@ export default function DrawerLayout() {
                     sx={[
                       open
                         ? {
-                            opacity: 1,
-                          }
+                          opacity: 1,
+                        }
                         : {
-                            opacity: 0,
-                          },
+                          opacity: 0,
+                        },
                     ]}
                   />
                 </ListItemButton>
@@ -308,12 +300,9 @@ export default function DrawerLayout() {
         component="main"
         sx={(theme: Theme) => ({
           flexGrow: 1,
-          // match the app's stepper/background so the toolbar spacer isn't white
           backgroundColor: "#DACDC9",
-          // make the main area fill the viewport and prevent page scrolling
           height: "100vh",
           overflow: "hidden",
-          // shift the main content to the right when drawer opens/closes
           transition: theme.transitions.create(["margin", "width"], {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen,
@@ -323,15 +312,12 @@ export default function DrawerLayout() {
             : `calc(${theme.spacing(7)} + 1px)`,
         })}
       >
-        {/* Page root: first child (PageHeader) will be sticky; the remaining area becomes scrollable */}
         <Box
           className="page-root"
           sx={{
             display: "flex",
             flexDirection: "column",
             height: "100%",
-            // ensure the header stays visible while inner content scrolls
-            // keep header fixed horizontally by pinning left/right and full width
             "& > :first-of-type": {
               position: "sticky",
               top: 0,
@@ -339,11 +325,8 @@ export default function DrawerLayout() {
               right: 0,
               width: "100%",
               zIndex: 1100,
-              // create a separate stacking context for smoother rendering
               transform: "translateZ(0)",
             },
-            // the content after the header should take remaining space and scroll
-            // allow both horizontal and vertical scrolling for wide content
             "& > :not(:first-of-type)": {
               flex: 1,
               overflowX: "auto",
@@ -352,9 +335,6 @@ export default function DrawerLayout() {
             },
           }}
         >
-          {/* Scroll container: pages render inside here. Making this the scroll container
-              ensures `position: sticky` headers inside pages (like PageHeader) stick
-              while the content below scrolls both vertically and horizontally. */}
           <Box
             sx={{
               flex: 1,
