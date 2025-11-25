@@ -22,6 +22,8 @@ export default function MapWithSelector({
     Record<string, boolean>
   >({});
   const selected = controlledSelected ?? internalSelected;
+
+  console.log('currentClick', internalSelected);
   const [zoom, setZoom] = useState<number>(1);
 
   const allHalls = halls.map((h) => ({ id: h.id, label: h.label }));
