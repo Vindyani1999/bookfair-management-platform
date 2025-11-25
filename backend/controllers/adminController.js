@@ -90,7 +90,7 @@ exports.loginAdmin = async (req, res) => {
 /**
  * @route   POST /api/v1/admins/refresh
  * @desc    Refresh access token using refresh token
- * @access  Public
+ * @access  Private
  */
 exports.refreshToken = async (req, res) => {
   try {
@@ -124,7 +124,7 @@ exports.refreshToken = async (req, res) => {
 /**
  * @route   POST /api/v1/admins/logout
  * @desc    Logout admin (invalidate refresh token)
- * @access  Public
+ * @access  Private
  */
 exports.logoutAdmin = async (req, res) => {
   try {

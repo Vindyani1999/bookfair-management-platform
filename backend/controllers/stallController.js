@@ -19,7 +19,7 @@ exports.getAllStalls = async (req, res) => {
       include: [
         {
           model: Hall,
-          as: "hall", // ✅ MUST match the alias in Stall.belongsTo(Hall, { as: 'hall' })
+          as: "hall", 
           attributes: ["name"],
         },
       ],
@@ -45,7 +45,7 @@ exports.getStallById = async (req, res) => {
       include: [
         {
           model: Hall,
-          as: "hall", // ✅ MUST match the alias in Stall.belongsTo(Hall, { as: 'hall' })
+          as: "hall", 
           attributes: ["name"],
         },
       ],

@@ -1,4 +1,3 @@
-// config/swagger.js
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
@@ -21,21 +20,18 @@ const options = {
       }
     ]
   },
-  // Point to the files where Swagger will look for JSDoc comments to build the spec
   apis: [
-    './routes/*.js',        // your route files
-    './controllers/*.js',   // optional: controllers with JSDoc
-    './models/*.js'         // optional: model files if you add JSDoc there
+    './routes/*.js',        
+    './controllers/*.js',   
+    './models/*.js'         
   ],
 };
 
 const swaggerSpec = swaggerJsdoc(options);
 
 function setupSwagger(app) {
-  // Serve the swagger ui at /api-docs
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-  // Optional: expose raw JSON at /api-docs.json
   app.get('/api-docs.json', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.send(swaggerSpec);

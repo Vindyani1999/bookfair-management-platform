@@ -29,7 +29,7 @@ const Hall = sequelize.define('Hall', {
 	defaultValue: 'available'
   },
   imageUrl: {
-    type: DataTypes.STRING, // Cloudinary URL
+    type: DataTypes.STRING, 
     allowNull: true
   }
 }, {
