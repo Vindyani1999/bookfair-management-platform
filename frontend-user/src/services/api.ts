@@ -1,17 +1,13 @@
 import axios, { AxiosError } from "axios";
-import type { LoginCredentials, RegisterData, AuthResponse, UpdateProfileData, SettingsUpdateResponse } from "../types";
+import type { LoginCredentials, RegisterData, AuthResponse, UpdateProfileData, SettingsUpdateResponse, Reservation, ReservationStep1, ReservationStep2, ReservationStep3 } from "../types";
+
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
+  import.meta.env.VITE_API_URL || " https://bookfair-management-platform-production.up.railway.app/api/v1";
 
-interface BackendRegisterData {
-  contactPerson: string;
-  email: string;
-  phoneNumber: string;
-  businessName?: string;
-  businessAddress?: string;
-  password: string;
-}
+export  const token =localStorage.getItem('token');
+
+
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -59,20 +55,45 @@ api.interceptors.response.use(
 
 export const authAPI = {
   login: async (credentials: LoginCredentials) => {
-    return api.post<AuthResponse>("/auth/login", credentials);
+    try {
+      // ✅ Ensure we only send email and password (no extra fields)
+      const response = await api.post<AuthResponse>("/auth/login", {
+        email: credentials.email,
+        password: credentials.password,
+      });
+
+      // ✅ Log response for debugging
+      console.log('Login response:', response.data);
+
+      if (!response.data.token || !response.data.user) {
+        throw new Error('Invalid response from server');
+      }
+
+      return response;
+    } catch (error) {
+      console.error('Login API error:', error);
+      throw error;
+    }
   },
 
   register: async (userData: RegisterData) => {
-    const backendData: BackendRegisterData = {
+    const backendData = {
       contactPerson: userData.fullName,
       email: userData.email,
       phoneNumber: userData.contactNumber,
-      businessName: userData.businessName,
-      businessAddress: userData.businessAddress,
+      businessName: userData.businessName || undefined,
+      businessAddress: userData.businessAddress || undefined,
       password: userData.password,
     };
 
-    return api.post<AuthResponse>("/auth/register", backendData);
+    try {
+      const response = await api.post<AuthResponse>("/auth/register", backendData);
+      console.log('Register response:', response.data);
+      return response;
+    } catch (error) {
+      console.error('Register API error:', error);
+      throw error;
+    }
   },
 
   requestPasswordReset: async (email: string) => {
@@ -118,7 +139,7 @@ export const userAPI = {
     return api.put<SettingsUpdateResponse>(`/users/${userId}`, userData);
   },
 
-  changePassword: async (currentPassword: string, newPassword: string) => {
+  changePassword: async ( newPassword: string) => {
     const userStr = sessionStorage.getItem("user") || localStorage.getItem("user");
 
     if (!userStr) {
@@ -143,5 +164,137 @@ export const userAPI = {
   },
 
 };
+
+
+export const steperApi = {
+
+getReservationById: async (id: string[]): Promise<Reservation> => {
+  try {
+    console.log('id', id[0]);
+    const numericIdNumber = Number(id[0].split('-')[1]);
+
+    const response = await api.get<Reservation>(`/reservation/${numericIdNumber}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+},
+
+
+  addReservation: async (userId: string, hallId: string): Promise<any> => {
+    try {
+      console.log('userId', userId, 'hallId', hallId)
+      const response = await api.post<any>(
+        '/reservation',
+        {hallId:hallId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      return response.data;
+
+    } catch (error) {
+      console.error(error);
+      throw error
+    }
+  },
+};
+
+export const updateReservation = {
+  updateStep1: async (step1Data: ReservationStep1, reserNo: string): Promise<any> => {
+    try {
+      const response = await api.put(`/reservation/${reserNo}`, {
+        userId:step1Data.userId,
+        hallId:step1Data.hallId
+      },{
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      return response.data;
+
+    } catch (error) {
+      console.error("Error updating step 1:", error);
+      throw error;
+    }
+  },
+
+  updateStep2: async <T>(step2Data: ReservationStep2, reserNo:string): Promise<T> => {
+    try {
+      const response = await api.put<T>(`/reservation/${reserNo}`, {
+        stallIds:step2Data
+      },{
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      return response.data;
+
+    } catch (error) {
+      console.error("Error updating step 2:", error);
+      throw error;
+    }
+  },
+
+  updateStep3: async <T>(step3Data: ReservationStep3, reserNo:string): Promise<T> => {
+    try {
+      const response = await api.put<T>(`/reservation/${reserNo}`, step3Data);
+      return response.data;
+
+    } catch (error) {
+      console.error("Error updating step 3:", error);
+      throw error;
+    }
+  },
+
+};
+
+export const paymentApi = {
+  payForReservation: async (reservationId: string, amount: number): Promise<any> => {
+    try {
+      const res = api.post('/transaction', {
+        reservationId: reservationId,
+        amount: amount
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      return res;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  checkPayment: async (sessionId: string): Promise<any> => {
+    try {
+      const res = api.put('/transaction', {
+        sessionId: sessionId
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      return res;
+    } catch (error) {
+      throw error;
+    }
+  }
+}
+
+
+
+
 
 export default api;

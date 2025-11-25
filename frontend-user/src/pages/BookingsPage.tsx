@@ -1,4 +1,3 @@
-/* Booking reservations table page */
 import React from "react";
 import {
   Box,
@@ -58,7 +57,6 @@ const columns = [
     header: "Size",
     cell: (info) => {
       const val = info.getValue() as Reservation["size"];
-      // Map sizes to expressive chip colors: Small=green, Medium=amber, Large=primary
       const color:
         | "default"
         | "primary"
@@ -188,7 +186,6 @@ const BookingsPage: React.FC = () => {
             boxShadow: "10px 12px 20px rgba(16,24,40,0.06)",
           }}
         >
-          {/* Toolbar: search + page size */}
           <Box
             sx={{
               display: "flex",

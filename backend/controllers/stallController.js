@@ -1,5 +1,5 @@
-const Stall = require('../models/stall');
-const Hall = require('../models/hall');
+const Stall = require("../models/stall");
+const Hall = require("../models/hall");
 
 /**
  * @desc    Get all stalls
@@ -19,19 +19,20 @@ exports.getAllStalls = async (req, res) => {
       include: [
         {
           model: Hall,
-          as: 'hall', // ✅ MUST match the alias in Stall.belongsTo(Hall, { as: 'hall' })
-          attributes: ['name']
-        }
+          as: "hall", // ✅ MUST match the alias in Stall.belongsTo(Hall, { as: 'hall' })
+          attributes: ["name"],
+        },
       ],
-      order: [['name', 'ASC']]
+      order: [["name", "ASC"]],
     });
 
     res.json(stalls);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching stalls', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching stalls", error: error.message });
   }
 };
-
 
 /**
  * @desc    Get single stall by ID
@@ -44,22 +45,23 @@ exports.getStallById = async (req, res) => {
       include: [
         {
           model: Hall,
-          as: 'hall', // ✅ MUST match the alias in Stall.belongsTo(Hall, { as: 'hall' })
-          attributes: ['name']
-        }
-      ]
+          as: "hall", // ✅ MUST match the alias in Stall.belongsTo(Hall, { as: 'hall' })
+          attributes: ["name"],
+        },
+      ],
     });
 
     if (!stall) {
-      return res.status(404).json({ message: 'Stall not found' });
+      return res.status(404).json({ message: "Stall not found" });
     }
 
     res.json(stall);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching stall', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching stall", error: error.message });
   }
 };
-
 
 exports.getStallsByHallId = async (req, res) => {
   try {
@@ -70,24 +72,28 @@ exports.getStallsByHallId = async (req, res) => {
       include: [
         {
           model: Hall,
-          as: 'hall',
-          attributes: ['name']
-        }
+          as: "hall",
+          attributes: ["name"],
+        },
       ],
-      order: [['name', 'ASC']]
+      order: [["name", "ASC"]],
     });
 
     if (!stalls.length) {
-      return res.status(404).json({ message: 'No stalls found for this hall' });
+      return res.status(404).json({ message: "No stalls found for this hall" });
     }
 
     res.json(stalls);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Error fetching stalls by hall ID', error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "Error fetching stalls by hall ID",
+        error: error.message,
+      });
   }
 };
-
 
 /**
  * @desc    Create a new stall
@@ -100,37 +106,39 @@ exports.createStall = async (req, res) => {
 
     // Validation: hallId is required
     if (!hallId) {
-      return res.status(400).json({ message: 'Hall ID is required' });
+      return res.status(400).json({ message: "Hall ID is required" });
     }
 
     // Check if hall exists
     const hall = await Hall.findByPk(hallId);
     if (!hall) {
-      return res.status(404).json({ message: 'Hall not found' });
+      return res.status(404).json({ message: "Hall not found" });
     }
 
     // Create new stall
     const stall = await Stall.create({
       name,
       hallId,
-      size: size || 'small',
+      size: size || "small",
       price: price || 0,
       description,
-      status: status || 'available'
+      status: status || "available",
     });
 
     res.status(201).json({
-      message: 'Stall created successfully',
-      stall
+      message: "Stall created successfully",
+      stall,
     });
   } catch (error) {
-    if (error.name === 'SequelizeValidationError') {
+    if (error.name === "SequelizeValidationError") {
       return res.status(400).json({
-        message: 'Invalid stall data',
-        error: error.errors.map((e) => e.message)
+        message: "Invalid stall data",
+        error: error.errors.map((e) => e.message),
       });
     }
-    res.status(500).json({ message: 'Error creating stall', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error creating stall", error: error.message });
   }
 };
 
@@ -143,15 +151,15 @@ exports.updateStall = async (req, res) => {
   try {
     const stall = await Stall.findByPk(req.params.id);
     if (!stall) {
-      return res.status(404).json({ message: 'Stall not found' });
+      return res.status(404).json({ message: "Stall not found" });
     }
 
-    const { name, size, price, description, hallId, status} = req.body;
+    const { name, size, price, description, hallId, status } = req.body;
 
     if (hallId) {
       const hall = await Hall.findByPk(hallId);
       if (!hall) {
-        return res.status(404).json({ message: 'Hall not found' });
+        return res.status(404).json({ message: "Hall not found" });
       }
     }
 
@@ -161,21 +169,23 @@ exports.updateStall = async (req, res) => {
       price: price ?? stall.price,
       description: description ?? stall.description,
       hallId: hallId ?? stall.hallId,
-      status: status ?? stall.status
+      status: status ?? stall.status,
     });
 
     res.json({
-      message: 'Stall updated successfully',
-      stall: updatedStall
+      message: "Stall updated successfully",
+      stall: updatedStall,
     });
   } catch (error) {
-    if (error.name === 'SequelizeValidationError') {
+    if (error.name === "SequelizeValidationError") {
       return res.status(400).json({
-        message: 'Invalid stall data',
-        error: error.errors.map((e) => e.message)
+        message: "Invalid stall data",
+        error: error.errors.map((e) => e.message),
       });
     }
-    res.status(500).json({ message: 'Error updating stall', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error updating stall", error: error.message });
   }
 };
 
@@ -188,12 +198,14 @@ exports.deleteStall = async (req, res) => {
   try {
     const stall = await Stall.findByPk(req.params.id);
     if (!stall) {
-      return res.status(404).json({ message: 'Stall not found' });
+      return res.status(404).json({ message: "Stall not found" });
     }
 
     await stall.destroy();
-    res.json({ message: 'Stall deleted successfully' });
+    res.json({ message: "Stall deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting stall', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error deleting stall", error: error.message });
   }
 };
