@@ -5,7 +5,7 @@ const { encryptPassword } = require('../helpers/crypto');
 /**
  * @desc Get all users
  * @route GET http://localhost:5000/api/v1/users/
- * @access Public
+ * @access Private
  */
 exports.getAllUsers = async (req, res) => {
   try {
@@ -20,7 +20,7 @@ exports.getAllUsers = async (req, res) => {
 /**
  * @desc Get a user
  * @route GET http://localhost:5000/api/v1/users/id
- * @access Public
+ * @access Private
  */
 exports.getUserById = async (req, res) => {
   try {
@@ -35,7 +35,7 @@ exports.getUserById = async (req, res) => {
 /**
  * @desc Update a user
  * @route PUT http://localhost:5000/api/v1/users/id
- * @access Public
+ * @access Private
  */
 exports.updateUser = async (req, res) => {
   try {
@@ -82,7 +82,7 @@ exports.updateUser = async (req, res) => {
 /**
  * @desc Delete a user
  * @route DELETE http://localhost:5000/api/v1/users/id
- * @access Public
+ * @access Private
  */
 exports.deleteUser = async (req, res) => {
   try {

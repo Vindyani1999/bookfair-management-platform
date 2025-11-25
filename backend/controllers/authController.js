@@ -151,7 +151,7 @@ exports.requestPasswordReset = async (req, res) => {
 /**
  * POST /api/v1/auth/verify-otp
  * @desc    Verify OTP and issue reset token
- * @access  Public
+ * @access  Private
  */
 exports.verifyOtp = async (req, res) => {
   try {
@@ -180,7 +180,7 @@ exports.verifyOtp = async (req, res) => {
 /**
  * POST /api/v1/auth/reset-password
  * @desc    Reset password using reset token
- * @access  Public
+ * @access  Private
  */
 exports.resetPassword = async (req, res) => {
   try {
