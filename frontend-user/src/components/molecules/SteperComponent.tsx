@@ -19,14 +19,12 @@ import theme from "../../utils/colorConfig";
 import MapWithSelector from "../organisms/MapWithSelector";
 import MapWithStalls from "../organisms/MapWithStalls";
 import BookingForm from "../organisms/BookingForm";
-import PaymentDetails from "../organisms/PaymentDetails";
+
 import ReservationConfirmation from "../organisms/ReservationConfirmation";
 import StatCard from "../atoms/StatCard";
 import stats from "../../utils/data";
 import type { FormData } from "../../utils/types";
-import api, { paymentApi, steperApi, updateReservation } from "../../services/api";
-import type { ReservationStep1 } from "../../types";
-import axios from "axios";
+import  { paymentApi, steperApi, updateReservation } from "../../services/api";
 
 // ===== Custom Connector (line between steps) =====
 const CustomConnector = styled(StepConnector)(() => ({
@@ -157,14 +155,14 @@ const SteperComponent = () => {
   const [secondStepData, setSecondStepData] =useState({
     'stallIds':[]
   })
-  const [thirdStepData, setThirdStepData] =useState({
-    'fullName':'',
-    'contactNo':'',
-    'email':'',
-    'businessName':'',
-    'businessAddress':'',
-    'node':''
-  })
+  // const [thirdStepData, setThirdStepData] =useState({
+  //   'fullName':'',
+  //   'contactNo':'',
+  //   'email':'',
+  //   'businessName':'',
+  //   'businessAddress':'',
+  //   'node':''
+  // })
 
   const [paymentDtail, setPaymentDetail] = useState({
     'url':'',
@@ -187,11 +185,11 @@ const SteperComponent = () => {
   const [bookingFormValid, setBookingFormValid] = useState<boolean>(false);
   // payment form ref & validity
   const paymentFormRef = useRef<any>(null);
-  const [paymentFormValid, setPaymentFormValid] = useState<boolean>(false);
 
- 
 
-  const userId = '1';
+ console.log(secondStepData, hallId)
+
+
 
 
   function toggleHall(id: string, checked: boolean) {
@@ -313,7 +311,6 @@ const SteperComponent = () => {
     setReservationId(null);
     setReservationDate(null);
     setBookingFormValid(false);
-    setPaymentFormValid(false);
     setActiveStep(0);
     // navigate to the reservations page on localhost:3000
     try {
