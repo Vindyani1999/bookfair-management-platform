@@ -1,5 +1,10 @@
-// Temporary mock data to simulate backend response for halls
-// Replace or remove when backend endpoint is wired up.
+const stats = {
+  totalStalls: 250,
+  availableStalls: 120,
+  reservedStalls: 130,
+};
+
+export default stats;
 
 export type Hall = { id: string; label: string };
 

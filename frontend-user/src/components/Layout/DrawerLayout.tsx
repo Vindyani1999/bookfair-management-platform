@@ -7,7 +7,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
@@ -18,6 +18,8 @@ import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import { styled, type CSSObject, type Theme } from "@mui/material";
 import type { DrawerItem } from "../../utils/types";
 import ImportContactsOutlinedIcon from "@mui/icons-material/ImportContactsOutlined";
+import { useAuth } from "../../context/AuthContext";
+import LogoutConfirmationModal from "../molecules/LogoutConfirmationModal";
 
 const drawerWidth = 240;
 
@@ -25,22 +27,22 @@ const drawerData: DrawerItem[] = [
   {
     name: "Dashboard",
     icon: <DashboardOutlinedIcon />,
-    navPath: "",
+    navPath: "/dashboard",
   },
   {
     name: "Your Bookings",
     icon: <DateRangeOutlinedIcon />,
-    navPath: "",
+    navPath: "/bookings",
   },
   {
     name: "Help",
     icon: <TelegramIcon />,
-    navPath: "",
+    navPath: "/help",
   },
   {
     name: "Settings",
     icon: <SettingsIcon />,
-    navPath: "",
+    navPath: "/settings",
   },
   {
     name: "Logout",
@@ -112,10 +114,33 @@ export default function DrawerLayout() {
   const [open, setOpen] = React.useState(false);
   const [isOpneFullDash, setIsOpnetFullDash] = React.useState(false);
   const [selectedTab, setSelectedTab] = React.useState(
-    localStorage.getItem("tabMemory") || "Dashboard"
+    localStorage.getItem("tabMemory") || "Your Bookings"
   );
 
-  // const navigate = useNavigate();
+  const [showLogoutModal, setShowLogoutModal] = React.useState(false);
+
+  const { logout, user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  React.useEffect(() => {
+    if (
+      location.pathname === "" ||
+      location.pathname === "/" ||
+      location.pathname === ""
+    ) {
+      navigate("/bookings", { replace: true });
+      setSelectedTab("Your Bookings");
+      return;
+    }
+
+    const matched = drawerData.find((d) => d.navPath === location.pathname);
+    if (matched) {
+      setSelectedTab(matched.name);
+      localStorage.setItem("tabMemory", matched.name);
+    }
+  }, [location.pathname, navigate]);
+
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -136,9 +161,25 @@ export default function DrawerLayout() {
   };
 
   const handleTabClick = (text: DrawerItem) => {
+    if (text.name === "Logout") {
+      setShowLogoutModal(true);
+      return;
+    }
+
     setSelectedTab(text.name);
     localStorage.setItem("tabMemory", text.name);
-    // navigate(text.navPath);
+    if (text.navPath) {
+      navigate(text.navPath);
+    }
+  };
+
+  const handleLogoutConfirm = () => {
+    setShowLogoutModal(false);
+    logout();
+  };
+
+  const handleLogoutCancel = () => {
+    setShowLogoutModal(false);
   };
 
   return (
@@ -147,11 +188,11 @@ export default function DrawerLayout() {
         <Box
           sx={{
             height: "100%",
-            width: "90%",
-            m: 1,
-            bgcolor: "#EDF1F3", // hard corded
+            width: "100%",
+            m: 0,
+            bgcolor: "#EDF1F3",
             borderRadius: "30px",
-            boxShadow: "5px 5px 8px 0px rgba(0, 0, 0, 0.25)", // hard code
+            boxShadow: "5px 5px 8px 0px rgba(0, 0, 0, 0.25)",
           }}
         >
           <DrawerHeader>
@@ -200,17 +241,17 @@ export default function DrawerLayout() {
                       minHeight: 48,
                       px: 2.5,
                       bgcolor:
-                        selectedTab === text.name ? "#DACDC9" : "#EDF1F3", // hardcoded
+                        selectedTab === text.name ? "#DACDC9" : "#EDF1F3", 
                       borderRadius: "0px 30px 30px 0px",
                       mr: 1,
                     },
                     open
                       ? {
-                          justifyContent: "initial",
-                        }
+                        justifyContent: "initial",
+                      }
                       : {
-                          justifyContent: "center",
-                        },
+                        justifyContent: "center",
+                      },
                   ]}
                   onClick={() => handleTabClick(text)}
                 >
@@ -223,11 +264,11 @@ export default function DrawerLayout() {
                       },
                       open
                         ? {
-                            mr: 3,
-                          }
+                          mr: 3,
+                        }
                         : {
-                            mr: "auto",
-                          },
+                          mr: "auto",
+                        },
                     ]}
                   >
                     {text.icon}
@@ -242,11 +283,11 @@ export default function DrawerLayout() {
                     sx={[
                       open
                         ? {
-                            opacity: 1,
-                          }
+                          opacity: 1,
+                        }
                         : {
-                            opacity: 0,
-                          },
+                          opacity: 0,
+                        },
                     ]}
                   />
                 </ListItemButton>
@@ -259,12 +300,9 @@ export default function DrawerLayout() {
         component="main"
         sx={(theme: Theme) => ({
           flexGrow: 1,
-          // match the app's stepper/background so the toolbar spacer isn't white
           backgroundColor: "#DACDC9",
-          // make the main area fill the viewport and prevent page scrolling
           height: "100vh",
           overflow: "hidden",
-          // shift the main content to the right when drawer opens/closes
           transition: theme.transitions.create(["margin", "width"], {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen,
@@ -274,9 +312,47 @@ export default function DrawerLayout() {
             : `calc(${theme.spacing(7)} + 1px)`,
         })}
       >
-        {/* Removed the DrawerHeader spacer here so pages (like the stepper) can render flush at the top */}
-        <Outlet />
+        <Box
+          className="page-root"
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            "& > :first-of-type": {
+              position: "sticky",
+              top: 0,
+              left: 0,
+              right: 0,
+              width: "100%",
+              zIndex: 1100,
+              transform: "translateZ(0)",
+            },
+            "& > :not(:first-of-type)": {
+              flex: 1,
+              overflowX: "auto",
+              overflowY: "auto",
+              WebkitOverflowScrolling: "touch",
+            },
+          }}
+        >
+          <Box
+            sx={{
+              flex: 1,
+              width: "100%",
+              overflowX: "auto",
+              overflowY: "auto",
+            }}
+          >
+            <Outlet />
+          </Box>
+        </Box>
       </Box>
+      <LogoutConfirmationModal
+        isOpen={showLogoutModal}
+        onClose={handleLogoutCancel}
+        onConfirm={handleLogoutConfirm}
+        userName={user?.contactPerson || "User"}
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import type { ImgHTMLAttributes, JSX } from "react";
 import type { Hall, Stall } from "./data";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { User } from "../types";
 
 export type Props = ImgHTMLAttributes<HTMLImageElement> & {
   src: string;
@@ -46,13 +47,9 @@ export type ReservationConfirmationProps = {
 };
 
 export type CustomButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  /** Visible label (if children not provided) */
   label?: string;
-  /** Background color (overrides default theme) */
   color?: string;
-  /** Text color (defaults to white) */
   textColor?: string;
-  /** Right-side icon (optional) */
   iconRight?: ReactNode;
   iconLeft?: ReactNode;
 };
@@ -67,3 +64,31 @@ export type StepCount = {
   step: number
 };
 
+export type LogoutConfirmationModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  userName?: string;
+};
+
+export type UserProfileData = {
+  fullName: string;
+  contactNumber: string;
+  email: string;
+  businessName?: string;
+  businessAddress?: string;
+};
+
+export interface UpdateProfileData {
+  contactPerson?: string;
+  email?: string;
+  phoneNumber?: string;
+  businessName?: string;
+  businessAddress?: string;
+  password?: string;
+}
+
+export interface SettingsUpdateResponse {
+  message: string;
+  user: User;
+}
