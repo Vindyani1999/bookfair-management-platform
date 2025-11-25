@@ -16,8 +16,8 @@ const createStripeSession = async (price, currency) => {
         quantity: 1,
       },
     ],
-    success_url: `${process.env.BASE_URL}/payment-success`,
-    cancel_url: `${process.env.BASE_URL}/payment-cancel`,
+    success_url: `${process.env.BASE_URL}/dashboard`,
+    cancel_url: `${process.env.BASE_URL}/dashboard`,
   };
 
   const session = await stripe.checkout.sessions.create(params);

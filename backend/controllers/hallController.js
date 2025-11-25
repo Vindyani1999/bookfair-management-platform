@@ -24,12 +24,11 @@ exports.getAllHalls = async (req, res) => {
 exports.getHallById = async (req, res) => {
   try {
     const hall = await Hall.findByPk(req.params.id, {
-      include: [
-        {
-          model: Stall,
-          attributes: ["id", "name", "description", "status"],
-        },
-      ],
+      include: [{
+        model: Stall,
+        as: 'stalls', 
+        attributes: ['id', 'name', 'description', 'status']
+      }]
     });
 
     if (!hall) {

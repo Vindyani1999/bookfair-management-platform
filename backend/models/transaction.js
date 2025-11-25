@@ -32,7 +32,7 @@ const Transaction = sequelize.define('Transaction', {
         allowNull: false
     },
     sessionUrl: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false
     },
     isPaid: {

@@ -17,10 +17,11 @@ app.use(express.json());
 
 // CORS Middleware
 app.use(
-  cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
-    credentials: true,
-  })
+   cors({
+      origin: "*",
+      methods: "*",
+      credentials: true,
+   })
 );
 
 // Test route
