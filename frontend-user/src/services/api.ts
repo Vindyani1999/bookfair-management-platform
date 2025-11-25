@@ -3,14 +3,6 @@ import type { LoginCredentials, RegisterData, AuthResponse, UpdateProfileData, S
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
 
-interface BackendRegisterData {
-  contactPerson: string;
-  email: string;
-  phoneNumber: string;
-  businessName?: string;
-  businessAddress?: string;
-  password: string;
-}
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -142,7 +134,7 @@ export const userAPI = {
     return api.put<SettingsUpdateResponse>(`/users/${userId}`, userData);
   },
 
-  changePassword: async (currentPassword: string, newPassword: string) => {
+  changePassword: async ( newPassword: string) => {
     const userStr = sessionStorage.getItem("user") || localStorage.getItem("user");
 
     if (!userStr) {

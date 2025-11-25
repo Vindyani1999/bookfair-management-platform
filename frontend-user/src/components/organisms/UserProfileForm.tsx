@@ -47,7 +47,7 @@ export default function UserProfileForm() {
 
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
-  const [resetToken, setResetToken] = useState("");
+  const [_resetToken, setResetToken] = useState("");
 
   useEffect(() => {
     if (user) {
