@@ -76,3 +76,38 @@ export interface SettingsUpdateResponse {
   message: string;
   user: User;
 }
+
+export interface Reservation {
+  id: number;
+  userId: number;
+  hallId: number;
+  stallIds: number[];
+  fullName: string;
+  contactNumber: string;
+  email: string;
+  businessName?: string;
+  businessAddress?: string | null;
+  note?: string;
+  price?: string;
+  isPaid?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ReservationStep1 {
+  userId: string;
+  hallId: string;
+}
+
+export interface ReservationStep2 {
+  stallIds: number[];
+}
+
+export interface ReservationStep3 {
+  fullName: string;
+  contactNumber: string;
+  email: string;
+  businessName: string;
+  businesAddress: string;
+  note: string;
+}
