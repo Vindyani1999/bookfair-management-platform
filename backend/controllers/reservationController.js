@@ -1,7 +1,8 @@
-const { Sequelize, Model, DataTypes } = require('../config/db');
+const { Sequelize, Model, DataTypes } = require("../config/db");
+const Hall = require("../models/hall");
 
-const Reservation = require('../models/reservation');
-const Stall = require('../models/stall');
+const Reservation = require("../models/reservation");
+const Stall = require("../models/stall");
 
 exports.getAllReservations = async (req, res) => {
   try {
@@ -9,7 +10,7 @@ exports.getAllReservations = async (req, res) => {
     res.status(200).send(reservations);
   } catch (error) {
     console.error(error);
-    res.status(500).send({ message: 'Internal Server Error' });
+    res.status(500).send({ message: "Internal Server Error" });
   }
 };
 
@@ -18,43 +19,46 @@ exports.getReservationById = async (req, res) => {
     const id = req.params.id;
     const reservation = await Reservation.findOne({ where: { id } });
     if (!reservation) {
-      res.status(404).send({ message: 'Reservation not found' });
+      res.status(404).send({ message: "Reservation not found" });
     } else {
       res.status(200).send(reservation);
     }
   } catch (error) {
     console.error(error);
-    res.status(500).send({ message: 'Internal Server Error' });
+    res.status(500).send({ message: "Internal Server Error" });
   }
 };
 
 exports.createReservation = async (req, res) => {
   try {
-    const { id } = req.user
-    const newReservation = await Reservation.create({...req.body, userId: id});
-    res.status(201).send(newReservation,);
+    const { id } = req.user;
+    const newReservation = await Reservation.create({
+      ...req.body,
+      userId: id,
+    });
+    res.status(201).send(newReservation);
   } catch (error) {
     console.error(error);
-    res.status(500).send({ message: 'Internal Server Error' });
+    res.status(500).send({ message: "Internal Server Error" });
   }
 };
 
 exports.updateReservation = async (req, res) => {
   try {
     const id = req.params.id;
-    
+
     const resevation = await Reservation.findOne({ where: { id } });
     if (!resevation) {
-      res.status(404).send({ message: 'Reservation not found' });
+      res.status(404).send({ message: "Reservation not found" });
     }
 
-    let price = 0;
-    if(req.body?.stallIds.length > 0){ {
+    let price;
+    if (req.body?.stallIds && req.body?.stallIds.length > 0) {
       price = await calculatePrice(req.body?.stallIds);
     }
-    
+
     const updatedReservation = await resevation.update({
-      userId : req.body?.userId ?? resevation.userId,
+      userId: req.body?.userId ?? resevation.userId,
       hallId: req.body?.hallId ?? resevation.hallId,
       stallIds: req.body?.stallIds ?? resevation.stallIds,
       fullName: req.body?.fullName ?? resevation.fullName,
@@ -63,12 +67,12 @@ exports.updateReservation = async (req, res) => {
       businessName: req.body?.businessName ?? resevation.businessName,
       businessAddress: req.body?.businessAddress ?? resevation.businessAddress,
       note: req.body?.note ?? resevation.note,
-      price: price,
+      price: price ?? resevation.price,
     });
     res.status(200).send(updatedReservation);
-  }} catch (error) {
+  } catch (error) {
     console.error(error);
-    res.status(500).send({ message: 'Internal Server Error' });
+    res.status(500).send({ message: error.message });
   }
 };
 
@@ -76,19 +80,18 @@ exports.deleteReservation = async (req, res) => {
   try {
     const id = req.params.id;
     await Reservation.destroy({ where: { id } });
-    res.status(204).send({ message: 'Reservation deleted successfully' });
+    res.status(204).send({ message: "Reservation deleted successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).send({ message: 'Internal Server Error' });
+    res.status(500).send({ message: error.message });
   }
 };
-
 
 const calculatePrice = async (stallIds) => {
   try {
     const stalls = await Stall.findAll({
       where: { id: stallIds },
-      attributes: ['price'] // optional optimization
+      attributes: ["price"], // optional optimization
     });
 
     const total = stalls.reduce((sum, stall) => {
@@ -97,7 +100,35 @@ const calculatePrice = async (stallIds) => {
 
     return total;
   } catch (error) {
-    console.error('Error calculating total price:', error);
+    console.error("Error calculating total price:", error);
     throw error;
+  }
+};
+
+exports.getUserResevations = async (req, res) => {
+  try {
+    const id = req.user.id;
+    const reservations = await Reservation.findAll({ where: { userId: id, isPaid: true } });
+    let reservationData = [];
+    for (let resevation of reservations) {
+      const stalls = await Stall.findAll({
+        where: { id: resevation.stallIds },
+      });
+      const hall = await Hall.findByPk(resevation.hallId);
+     const data = stalls.map((stall) => {
+        return {
+          hall: hall.name,
+          stall: stall.name,
+          size: stall.size,
+          cost: stall.price,
+          date: resevation.createdAt,
+        };
+      });
+      reservationData.push(...data);
+    }
+    res.status(200).json({message: 'Resevation fetched successfully', resevations: reservationData});
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: error.message });
   }
 };

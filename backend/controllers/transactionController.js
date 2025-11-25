@@ -3,7 +3,7 @@ const Resevation = require("../models/reservation");
 const Stall = require("../models/stall");
 const Transaction = require("../models/transaction");
 const User = require("../models/user");
-const { sendResevationEmail } = require("../utils/emailService");
+const { sendReservationEmail } = require("../utils/emailService");
 const {
   createStripeSession,
   getSessionById,
@@ -123,7 +123,7 @@ const updateTransaction = async (req, res) => {
       bookingDate: reservation.createdAt,
     };
     
-    await sendResevationEmail(reservation.email, emailData);
+    await sendReservationEmail(reservation.email, emailData);
 
 
     res.status(200).json({...reservation, qrCodeDataURL});
