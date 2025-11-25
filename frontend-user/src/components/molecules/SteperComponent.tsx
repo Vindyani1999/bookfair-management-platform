@@ -11,6 +11,7 @@ import {
   ThemeProvider,
   StepConnector,
   stepConnectorClasses,
+  Typography,
 } from "@mui/material";
 import CustomButton from "../atoms/CustomButton";
 import CheckIcon from "@mui/icons-material/Check";
@@ -18,11 +19,12 @@ import theme from "../../utils/colorConfig";
 import MapWithSelector from "../organisms/MapWithSelector";
 import MapWithStalls from "../organisms/MapWithStalls";
 import BookingForm from "../organisms/BookingForm";
-import PaymentDetails from "../organisms/PaymentDetails";
+
 import ReservationConfirmation from "../organisms/ReservationConfirmation";
 import StatCard from "../atoms/StatCard";
 import stats from "../../utils/data";
 import type { FormData } from "../../utils/types";
+import  { paymentApi, steperApi, updateReservation } from "../../services/api";
 
 // ===== Custom Connector (line between steps) =====
 const CustomConnector = styled(StepConnector)(() => ({
@@ -144,6 +146,28 @@ const SteperComponent = () => {
     "Confirmation",
   ];
 
+  const [hallId, setHallId] = useState('');
+  const [reserNo, setReserNo] = useState('');
+  const [firstStepData, setFirstStepData] =useState({
+    'userId':'',
+    'hallId':''
+  })
+  const [secondStepData, setSecondStepData] =useState({
+    'stallIds':[]
+  })
+  // const [thirdStepData, setThirdStepData] =useState({
+  //   'fullName':'',
+  //   'contactNo':'',
+  //   'email':'',
+  //   'businessName':'',
+  //   'businessAddress':'',
+  //   'node':''
+  // })
+
+  const [paymentDtail, setPaymentDetail] = useState({
+    'url':'',
+    'sessionId':''
+  });
   // Booking flow state managed by the stepper (single source of truth)
   const [selectedHalls, setSelectedHalls] = useState<Record<string, boolean>>(
     {}
@@ -161,7 +185,12 @@ const SteperComponent = () => {
   const [bookingFormValid, setBookingFormValid] = useState<boolean>(false);
   // payment form ref & validity
   const paymentFormRef = useRef<any>(null);
-  const [paymentFormValid, setPaymentFormValid] = useState<boolean>(false);
+
+
+ console.log(secondStepData, hallId)
+
+
+
 
   function toggleHall(id: string, checked: boolean) {
     // Allow only one hall to be selected. Selecting a hall will deselect others.
@@ -185,42 +214,69 @@ const SteperComponent = () => {
     });
   }
 
-  function handleContinue() {
+  const  handleContinue = async() => {
+
+
     // Behavior depends on current activeStep
     if (activeStep === 0) {
       const ids = Object.keys(selectedHalls).filter((k) => selectedHalls[k]);
       setSelectedHallIds(ids);
       setActiveStep(1);
+      const hallData = await steperApi.getReservationById(ids)
+      console.log('hall response', hallData);
+
+      setHallId(hallData.hallId.toString());
+
+      
+
+      
+      setFirstStepData({
+        userId: hallData.userId.toString(),
+        hallId: hallData.hallId.toString(),
+      });
+
+      const addReservation = await steperApi.addReservation(hallData.userId.toString(), hallData.hallId.toString()); 
+      console.log('add resavation', addReservation);
+      setReserNo(addReservation.id)
       return;
     }
     if (activeStep === 1) {
       const ids = Object.keys(selectedStalls).filter((k) => selectedStalls[k]);
       setSelectedStallIds(ids);
       setActiveStep(2);
+      const response1 = await updateReservation.updateStep1(firstStepData, reserNo);
+      console.log('res 1', response1);
+      setSecondStepData({
+        stallIds:response1.stallIds.toString()
+    })
       return;
     }
     if (activeStep === 2) {
       // Validate booking form via ref and advance to payment if valid
       if (bookingFormRef.current?.isValid()) {
         const data = bookingFormRef.current.getData();
-        handleSubmitBooking(data);
+        await handleSubmitBooking(data);
+        
+        console.log('user data', data);
       } else {
         bookingFormRef.current?.validateAndShow();
       }
       return;
     }
     if (activeStep === 3) {
+
+      handleSubmitPayment();
       // Validate payment form and advance to confirmation if valid
       if (paymentFormRef.current?.isValid()) {
         // we could collect payment data here: const p = paymentFormRef.current.getData();
-        handleSubmitPayment();
+        
       } else {
         paymentFormRef.current?.validateAndShow();
       }
       return;
     }
     // If on final step, finish the flow
-    if (activeStep === steps.length - 1) {
+    if (activeStep === steps.length -1 ) {
       handleFinish();
       return;
     }
@@ -233,14 +289,20 @@ const SteperComponent = () => {
     setActiveStep((prev) => Math.max(0, prev - 1));
   }
 
-  function handleSubmitBooking(data: FormData) {
+  const handleSubmitBooking = async(data: any) => {
     // save booking data and advance to payment step
     setBookingData(data);
     setActiveStep(3);
+
+    const response3 = await updateReservation.updateStep3(data, reserNo)
+    
+    console.log('res 3', response3)
   }
 
-  function handleFinish() {
-    // reset flow and redirect to dashboard (or reset to step 0)
+  const handleFinish = async() => {
+    console.log('asdfghjkl')
+    const checkPayRes = await paymentApi.checkPayment(paymentDtail.sessionId);
+    console.log('check res', checkPayRes);
     setSelectedHalls({});
     setSelectedStalls({});
     setSelectedHallIds([]);
@@ -249,18 +311,26 @@ const SteperComponent = () => {
     setReservationId(null);
     setReservationDate(null);
     setBookingFormValid(false);
-    setPaymentFormValid(false);
     setActiveStep(0);
     // navigate to the reservations page on localhost:3000
     try {
-      window.location.href = "http://localhost:3000/my-reservation";
+      window.location.href = "http://localhost:5173/dashboard";
     } catch {
       /* ignore */
     }
   }
 
-  function handleSubmitPayment() {
-    // simulate payment success, create reservation and go to confirmation
+  const handleSubmitPayment = async() => {
+
+    console.log('ruuuun', reserNo)
+    const response = await paymentApi.payForReservation('19', 150)
+    console.log('pay', response);
+    setPaymentDetail({
+      'url':response.data.transaction.sessionUrl,
+      'sessionId':response.data.transaction.sessionId
+    })
+    
+    window.location.href = response.data.transaction.sessionUrl;
     const id = Math.random().toString(36).slice(2, 14);
     const date = new Date().toLocaleDateString(undefined, {
       month: "long",
@@ -292,7 +362,7 @@ const SteperComponent = () => {
     canContinue = bookingFormValid;
   } else if (activeStep === 3) {
     // require payment form valid before enabling Continue
-    canContinue = paymentFormValid;
+    canContinue = true;
   } else if (activeStep === steps.length - 1) {
     // final step: enable Finish (Continue becomes Finish)
     canContinue = true;
@@ -393,10 +463,7 @@ const SteperComponent = () => {
           )}
 
           {activeStep === 3 && (
-            <PaymentDetails
-              ref={paymentFormRef}
-              onValidityChange={setPaymentFormValid}
-            />
+            <Typography>150</Typography>
           )}
 
           {activeStep === 4 &&
@@ -436,7 +503,7 @@ const SteperComponent = () => {
             </CustomButton>
           )}
           <CustomButton
-            onClick={handleContinue}
+            onClick={() =>handleContinue()}
             disabled={!canContinue}
             color="#000"
             textColor="#fff"
