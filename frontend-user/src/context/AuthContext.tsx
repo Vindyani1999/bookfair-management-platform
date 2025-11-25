@@ -27,8 +27,8 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-const REMEMBER_ME_DURATION = 10 * 60 * 1000;
-const INACTIVITY_DURATION = 6 * 60 * 1000;
+const REMEMBER_ME_DURATION = 60 * 60 * 1000;
+const INACTIVITY_DURATION = 30 * 60 * 1000;
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
@@ -36,17 +36,37 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
 
   const validateToken = useCallback((token: string): boolean => {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const expirationTime = payload.exp * 1000;
-      const currentTime = Date.now();
-
-      return currentTime < expirationTime;
-    } catch (error) {
-      console.error('Error validating token:', error);
+  try {
+    // ✅ Better token validation
+    if (!token || token.split('.').length !== 3) {
+      console.error('Invalid token format');
       return false;
     }
-  }, []);
+
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    
+    if (!payload.exp) {
+      console.error('Token missing expiration');
+      return false;
+    }
+
+    const expirationTime = payload.exp * 1000;
+    const currentTime = Date.now();
+    const isValid = currentTime < expirationTime;
+
+    console.log('Token validation:', {
+      expiresAt: new Date(expirationTime),
+      currentTime: new Date(currentTime),
+      isValid,
+      timeRemaining: Math.floor((expirationTime - currentTime) / 1000 / 60) + ' minutes'
+    });
+
+    return isValid;
+  } catch (error) {
+    console.error('Error validating token:', error);
+    return false;
+  }
+}, []);
 
   const isRememberMeExpired = useCallback((): boolean => {
     const loginTime = localStorage.getItem('loginTime');
@@ -192,38 +212,50 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, [user, token, isRememberMeExpired, checkInactivity, clearAuthData]);
 
   const login = async (credentials: LoginCredentials) => {
-    try {
-      const response = await authAPI.login(credentials);
-      const { token: authToken, user: userData } = response.data;
+  try {
+    const response = await authAPI.login({
+  email: credentials.email,
+  password: credentials.password
+});
+    const { token: authToken, user: userData } = response.data;
 
-      if (!authToken || !userData) {
-        throw new Error('Invalid response from server');
-      }
-
-      setToken(authToken);
-      setUser(userData);
-
-      const currentTime = Date.now();
-
-      if (credentials.rememberMe) {
-        localStorage.setItem('token', authToken);
-        localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('loginTime', currentTime.toString());
-        localStorage.setItem('lastActivity', currentTime.toString());
-      } else {
-        sessionStorage.setItem('token', authToken);
-        sessionStorage.setItem('user', JSON.stringify(userData));
-      }
-    } catch (error) {
-      clearAuthData();
-
-      if (error instanceof AxiosError) {
-        const message = error.response?.data?.message || 'Login failed';
-        throw new Error(message);
-      }
-      throw new Error('An unexpected error occurred');
+    if (!authToken || !userData) {
+      console.error('Invalid server response:', response.data);
+      throw new Error('Invalid response from server');
     }
-  };
+
+    console.log('Token received:', authToken.substring(0, 20) + '...');
+    console.log('User data:', userData);
+
+    setToken(authToken);
+    setUser(userData);
+
+    const currentTime = Date.now();
+
+    if (credentials.rememberMe) {
+      localStorage.setItem('token', authToken);
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('loginTime', currentTime.toString());
+      localStorage.setItem('lastActivity', currentTime.toString());
+    } else {
+      sessionStorage.setItem('token', authToken);
+      sessionStorage.setItem('user', JSON.stringify(userData));
+    }
+  } catch (error) {
+    clearAuthData();
+
+    if (error instanceof AxiosError) {
+      const message = error.response?.data?.message || 'Login failed';
+      console.error('Login error details:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: message
+      });
+      throw new Error(message);
+    }
+    throw new Error('An unexpected error occurred');
+  }
+};
 
   const register = async (data: RegisterData) => {
     try {
