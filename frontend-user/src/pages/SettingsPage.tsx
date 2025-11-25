@@ -18,8 +18,6 @@ const SettingsPage = () => {
           sx={{
             width: "100%",
             bgcolor: "transparent",
-            // let the parent scroll container handle height; align items to top so
-            // the form sits just below the PageHeader with minimal gap
             display: "flex",
             alignItems: "flex-start",
             justifyContent: "center",

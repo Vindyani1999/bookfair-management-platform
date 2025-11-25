@@ -241,7 +241,7 @@ export default function DrawerLayout() {
                       minHeight: 48,
                       px: 2.5,
                       bgcolor:
-                        selectedTab === text.name ? "#DACDC9" : "#EDF1F3", // hardcoded
+                        selectedTab === text.name ? "#DACDC9" : "#EDF1F3", 
                       borderRadius: "0px 30px 30px 0px",
                       mr: 1,
                     },
