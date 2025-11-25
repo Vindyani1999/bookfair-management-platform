@@ -12,10 +12,8 @@ const reservationRoutes = require('./routes/reservationRoutes');
 const cors = require("cors");
 const app = express();
 
-// Middleware to parse JSON
 app.use(express.json());
 
-// CORS Middleware
 app.use(
    cors({
       origin: "*",
@@ -24,10 +22,8 @@ app.use(
    })
 );
 
-// Test route
 app.get("/", (req, res) => res.send("SIB-RMS Backend is running"));
 
-// Routes
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/admins', adminRoutes);

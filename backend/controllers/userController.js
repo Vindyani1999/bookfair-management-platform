@@ -1,12 +1,6 @@
 const User = require('../models/user');
 const { encryptPassword } = require('../helpers/crypto');
 
-
-/**
- * @desc Get all users
- * @route GET http://localhost:5000/api/v1/users/
- * @access Public
- */
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await User.findAll();
@@ -17,11 +11,6 @@ exports.getAllUsers = async (req, res) => {
 };
 
 
-/**
- * @desc Get a user
- * @route GET http://localhost:5000/api/v1/users/id
- * @access Public
- */
 exports.getUserById = async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
@@ -32,11 +21,6 @@ exports.getUserById = async (req, res) => {
   }
 };
 
-/**
- * @desc Update a user
- * @route PUT http://localhost:5000/api/v1/users/id
- * @access Public
- */
 exports.updateUser = async (req, res) => {
   try {
     const { businessName, contactPerson, email, phoneNumber, businessAddress, password } = req.body;
@@ -77,13 +61,6 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-
-
-/**
- * @desc Delete a user
- * @route DELETE http://localhost:5000/api/v1/users/id
- * @access Public
- */
 exports.deleteUser = async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);

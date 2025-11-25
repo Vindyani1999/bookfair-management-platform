@@ -24,9 +24,9 @@ const Resevation = sequelize.define('Resevation', {
         }
     },
     stallIds: {
-        type: DataTypes.JSON, // ✅ use JSON instead of ARRAY
+        type: DataTypes.JSON, 
         allowNull: true,
-        defaultValue: [] // ✅ default to empty array
+        defaultValue: [] 
     },
     fullName: {
         type: DataTypes.STRING,

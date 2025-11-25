@@ -6,9 +6,6 @@ const redisClient = require('../config/redisClient');
 const ACCESS_TOKEN_EXPIRY = '1h';
 const REFRESH_TOKEN_EXPIRY = '7d';
 
-/**
- * Generate Access & Refresh Tokens
- */
 function generateTokens(admin) {
   const accessToken = jwt.sign(
     { id: admin.id, adminName: admin.adminName, role: admin.role || 'admin' },
@@ -25,11 +22,6 @@ function generateTokens(admin) {
   return { accessToken, refreshToken };
 }
 
-/**
- * @route   POST /api/v1/admins/register
- * @desc    Register a new admin
- * @access  Public
- */
 exports.registerAdmin = async (req, res) => {
   try {
     const { adminName, password, role } = req.body;
@@ -54,11 +46,6 @@ exports.registerAdmin = async (req, res) => {
   }
 };
 
-/**
- * @route   POST /api/v1/admins/login
- * @desc    Admin login (returns access + refresh tokens)
- * @access  Public
- */
 exports.loginAdmin = async (req, res) => {
   try {
     const { adminName, password } = req.body;
@@ -87,11 +74,6 @@ exports.loginAdmin = async (req, res) => {
   }
 };
 
-/**
- * @route   POST /api/v1/admins/refresh
- * @desc    Refresh access token using refresh token
- * @access  Public
- */
 exports.refreshToken = async (req, res) => {
   try {
     const { refreshToken } = req.body;
@@ -121,11 +103,6 @@ exports.refreshToken = async (req, res) => {
   }
 };
 
-/**
- * @route   POST /api/v1/admins/logout
- * @desc    Logout admin (invalidate refresh token)
- * @access  Public
- */
 exports.logoutAdmin = async (req, res) => {
   try {
     const { refreshToken } = req.body;
