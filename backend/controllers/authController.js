@@ -6,11 +6,6 @@ const crypto = require('crypto');
 const redisClient = require('../config/redisClient');
 const { sendOtpEmail } = require('../utils/emailService');
 
-/**
- * @route   POST /api/v1/auth/register
- * @desc    Register a new vendor
- * @access  Public
- */
 exports.registerUser = async (req, res) => {
   try {
     const { businessName, contactPerson, email, phoneNumber, businessAddress, password } = req.body
@@ -52,11 +47,6 @@ exports.registerUser = async (req, res) => {
   }
 };
 
-/**
- * @route   POST /api/v1/auth/login
- * @desc    Login a vendor
- * @access  Public
- */
 exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body || {};
@@ -113,11 +103,6 @@ async function incrementRateLimit(key, windowSeconds = 3600) {
   return v;
 }
 
-/**
- * POST /api/v1/auth/forgot
- * @desc    Forgot password: send OTP to email
- * @access  Public
- */
 exports.requestPasswordReset = async (req, res) => {
   try {
     const { email } = req.body || {};
@@ -148,11 +133,6 @@ exports.requestPasswordReset = async (req, res) => {
   }
 };
 
-/**
- * POST /api/v1/auth/verify-otp
- * @desc    Verify OTP and issue reset token
- * @access  Public
- */
 exports.verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body || {};
@@ -177,11 +157,6 @@ exports.verifyOtp = async (req, res) => {
   }
 };
 
-/**
- * POST /api/v1/auth/reset-password
- * @desc    Reset password using reset token
- * @access  Public
- */
 exports.resetPassword = async (req, res) => {
   try {
     const { resetToken, newPassword, email } = req.body || {};

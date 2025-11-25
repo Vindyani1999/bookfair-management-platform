@@ -1,9 +1,5 @@
 const jwt = require('jsonwebtoken');
 
-/**
- * General authentication middleware
- * Verifies JWT and attaches decoded token info to req.user
- */
 exports.authenticate = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -28,9 +24,6 @@ exports.authenticate = (req, res, next) => {
   }
 };
 
-/**
- * Role-based authorization middleware
- */
 exports.authorizeRoles = (...allowedRoles) => {
   return (req, res, next) => {
     if (!req.user || !allowedRoles.includes(req.user.role)) {
